@@ -1,4 +1,4 @@
-const API_BASE = "https://localhost:7078/api/analisis"
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://localhost:7078/api/analisis"
 
 export const EMPRESA_ID = "11111111-1111-1111-1111-111111111111"
 export const USUARIO_ID = "22222222-2222-2222-2222-222222222222"
@@ -17,7 +17,7 @@ async function request(path, options = {}, tipoRespuesta = "json") {
       throw new Error("La solicitud tardó demasiado. Reintenta la operación.")
     }
     throw new Error(
-      "No se pudo conectar con la API local (https://localhost:7078). Verifica que el backend esté corriendo.",
+      `No se pudo conectar con la API (${API_BASE}). Verifica que el backend esté corriendo.`,
     )
   } finally {
     clearTimeout(timeout)
