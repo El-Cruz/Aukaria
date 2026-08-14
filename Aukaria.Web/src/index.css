@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+:root {
+  font: 100%/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: light dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* Dark glass / vibrant surfaces rely on a translucent scrim to dim text behind them.
+   Keep a small scrollbar so long dashboards never look broken on the right edge. */
+* {
+  scrollbar-width: thin;
+}
+
+::selection {
+  background: rgba(59, 130, 246, 0.25);
+}
+
+/* ---------------------------------------------------------------------------
+   Accessibility — the defaults below give gentle, non-vestibular equivalents.
+   --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .glass,
+  [data-surface="glass"] {
+    box-shadow: 0 0 0 1px currentColor !important;
+  }
+}

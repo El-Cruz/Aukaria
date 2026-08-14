@@ -1,0 +1,126 @@
+using System.Text.Json;
+using Aukaria.Application.DTOs;
+using Aukaria.Application.DTOs.JsonSchema;
+using Aukaria.Application.DTOs.Requests;
+using Aukaria.Application.DTOs.Responses;
+using Aukaria.Application.Interfaces;
+using Aukaria.Domain.Entities;
+using Aukaria.Domain.Enums;
+
+namespace Aukaria.Application.Services;
+
+public sealed class AnalisisPredialService : IAnalisisPredialService
+{
+    private readonly IAnalisisPredialRepository _repository;
+    private readonly IPdfExtractorService _pdfExtractorService;
+    private readonly IClaudeApiService _claudeApiService;
+    private readonly IDocumentClassifierService _documentClassifierService;
+    private readonly IReportGeneratorService _reportGeneratorService;
+
+    public AnalisisPredialService(
+        IAnalisisPredialRepository repository,
+        IPdfExtractorService pdfExtractorService,
+        IClaudeApiService claudeApiService,
+        IDocumentClassifierService documentClassifierService,
+        IReportGeneratorService reportGeneratorService)
+    {
+        _repository = repository;
+        _pdfExtractorService = pdfExtractorService;
+        _claudeApiService = claudeApiService;
+        _documentClassifierService = documentClassifierService;
+        _reportGeneratorService = reportGeneratorService;
+    }
+
+    public async Task<PreAnalisisFmiResponseDto> PreAnalizarFmiAsync(
+        Stream pdfStream,
+        Guid empresaId,
+        CancellationToken cancellationToken = default)
+    {
+        string? fmi = await _pdfExtractorService.ExtraerFmiRapidoAsync(pdfStream, cancellationToken);
+        string textoTemprano = await _pdfExtractorService.ExtraerTextoRapidoAsync(pdfStream, cancellationToken: cancellationToken);
+        ClasificacionDocumentoDto clasificacion = _documentClassifierService.Clasificar(textoTemprano);
+
+        AnalisisPredial? analisisPrevio = string.IsNullOrWhiteSpace(fmi)
+            ? null
+            : await _repository.ObtenerUltimoPorFmiAsync(fmi, empresaId, cancellationToken);
+
+        return new PreAnalisisFmiResponseDto
+        {
+            MatriculaFMI = fmi ?? string.Empty,
+            ExistePrevio = analisisPrevio is not null,
+            FechaUltimoAnalisis = analisisPrevio?.FechaAnalisis,
+            AnalisisIdPrevio = analisisPrevio?.Id,
+            ClasificacionDocumento = clasificacion
+        };
+    }
+
+    public async Task<AnalisisPredialResponseDto> ProcesarAnalisisCtlAsync(
+        SolicitudAnalisisRequestDto solicitud,
+        Stream pdfStream,
+        CancellationToken cancellationToken = default)
+    {
+        string textoCtl = await _pdfExtractorService.ExtraerTextoCompletoAsync(pdfStream, cancellationToken);
+        AnalisisResultadoJsonDto resultado = await _claudeApiService.AnalizarDocumentoAsync(
+            textoCtl,
+            solicitud.Proposito,
+            solicitud.TipoDocumento,
+            cancellationToken);
+
+        var analisis = new AnalisisPredial
+        {
+            Id = Guid.NewGuid(),
+            EmpresaId = solicitud.EmpresaId,
+            UsuarioId = solicitud.UsuarioId,
+            MatriculaFMI = resultado.MatriculaFMI,
+            ORIP = resultado.ORIP,
+            NombrePredio = resultado.NombrePredio,
+            Proposito = solicitud.Proposito,
+            TipoDocumento = solicitud.TipoDocumento,
+            Viabilidad = MapearViabilidad(resultado.Viabilidad),
+            ResumenEjecutivo = resultado.ResumenEjecutivo,
+            ResultadoJson = JsonSerializer.Serialize(resultado),
+            FechaAnalisis = DateTime.UtcNow,
+            ConsumoTokens = 0
+        };
+
+        await _repository.AgregarAsync(analisis, cancellationToken);
+
+        return new AnalisisPredialResponseDto
+        {
+            Id = analisis.Id,
+            MatriculaFMI = analisis.MatriculaFMI,
+            NombrePredio = analisis.NombrePredio,
+            Proposito = analisis.Proposito,
+            TipoDocumento = analisis.TipoDocumento,
+            NombreTipoDocumento = analisis.TipoDocumento.ObtenerNombre(),
+            Viabilidad = analisis.Viabilidad,
+            ResumenEjecutivo = analisis.ResumenEjecutivo,
+            Resultado = resultado,
+            FechaAnalisis = analisis.FechaAnalisis
+        };
+    }
+
+    public async Task<byte[]> DescargarReporteWordAsync(
+        Guid analisisId,
+        CancellationToken cancellationToken = default)
+    {
+        AnalisisPredial? analisis = await _repository.ObtenerPorIdAsync(analisisId, cancellationToken);
+
+        if (analisis is null)
+        {
+            throw new KeyNotFoundException("El análisis predial solicitado no existe.");
+        }
+
+        AnalisisResultadoJsonDto resultadoDto = JsonSerializer.Deserialize<AnalisisResultadoJsonDto>(analisis.ResultadoJson)
+            ?? new AnalisisResultadoJsonDto();
+
+        return await _reportGeneratorService.GenerarReporteWordAsync(resultadoDto, cancellationToken);
+    }
+
+    private static EstadoViabilidad MapearViabilidad(string viabilidad)
+    {
+        return Enum.TryParse<EstadoViabilidad>(viabilidad, ignoreCase: true, out EstadoViabilidad estado)
+            ? estado
+            : EstadoViabilidad.RequiereRevision;
+    }
+}
