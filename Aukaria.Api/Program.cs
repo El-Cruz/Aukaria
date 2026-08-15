@@ -79,10 +79,18 @@ app.UseExceptionHandler(errorApp =>
             context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature>();
         var ex = exceptionHandlerPathFeature?.Error;
 
+        string detalle = ex?.Message ?? string.Empty;
+        var inner = ex?.InnerException;
+        while (inner is not null)
+        {
+            detalle += " | " + inner.Message;
+            inner = inner.InnerException;
+        }
+
         var errorResponse = new
         {
             error = "Error interno al procesar el análisis predial.",
-            detalle = ex?.Message,
+            detalle,
             tipo = ex?.GetType().Name
         };
 
