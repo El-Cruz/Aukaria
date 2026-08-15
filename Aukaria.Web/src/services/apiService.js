@@ -1,8 +1,24 @@
-const API_BASE =
+// Limpia barras finales y define la raíz
+const RAW_URL =
   import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.PROD
-    ? "https://aukaria-production.up.railway.app/api/analisis"
-    : "https://localhost:7078/api/analisis")
+    ? "https://aukaria-production.up.railway.app"
+    : "https://localhost:7078")
+
+const CLEAN_URL = RAW_URL.replace(/\/+$/, "")
+
+// Garantiza el esquema https si la variable viene sin protocolo
+const SCHEMED_URL = /^https?:\/\//.test(CLEAN_URL) ? CLEAN_URL : `https://${CLEAN_URL}`
+
+// Elimina rutas legadas (/api/analisis) para evitar duplicados
+const ROOT_URL = SCHEMED_URL.replace(/\/api\/analisis$/i, "")
+
+// Garantiza que termine en /api/AnalisisPredial
+const API_BASE = ROOT_URL.includes("/api/AnalisisPredial")
+  ? ROOT_URL
+  : `${ROOT_URL}/api/AnalisisPredial`
+
+console.log("[Aukaria API Service] URL Base configurada:", API_BASE)
 
 export const EMPRESA_ID = "11111111-1111-1111-1111-111111111111"
 export const USUARIO_ID = "22222222-2222-2222-2222-222222222222"

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Aukaria.Api.Controllers;
 
 [ApiController]
-[Route("api/analisis")]
+[Route("api/AnalisisPredial")]
 public sealed class AnalisisPredialController : ControllerBase
 {
     private readonly IAnalisisPredialService _analisisService;
