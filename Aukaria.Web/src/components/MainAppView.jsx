@@ -123,15 +123,14 @@ export default function MainAppView({
                           <span aria-hidden className="text-neutral-300">|</span> Panel de Gestión Predial
                         </h1>
                         <p className="mt-2 max-w-xl text-sm text-neutral-600 md:text-[15px]">
-                          Analiza Certificados de Tradición y Libertad con IA. Procesa folios de la{" "}
+                          Analiza Certificados de Tradición (CTL), Escrituras y VUR. Procesa folios de la{" "}
                           <span className="font-semibold text-black">{empresa}</span>, revisa su
                           viabilidad jurídica y descarga el dictamen en Word.
                         </p>
                       </div>
-                      <div className="grid grid-cols-3 gap-2 md:gap-3">
+                      <div className="grid grid-cols-2 gap-2 md:gap-3">
                         <StatChip etiqueta="Créditos" valor={`${restantes} / ${total}`} />
                         <StatChip etiqueta="Plan" valor={usuario?.rol || "Empresarial"} />
-                        <StatChip etiqueta="API" valor="En línea" dot="bg-emerald-500" />
                       </div>
                     </div>
                   </motion.section>

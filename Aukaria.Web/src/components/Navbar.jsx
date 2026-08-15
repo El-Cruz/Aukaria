@@ -1,4 +1,5 @@
 import { motion } from "framer-motion"
+import LanguageSelector from "./LanguageSelector"
 
 const spring = { type: "spring", stiffness: 400, damping: 25 }
 
@@ -29,13 +30,7 @@ export default function Navbar({ usuario = null, onLogout = () => {} }) {
         </div>
 
         <div className="ml-auto flex items-center gap-3">
-          <div className="hidden items-center gap-2 md:flex">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-            </span>
-            <span className="text-xs font-medium text-neutral-500">API Conectada</span>
-          </div>
+          <LanguageSelector className="hidden sm:block" />
 
           <div className="flex items-center gap-2 rounded-full border border-black/10 bg-white/60 py-1 pl-1 pr-3">
             <span className="flex h-6 w-6 select-none items-center justify-center rounded-full bg-black text-[10px] font-bold text-white">

@@ -10,24 +10,24 @@ const TOTAL_MS = 3900
 
 const STEPS = [
   {
-    label: "Lectura y extracción de texto del CTL",
-    msg: "Extrayendo texto del CTL y detectando el FMI…",
+    label: "Lectura e indexación de folios y documentos registrales",
+    msg: "Indexando folios y documentos registrales…",
   },
   {
-    label: "Análisis con IA & Derecho Inmobiliario",
-    msg: "Consultando Claude API · derecho inmobiliario…",
+    label: "Auditoría de tradición y cotejo de medidas cautelares",
+    msg: "Auditando cadena traditiva y medidas cautelares…",
   },
   {
-    label: "Evaluación de gravámenes y alertas",
-    msg: "Cruzándo anotaciones contra gravámenes y embargos…",
+    label: "Estructuración de matriz de riesgos y recomendaciones",
+    msg: "Consolidando matriz de riesgos y recomendaciones…",
   },
   {
-    label: "Generación del estudio predial",
-    msg: "Generando diagnóstico y estructura traditiva…",
+    label: "Consolidando dictamen jurídico",
+    msg: "Preparando dictamen jurídico…",
   },
 ]
 
-const DONE_MSG = "Estudio predial generado correctamente"
+const DONE_MSG = "Dictamen jurídico generado correctamente"
 
 function PdfIcon({ className = "" }) {
   return (
@@ -202,7 +202,7 @@ export default function ProcessingOverlay({ onComplete, autoCompletar = true }) 
         </div>
 
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400">
-          Aukaria IA · Auditoría en tiempo real
+          Aukaria Legal · Auditoría en tiempo real
         </p>
         <h3 className="mt-2 text-lg font-black tracking-tight text-black">
           Analizando el folio predial

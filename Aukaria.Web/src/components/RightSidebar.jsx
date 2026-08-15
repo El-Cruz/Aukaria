@@ -293,6 +293,8 @@ export default function RightSidebar({
             enviarConsulta={enviarConsulta}
           />
 
+          <NotaServicios />
+
           <PerfilSesion usuario={usuario} iniciales={iniciales} onLogout={onLogout} />
         </>
       ) : (
@@ -367,22 +369,6 @@ export default function RightSidebar({
               </svg>
               Centro de Soporte
             </motion.button>
-            <motion.button
-              type="button"
-              whileTap={{ scale: 0.97 }}
-              transition={spring}
-              onClick={() => accionRapida("Estado API · SNR operativa, 99.98% uptime ✓")}
-              className={`${botonSecundario} justify-between`}
-            >
-              <span className="flex items-center gap-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-                </span>
-                Estado de la API
-              </span>
-              <span className="font-mono text-[9px] uppercase tracking-widest text-neutral-400">SNR</span>
-            </motion.button>
 
             <AnimatePresence>
               {feedback && (
@@ -398,6 +384,8 @@ export default function RightSidebar({
               )}
             </AnimatePresence>
           </div>
+
+          <NotaServicios />
 
           <PerfilSesion usuario={usuario} iniciales={iniciales} onLogout={onLogout} />
         </>
@@ -431,16 +419,20 @@ function AsistenteIA({ preguntas, mensajes, consulta, escribiendo, setConsulta, 
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black text-[10px] font-bold text-white">
-          IA
+          CP
         </span>
         <p
           className={`font-mono font-bold uppercase tracking-[0.25em] ${
             destacado ? "text-[11px] text-neutral-600" : "text-[10px] text-neutral-400"
           }`}
         >
-          {destacado ? "Asistente Jurídico Aukaria" : "Asistente Jurídico"}
+          {destacado ? "Consultor Predial" : "Consultor Predial · Asistente Técnico"}
         </p>
       </div>
+
+      <p className="font-mono text-[9px] uppercase tracking-widest text-neutral-400">
+        Cada consulta consume 1 crédito de la bolsa corporativa.
+      </p>
 
       <div className="flex flex-wrap gap-2">
         {preguntas.map((pregunta) => (
@@ -518,6 +510,15 @@ function AsistenteIA({ preguntas, mensajes, consulta, escribiendo, setConsulta, 
         </AnimatePresence>
       </div>
     </div>
+  )
+}
+
+function NotaServicios() {
+  return (
+    <p className="rounded-2xl border border-black/10 bg-white/70 px-4 py-3 font-mono text-[10px] leading-relaxed text-neutral-500 backdrop-blur-xl">
+      La autenticación y firma digital por abogado colegiado puede solicitarse como servicio
+      complementario.
+    </p>
   )
 }
 

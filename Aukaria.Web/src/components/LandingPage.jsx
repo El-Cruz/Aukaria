@@ -1,5 +1,6 @@
 import { useReducedMotion } from "framer-motion"
 import { motion } from "framer-motion"
+import LanguageSelector from "./LanguageSelector"
 import PdfUploadZone from "./PdfUploadZone"
 
 const spring = { type: "spring", bounce: 0, duration: 0.4 }
@@ -58,18 +59,18 @@ const METRICAS = [
 const PASOS = [
   {
     nro: "01",
-    titulo: "Carga el CTL en PDF",
+    titulo: "Carga de Documentación Registral (CTL, VUR o Escrituras)",
     descripcion: "Sin guardar archivos desprotegidos. El folio se procesa en memoria y con cifrado de extremo a extremo.",
   },
   {
     nro: "02",
-    titulo: "Auditoría Jurídica por IA",
-    descripcion: "Evaluación de tracto sucesivo y viabilidad. Semaforización de riesgos con rigor normativo colombiano.",
+    titulo: "Diagnóstico Jurídico Automatizado",
+    descripcion: "Evaluación de tracto sucesivo, cargas y gravámenes con semaforización de riesgos y rigor normativo colombiano.",
   },
   {
     nro: "03",
-    titulo: "Descarga el Estudio en Word",
-    descripcion: "Listo con firma y formato oficial. Generado bajo demanda con el diagnóstico estructurado de la IA.",
+    titulo: "Emisión de Dictamen en Word / PDF",
+    descripcion: "Estructura editable lista para la revisión profesional y firma del abogado colegiado.",
   },
 ]
 
@@ -171,6 +172,7 @@ export default function LandingPage({ onAnalyze = () => {}, onLogin = () => {} }
           </div>
 
           <div className="ml-auto flex items-center gap-3 md:ml-0">
+            <LanguageSelector />
             <button
               type="button"
               onClick={onLogin}
@@ -195,16 +197,16 @@ export default function LandingPage({ onAnalyze = () => {}, onLogin = () => {} }
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
-              Potenciado con Claude 3.5 Sonnet · Especializado en Derecho Inmobiliario Colombiano
+              Potenciado por Metodología y Parámetros Avalados por Profesionales en Derecho Inmobiliario
             </span>
 
             <h1 className="mx-auto mt-6 max-w-4xl text-5xl font-black leading-none tracking-tight text-black md:text-7xl">
-              Estudios Prediales e Inmobiliarios en <span className="text-neutral-400">Segundos.</span>
+              Estudios Prediales y Diagnóstico Jurídico en <span className="text-neutral-400">Segundos.</span>
             </h1>
 
             <p className="mx-auto mt-5 max-w-2xl text-lg text-neutral-600">
-              Automatiza la lectura de Certificados de Tradición y Libertad (CTL). Detecta
-              embargos, hipotecas y falsas tradiciones al instante con rigor jurídico.
+              Automatiza la lectura y validación de Certificados de Tradición (CTL), Escrituras y VUR.
+              Identifica gravámenes, afectaciones y alertas patrimoniales con precisión técnica.
             </p>
           </motion.div>
 
@@ -333,7 +335,7 @@ export default function LandingPage({ onAnalyze = () => {}, onLogin = () => {} }
               </h2>
               <p className="mx-auto mt-4 max-w-lg text-base text-neutral-600">
                 Planes por volumen de análisis para empresas, notarías e instituciones. Escala con
-                créditos de auditoría IA, sin contratos rígidos.
+                créditos de diagnóstico jurídico, sin contratos rígidos.
               </p>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                 <button

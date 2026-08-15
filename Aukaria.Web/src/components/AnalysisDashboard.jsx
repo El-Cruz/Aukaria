@@ -234,7 +234,7 @@ export default function AnalysisDashboard({ analisis = null, viability = "viable
       initial="hidden"
       animate="show"
       className="mx-auto flex w-full max-w-5xl flex-col gap-5"
-      aria-label="Resultado del análisis jurídico"
+      aria-label="Dictamen Jurídico Automatizado"
     >
       <motion.div
         variants={item}

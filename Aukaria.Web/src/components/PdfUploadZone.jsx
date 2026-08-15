@@ -334,9 +334,12 @@ export default function PdfUploadZone({ onAnalyze = () => {} }) {
                         }
                         className="rounded-full bg-black px-6 py-2.5 text-sm font-semibold text-white shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:bg-neutral-900"
                       >
-                        Iniciar Análisis Jurídico con IA →
+                        Iniciar Diagnóstico Jurídico →
                       </motion.button>
                     </div>
+                    <p className="mt-4 font-mono text-[11px] text-neutral-500">
+                      Extracción técnica de datos registrales y verificación de medidas cautelares.
+                    </p>
                   </motion.div>
                 )}
               </AnimatePresence>
