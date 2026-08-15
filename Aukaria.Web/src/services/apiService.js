@@ -1,4 +1,8 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "https://localhost:7078/api/analisis"
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.PROD
+    ? "https://aukaria-production.up.railway.app/api/analisis"
+    : "https://localhost:7078/api/analisis")
 
 export const EMPRESA_ID = "11111111-1111-1111-1111-111111111111"
 export const USUARIO_ID = "22222222-2222-2222-2222-222222222222"
