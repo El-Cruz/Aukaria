@@ -2,6 +2,8 @@ using System.Text.Json.Serialization;
 using Aukaria.Application.Interfaces;
 using Aukaria.Application.Services;
 using Aukaria.Infrastructure;
+using Aukaria.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +51,21 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<IAnalisisPredialService, AnalisisPredialService>();
 
 var app = builder.Build();
+
+bool hayConexionBd = !string.IsNullOrWhiteSpace(app.Configuration.GetConnectionString("DefaultConnection"));
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AukariaDbContext>();
+    if (hayConexionBd)
+    {
+        dbContext.Database.Migrate();
+    }
+    else
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Program");
+        logger.LogError("ConnectionStrings:DefaultConnection no configurada. La base de datos no se inicializó.");
+    }
+}
 
 app.UseExceptionHandler(errorApp =>
 {

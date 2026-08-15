@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Aukaria.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InicialPostgres : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,18 +15,19 @@ namespace Aukaria.Infrastructure.Migrations
                 name: "AnalisisPrediales",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EmpresaId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UsuarioId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    MatriculaFMI = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    ORIP = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    NombrePredio = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Proposito = table.Column<int>(type: "int", nullable: false),
-                    Viabilidad = table.Column<int>(type: "int", nullable: false),
-                    ResumenEjecutivo = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ResultadoJson = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FechaAnalisis = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ConsumoTokens = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    EmpresaId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UsuarioId = table.Column<Guid>(type: "uuid", nullable: false),
+                    MatriculaFMI = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    ORIP = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    NombrePredio = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Proposito = table.Column<int>(type: "integer", nullable: false),
+                    TipoDocumento = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false, defaultValue: "CTL"),
+                    Viabilidad = table.Column<int>(type: "integer", nullable: false),
+                    ResumenEjecutivo = table.Column<string>(type: "text", nullable: false),
+                    ResultadoJson = table.Column<string>(type: "text", nullable: false),
+                    FechaAnalisis = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ConsumoTokens = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -37,12 +38,12 @@ namespace Aukaria.Infrastructure.Migrations
                 name: "Empresas",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Nit = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    BolsaCreditos = table.Column<int>(type: "int", nullable: false),
-                    FechaRegistro = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Activo = table.Column<bool>(type: "bit", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Nombre = table.Column<string>(type: "text", nullable: false),
+                    Nit = table.Column<string>(type: "text", nullable: false),
+                    BolsaCreditos = table.Column<int>(type: "integer", nullable: false),
+                    FechaRegistro = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Activo = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -53,13 +54,13 @@ namespace Aukaria.Infrastructure.Migrations
                 name: "Usuarios",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EmpresaId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Rol = table.Column<int>(type: "int", nullable: false),
-                    Activo = table.Column<bool>(type: "bit", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    EmpresaId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Nombre = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    PasswordHash = table.Column<string>(type: "text", nullable: false),
+                    Rol = table.Column<int>(type: "integer", nullable: false),
+                    Activo = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {

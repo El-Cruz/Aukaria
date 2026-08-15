@@ -12,8 +12,12 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        string? connectionString = configuration.GetConnectionString("DefaultConnection");
+
         services.AddDbContext<AukariaDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(string.IsNullOrWhiteSpace(connectionString)
+                ? "Host=localhost;Port=5432;Database=aukaria_dev;Username=postgres;Password=postgres"
+                : connectionString));
 
         services.AddScoped<IPdfExtractorService, PdfExtractorService>();
         services.AddScoped<IDocumentClassifierService, DocumentClassifierService>();

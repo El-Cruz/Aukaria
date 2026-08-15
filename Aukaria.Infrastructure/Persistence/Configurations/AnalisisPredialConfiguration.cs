@@ -20,8 +20,8 @@ public class AnalisisPredialConfiguration : IEntityTypeConfiguration<AnalisisPre
             .HasMaxLength(40)
             .HasDefaultValue(TipoDocumentoJuridico.CTL)
             .HasSentinel(TipoDocumentoJuridico.CTL);
-        builder.Property(a => a.ResumenEjecutivo).HasColumnType("nvarchar(max)");
-        builder.Property(a => a.ResultadoJson).HasColumnType("nvarchar(max)");
+        builder.Property(a => a.ResumenEjecutivo).HasColumnType("text");
+        builder.Property(a => a.ResultadoJson).HasColumnType("text");
 
         builder.HasIndex(a => new { a.MatriculaFMI, a.EmpresaId });
     }
