@@ -48,42 +48,32 @@ builder.Services.AddHttpLogging(logging =>
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<IAnalisisPredialService, AnalisisPredialService>();
 
-const string AukariaCorsPolicy = "AukariaCorsPolicy";
+var app = builder.Build();
 
-string[] origenesLocalesDesarrollo = ["http://localhost:5173", "http://localhost:3000"];
-
-bool esModoDemoOStaging =
-    builder.Environment.IsEnvironment("Demo") ||
-    builder.Environment.IsEnvironment("Staging");
-
-string? origenesProduccion = builder.Configuration["AllowedOrigins"];
-
-builder.Services.AddCors(options =>
+app.UseExceptionHandler(errorApp =>
 {
-    options.AddPolicy(AukariaCorsPolicy, policy =>
+    errorApp.Run(async context =>
     {
-        if (esModoDemoOStaging || string.IsNullOrWhiteSpace(origenesProduccion))
-        {
-            policy.AllowAnyOrigin()
-                  .AllowAnyMethod()
-                  .AllowAnyHeader();
-        }
-        else
-        {
-            string[] origenesPermitidos = origenesProduccion
-                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .Concat(origenesLocalesDesarrollo)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToArray();
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+        context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
 
-            policy.WithOrigins(origenesPermitidos)
-                  .AllowAnyMethod()
-                  .AllowAnyHeader();
-        }
+        var exceptionHandlerPathFeature =
+            context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature>();
+        var ex = exceptionHandlerPathFeature?.Error;
+
+        var errorResponse = new
+        {
+            error = "Error interno al procesar el análisis predial.",
+            detalle = ex?.Message,
+            tipo = ex?.GetType().Name
+        };
+
+        await context.Response.WriteAsJsonAsync(errorResponse);
     });
 });
 
-var app = builder.Build();
+app.UseCors("AukariaProductionCors");
 
 if (app.Environment.IsDevelopment())
 {
@@ -97,10 +87,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpLogging();
-
-app.UseCors(AukariaCorsPolicy);
-
-app.UseCors("AukariaProductionCors");
 
 app.UseRouting();
 

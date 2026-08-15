@@ -44,17 +44,27 @@ async function request(path, options = {}, tipoRespuesta = "json") {
   }
 
   if (!response.ok) {
-    let message = `El servidor respondió con un error (${response.status}).`
+    let message = `[HTTP ${response.status}] Error desconocido en el servidor.`
     try {
       const texto = await response.text()
       if (texto) {
         try {
           const data = JSON.parse(texto)
-          if (typeof data === "string" && data) message = data
-          else if (data?.detail) message = data.detail
-          else if (data?.message) message = data.message
+          if (typeof data === "string" && data) {
+            message = `[HTTP ${response.status}] ${data}`
+          } else if (data?.detalle) {
+            message = `[HTTP ${response.status}] ${data.detalle}`
+          } else if (data?.detail) {
+            message = `[HTTP ${response.status}] ${data.detail}`
+          } else if (data?.error) {
+            message = `[HTTP ${response.status}] ${data.error}`
+          } else if (data?.message) {
+            message = `[HTTP ${response.status}] ${data.message}`
+          } else {
+            message = `[HTTP ${response.status}] ${JSON.stringify(data)}`
+          }
         } catch {
-          message = texto
+          message = `[HTTP ${response.status}] ${texto}`
         }
       }
     } catch {

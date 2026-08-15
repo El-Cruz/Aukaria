@@ -5,6 +5,7 @@ using Aukaria.Application.DTOs.JsonSchema;
 using Aukaria.Application.Interfaces;
 using Aukaria.Domain.Enums;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Aukaria.Infrastructure.Services;
 
@@ -22,11 +23,13 @@ public sealed class ClaudeApiService : IClaudeApiService
 
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
+    private readonly ILogger<ClaudeApiService> _logger;
 
-    public ClaudeApiService(HttpClient httpClient, IConfiguration configuration)
+    public ClaudeApiService(HttpClient httpClient, IConfiguration configuration, ILogger<ClaudeApiService> logger)
     {
         _httpClient = httpClient;
         _configuration = configuration;
+        _logger = logger;
     }
 
     public async Task<AnalisisResultadoJsonDto> AnalizarDocumentoAsync(
@@ -35,8 +38,14 @@ public sealed class ClaudeApiService : IClaudeApiService
         TipoDocumentoJuridico tipoDocumento,
         CancellationToken cancellationToken = default)
     {
-        string apiKey = _configuration["Anthropic:ApiKey"]
-            ?? throw new InvalidOperationException("No se encontró la clave de API de Anthropic en la configuración ('Anthropic:ApiKey').");
+        string apiKey = _configuration["Anthropic:ApiKey"] ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(apiKey))
+        {
+            _logger.LogError("Clave de API de Anthropic ausente en la configuración ('Anthropic:ApiKey').");
+            throw new InvalidOperationException("La clave de API de Anthropic no está configurada. Verifica la variable Anthropic__ApiKey en el servidor.");
+        }
+
+        _logger.LogInformation("Clave de API de Anthropic leída correctamente.");
 
         string modelo = _configuration["Anthropic:Model"] ?? "claude-sonnet-5";
 
@@ -62,12 +71,17 @@ public sealed class ClaudeApiService : IClaudeApiService
         httpRequest.Headers.Add("anthropic-version", AnthropicVersion);
         httpRequest.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
+        _logger.LogInformation("Iniciando llamada a la API de Anthropic (modelo: {Modelo}).", modelo);
+
         using HttpResponseMessage response = await _httpClient.SendAsync(httpRequest, cancellationToken);
 
         string responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
 
+        _logger.LogInformation("Llamada a la API de Anthropic finalizada. Estado HTTP: {Estado}.", (int)response.StatusCode);
+
         if (!response.IsSuccessStatusCode)
         {
+            _logger.LogError("La API de Anthropic devolvió el estado {Estado}. Detalle: {Detalle}.", (int)response.StatusCode, responseBody);
             throw new HttpRequestException(
                 $"La API de Anthropic devolvió el estado {(int)response.StatusCode} ({response.ReasonPhrase}). Detalle: {responseBody}");
         }
