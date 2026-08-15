@@ -293,8 +293,6 @@ export default function RightSidebar({
             enviarConsulta={enviarConsulta}
           />
 
-          <NotaServicios />
-
           <PerfilSesion usuario={usuario} iniciales={iniciales} onLogout={onLogout} />
         </>
       ) : (
@@ -384,8 +382,6 @@ export default function RightSidebar({
               )}
             </AnimatePresence>
           </div>
-
-          <NotaServicios />
 
           <PerfilSesion usuario={usuario} iniciales={iniciales} onLogout={onLogout} />
         </>
@@ -510,15 +506,6 @@ function AsistenteIA({ preguntas, mensajes, consulta, escribiendo, setConsulta, 
         </AnimatePresence>
       </div>
     </div>
-  )
-}
-
-function NotaServicios() {
-  return (
-    <p className="rounded-2xl border border-black/10 bg-white/70 px-4 py-3 font-mono text-[10px] leading-relaxed text-neutral-500 backdrop-blur-xl">
-      La autenticación y firma digital por abogado colegiado puede solicitarse como servicio
-      complementario.
-    </p>
   )
 }
 

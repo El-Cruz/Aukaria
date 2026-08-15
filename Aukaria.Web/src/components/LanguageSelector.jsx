@@ -36,9 +36,6 @@ export default function LanguageSelector({ className = "" }) {
         onClick={() => setAbierto((v) => !v)}
         className="flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-3 py-1.5 backdrop-blur-xl transition-colors duration-150 hover:bg-white"
       >
-        <span aria-hidden className="text-sm leading-none">
-          {activo.flag}
-        </span>
         <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-neutral-700">
           {activo.code}
         </span>

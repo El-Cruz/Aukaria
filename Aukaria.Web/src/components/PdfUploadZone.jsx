@@ -98,11 +98,11 @@ export default function PdfUploadZone({ onAnalyze = () => {} }) {
   const esCtl = tipoDetectado?.key === "CTL"
 
   return (
-    <section aria-label="Subir Certificado de Tradición y Libertad">
+    <section aria-label="Subir documentos jurídicos (CTL, VUR o Escrituras)">
       <motion.div
         role="button"
         tabIndex={0}
-        aria-label="Zona de carga del Certificado de Tradición y Libertad"
+        aria-label="Zona de carga de documentos jurídicos"
         animate={isDragging ? { scale: 1.02 } : { scale: 1 }}
         transition={spring}
         onClick={() => !file && inputRef.current?.click()}
@@ -155,11 +155,11 @@ export default function PdfUploadZone({ onAnalyze = () => {} }) {
                   PDF
                 </span>
               </div>
-              <h2 className="mx-auto mt-5 max-w-xs text-lg font-semibold tracking-tight text-black md:text-xl">
-                Arrastra aquí el Certificado de Tradición y Libertad (CTL)
+              <h2 className="mx-auto mt-5 max-w-sm text-lg font-semibold tracking-tight text-black md:text-xl">
+                Arrastra aquí tus documentos jurídicos (CTL, VUR o Escrituras)
               </h2>
               <p className="mt-2 font-mono text-xs text-neutral-500">
-                Soporta archivos PDF de la SNR hasta 20 MB
+                Soporta PDFs de la SNR y notarías hasta 20 MB
               </p>
               <motion.button
                 type="button"
@@ -210,7 +210,7 @@ export default function PdfUploadZone({ onAnalyze = () => {} }) {
                     transition={fade}
                   >
                     <div className="flex items-center justify-between font-mono text-xs text-neutral-500">
-                      <span>Pre-análisis rápido · leyendo el CTL…</span>
+                      <span>Pre-análisis rápido · indexando el documento…</span>
                       <span aria-hidden>&lt; 500 ms</span>
                     </div>
                     <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/5">

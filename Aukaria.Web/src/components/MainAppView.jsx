@@ -165,12 +165,12 @@ export default function MainAppView({
 
                     {historial.length === 0 ? (
                       <div className="mt-5 rounded-2xl border border-black/10 bg-white/60 p-6 text-center backdrop-blur-xl">
-                        <p className="font-mono text-2xl font-black text-black/10">CTL</p>
+                        <p className="font-mono text-2xl font-black text-black/10">DOC</p>
                         <p className="mt-2 text-sm font-semibold text-neutral-700">
                           Aún no hay estudios analizados
                         </p>
                         <p className="mt-1 text-xs text-neutral-500">
-                          Sube tu primer Certificado de Tradición y Libertad para verlo aquí y
+                          Sube tu primer documento (CTL, VUR o Escritura) para verlo aquí y
                           reabrirlo con un clic.
                         </p>
                       </div>
