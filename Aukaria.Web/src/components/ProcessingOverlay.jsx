@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
-import MorphLoadingIndicator from "./MorphLoadingIndicator"
+import GoogleMorphLoader from "./GoogleMorphLoader"
 
 const spring = { type: "spring", stiffness: 320, damping: 30 }
-const progressSpring = { type: "spring", stiffness: 24, damping: 20, restDelta: 0.5 }
 const fade = { duration: 0.2 }
 
 const STEP_MS = 1100
@@ -155,10 +154,6 @@ export default function ProcessingOverlay({ onComplete, autoCompletar = true }) 
       ? STEPS[done].msg
       : DONE_MSG
     : STEPS[1 + (msgTick % 3)].msg
-  const progress = autoCompletar ? (done / STEPS.length) * 100 : 80
-  const stageIndex = autoCompletar
-    ? Math.min(done, STEPS.length) - 1
-    : 1 + (msgTick % 3)
 
   return (
     <motion.div
@@ -178,14 +173,6 @@ export default function ProcessingOverlay({ onComplete, autoCompletar = true }) 
         transition={spring}
         className="w-full max-w-md rounded-3xl border border-black/10 bg-white/70 p-8 shadow-2xl backdrop-blur-3xl"
       >
-        <div className="mb-6 h-1 overflow-hidden rounded-full bg-black/5">
-          <motion.div
-            animate={{ width: `${progress}%` }}
-            transition={reduce ? { duration: 0.3 } : progressSpring}
-            className="h-full rounded-full bg-black"
-          />
-        </div>
-
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400">
           Aukaria Legal · Auditoría en tiempo real
         </p>
@@ -193,9 +180,7 @@ export default function ProcessingOverlay({ onComplete, autoCompletar = true }) 
           Analizando el folio predial
         </h3>
 
-        <div className="mt-7">
-          <MorphLoadingIndicator stageIndex={stageIndex} progress={progress} />
-        </div>
+        <GoogleMorphLoader className="mt-7" />
 
         <div className="mt-5 flex h-8 items-center justify-center">
           <AnimatePresence mode="wait" initial={false}>
