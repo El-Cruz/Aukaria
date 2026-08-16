@@ -57,14 +57,29 @@ bool hayConexionBd = !string.IsNullOrWhiteSpace(
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AukariaDbContext>();
-    if (hayConexionBd)
+    var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Program");
+    if (!hayConexionBd)
     {
-        dbContext.Database.Migrate();
+        logger.LogError("No se encontró conexión a la base de datos (ni DATABASE_URL ni ConnectionStrings:DefaultConnection). La base de datos no se inicializó.");
     }
     else
     {
-        var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Program");
-        logger.LogError("No se encontró conexión a la base de datos (ni DATABASE_URL ni ConnectionStrings:DefaultConnection). La base de datos no se inicializó.");
+        try
+        {
+            if (dbContext.Database.CanConnect())
+            {
+                dbContext.Database.Migrate();
+                logger.LogInformation("Base de datos conectada y migraciones aplicadas correctamente.");
+            }
+            else
+            {
+                logger.LogError("La base de datos está configurada pero no se pudo conectar. Las migraciones no se aplicaron; la API continuará iniciándose.");
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error al conectar o migrar la base de datos en el arranque. La API continuará iniciándose.");
+        }
     }
 }
 
@@ -120,25 +135,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
-
-app.MapGet("/api/diagnostico-bd", (IConfiguration config) =>
-{
-    string HostOf(string? cs)
-    {
-        if (string.IsNullOrWhiteSpace(cs)) return "(vacía)";
-        var match = System.Text.RegularExpressions.Regex.Match(cs, @"@([^:/]+)");
-        return match.Success ? match.Groups[1].Value : "(sin @host)";
-    }
-
-    var dc = config.GetConnectionString("DefaultConnection");
-    var dbUrl = config["DATABASE_URL"];
-    return Results.Ok(new
-    {
-        defaultConnectionPresente = !string.IsNullOrWhiteSpace(dc),
-        defaultConnectionHost = HostOf(dc),
-        databaseUrlPresente = !string.IsNullOrWhiteSpace(dbUrl),
-        databaseUrlHost = HostOf(dbUrl),
-    });
-});
 
 app.Run();
