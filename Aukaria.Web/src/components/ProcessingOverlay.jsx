@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
+import MorphLoadingIndicator from "./MorphLoadingIndicator"
 
 const spring = { type: "spring", stiffness: 320, damping: 30 }
 const progressSpring = { type: "spring", stiffness: 24, damping: 20, restDelta: 0.5 }
@@ -28,25 +29,6 @@ const STEPS = [
 ]
 
 const DONE_MSG = "Dictamen jurídico generado correctamente"
-
-function PdfIcon({ className = "" }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.5}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden
-    >
-      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
-      <path d="M14 3v5h5" />
-      <path d="M9 13h6M9 17h6" />
-    </svg>
-  )
-}
 
 function StepIndicator({ state, reduce }) {
   const t = reduce ? { duration: 0.15 } : spring
@@ -174,6 +156,9 @@ export default function ProcessingOverlay({ onComplete, autoCompletar = true }) 
       : DONE_MSG
     : STEPS[1 + (msgTick % 3)].msg
   const progress = autoCompletar ? (done / STEPS.length) * 100 : 80
+  const stageIndex = autoCompletar
+    ? Math.min(done, STEPS.length) - 1
+    : 1 + (msgTick % 3)
 
   return (
     <motion.div
@@ -191,7 +176,7 @@ export default function ProcessingOverlay({ onComplete, autoCompletar = true }) 
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.97 }}
         transition={spring}
-        className="w-full max-w-md rounded-3xl border border-black/10 bg-white/85 p-8 shadow-2xl backdrop-blur-3xl"
+        className="w-full max-w-md rounded-3xl border border-black/10 bg-white/70 p-8 shadow-2xl backdrop-blur-3xl"
       >
         <div className="mb-6 h-1 overflow-hidden rounded-full bg-black/5">
           <motion.div
@@ -208,37 +193,8 @@ export default function ProcessingOverlay({ onComplete, autoCompletar = true }) 
           Analizando el folio predial
         </h3>
 
-        <div className="relative mx-auto mt-7 flex h-16 w-16 items-center justify-center">
-          <motion.span
-            animate={
-              reduce
-                ? { scale: 1, opacity: 0 }
-                : { scale: [1, 1.1, 1], opacity: [0.3, 0.45, 0.3] }
-            }
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute inset-0 rounded-3xl bg-black/5"
-          />
-          <motion.span
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2.4, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-0 text-neutral-900"
-          >
-            <svg viewBox="0 0 64 64" className="h-full w-full">
-              <circle
-                cx="32"
-                cy="32"
-                r="29"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeDasharray="40 142"
-                strokeLinecap="round"
-              />
-            </svg>
-          </motion.span>
-          <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-black shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
-            <PdfIcon className="h-7 w-7 text-white" />
-          </div>
+        <div className="mt-7">
+          <MorphLoadingIndicator stageIndex={stageIndex} progress={progress} />
         </div>
 
         <div className="mt-5 flex h-8 items-center justify-center">
