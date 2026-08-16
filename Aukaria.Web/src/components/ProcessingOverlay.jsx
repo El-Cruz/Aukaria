@@ -154,6 +154,9 @@ export default function ProcessingOverlay({ onComplete, autoCompletar = true }) 
       ? STEPS[done].msg
       : DONE_MSG
     : STEPS[1 + (msgTick % 3)].msg
+  const stageIndex = autoCompletar
+    ? Math.min(done, STEPS.length) - 1
+    : 1 + (msgTick % 3)
 
   return (
     <motion.div
@@ -180,7 +183,7 @@ export default function ProcessingOverlay({ onComplete, autoCompletar = true }) 
           Analizando el folio predial
         </h3>
 
-        <GoogleMorphLoader className="mt-7" />
+        <GoogleMorphLoader className="mt-7" stageIndex={stageIndex} />
 
         <div className="mt-5 flex h-8 items-center justify-center">
           <AnimatePresence mode="wait" initial={false}>
