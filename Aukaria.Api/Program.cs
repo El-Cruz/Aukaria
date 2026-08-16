@@ -52,9 +52,8 @@ builder.Services.AddScoped<IAnalisisPredialService, AnalisisPredialService>();
 
 var app = builder.Build();
 
-bool hayConexionBd =
-    !string.IsNullOrWhiteSpace(app.Configuration.GetConnectionString("DefaultConnection")) ||
-    !string.IsNullOrWhiteSpace(app.Configuration["DATABASE_URL"]);
+bool hayConexionBd = !string.IsNullOrWhiteSpace(
+    Aukaria.Infrastructure.DependencyInjection.ObtenerCadenaPostgresValida(app.Configuration));
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AukariaDbContext>();
@@ -65,7 +64,7 @@ using (var scope = app.Services.CreateScope())
     else
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Program");
-        logger.LogError("No se encontró conexión a la base de datos (ni ConnectionStrings:DefaultConnection ni DATABASE_URL). La base de datos no se inicializó.");
+        logger.LogError("No se encontró conexión a la base de datos (ni DATABASE_URL ni ConnectionStrings:DefaultConnection). La base de datos no se inicializó.");
     }
 }
 
