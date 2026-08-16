@@ -13,6 +13,10 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         string? connectionString = configuration.GetConnectionString("DefaultConnection");
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            connectionString = configuration["DATABASE_URL"];
+        }
 
         services.AddDbContext<AukariaDbContext>(options =>
             options.UseNpgsql(string.IsNullOrWhiteSpace(connectionString)
