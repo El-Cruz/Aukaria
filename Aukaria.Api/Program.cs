@@ -122,4 +122,24 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/health");
 
+app.MapGet("/api/diagnostico-bd", (IConfiguration config) =>
+{
+    string HostOf(string? cs)
+    {
+        if (string.IsNullOrWhiteSpace(cs)) return "(vacía)";
+        var match = System.Text.RegularExpressions.Regex.Match(cs, @"@([^:/]+)");
+        return match.Success ? match.Groups[1].Value : "(sin @host)";
+    }
+
+    var dc = config.GetConnectionString("DefaultConnection");
+    var dbUrl = config["DATABASE_URL"];
+    return Results.Ok(new
+    {
+        defaultConnectionPresente = !string.IsNullOrWhiteSpace(dc),
+        defaultConnectionHost = HostOf(dc),
+        databaseUrlPresente = !string.IsNullOrWhiteSpace(dbUrl),
+        databaseUrlHost = HostOf(dbUrl),
+    });
+});
+
 app.Run();
