@@ -138,7 +138,7 @@ export default function GoogleMorphLoader({ stageIndex = 0, className = "" }) {
   return (
     <div className={`relative flex items-center justify-center ${className}`}>
       <div className="relative h-20 w-20">
-        <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden>
+        <svg viewBox="0 0 100 100" className="h-full w-full overflow-visible" aria-hidden>
           <motion.path
             d={SHAPES[0]}
             style={{ transformBox: "view-box", transformOrigin: "50px 50px" }}
