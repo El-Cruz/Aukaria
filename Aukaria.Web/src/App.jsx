@@ -29,13 +29,20 @@ function extraerInfoPredio(res) {
       v(info, "NombrePredio", "nombrePredio") ||
       v(r, "NombrePredio", "nombrePredio") ||
       v(res, "NombrePredio", "nombrePredio"),
-    municipio: v(info, "Municipio", "municipio") || v(r, "Municipio", "municipio"),
-    departamento: v(info, "Departamento", "departamento") || v(r, "Departamento", "departamento"),
+    municipio:
+      v(info, "Municipio", "municipio") || v(r, "Municipio", "municipio") || v(res, "Municipio", "municipio"),
+    departamento:
+      v(info, "Departamento", "departamento") ||
+      v(r, "Departamento", "departamento") ||
+      v(res, "Departamento", "departamento"),
     orip:
       v(info, "ORIP", "orip", "oficinaRegistro", "OficinaRegistro") ||
-      v(r, "ORIP", "orip", "oficinaRegistro", "OficinaRegistro"),
+      v(r, "ORIP", "orip", "oficinaRegistro", "OficinaRegistro") ||
+      v(res, "ORIP", "orip", "oficinaRegistro", "OficinaRegistro"),
     cedulaCatastral:
-      v(info, "CedulaCatastral", "cedulaCatastral") || v(r, "CedulaCatastral", "cedulaCatastral"),
+      v(info, "CedulaCatastral", "cedulaCatastral") ||
+      v(r, "CedulaCatastral", "cedulaCatastral") ||
+      v(res, "CedulaCatastral", "cedulaCatastral"),
   }
 }
 

@@ -172,12 +172,14 @@ export default function AnalysisDashboard({ analisis = null, viability = "viable
   const departamentoDefinitivo =
     infoGeneral.Departamento ||
     infoGeneral.departamento ||
+    analisis?.Departamento ||
     preAnalisisData?.departamento ||
     "Sin Información"
 
   const municipioDefinitivo =
     infoGeneral.Municipio ||
     infoGeneral.municipio ||
+    analisis?.Municipio ||
     preAnalisisData?.municipio ||
     "Sin Información"
 
