@@ -1,15 +1,12 @@
-namespace Aukaria.Application.DTOs.Responses;
+namespace Aukaria.Application.DTOs;
 
-public class PreAnalisisFmiResponseDto
+public class ExtraccionPreAnalisisDto
 {
     public string MatriculaFMI { get; set; } = string.Empty;
-    public bool ExistePrevio { get; set; }
-    public DateTime? FechaUltimoAnalisis { get; set; }
-    public Guid? AnalisisIdPrevio { get; set; }
-    public ClasificacionDocumentoDto ClasificacionDocumento { get; set; } = new();
     public string CedulaCatastral { get; set; } = string.Empty;
     public string Nupre { get; set; } = string.Empty;
     public string Orip { get; set; } = string.Empty;
     public string NombrePredio { get; set; } = string.Empty;
     public string Municipio { get; set; } = string.Empty;
+    public string TextoExtraido { get; set; } = string.Empty;
 }

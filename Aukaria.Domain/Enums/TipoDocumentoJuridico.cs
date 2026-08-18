@@ -5,7 +5,8 @@ public enum TipoDocumentoJuridico
     CTL = 1,
     VUR = 2,
     EscrituraPublica = 3,
-    DocumentoInmobiliarioGeneral = 4
+    DocumentoInmobiliarioGeneral = 4,
+    ResolucionActoAdministrativo = 5
 }
 
 public static class TipoDocumentoJuridicoExtensions
@@ -15,6 +16,7 @@ public static class TipoDocumentoJuridicoExtensions
         TipoDocumentoJuridico.CTL => "Certificado de Tradición y Libertad",
         TipoDocumentoJuridico.VUR => "Informe VUR (Ventanilla Única Registral)",
         TipoDocumentoJuridico.EscrituraPublica => "Escritura Pública Notarial",
+        TipoDocumentoJuridico.ResolucionActoAdministrativo => "Resolución / Acto Administrativo",
         _ => "Documento Inmobiliario General"
     };
 }

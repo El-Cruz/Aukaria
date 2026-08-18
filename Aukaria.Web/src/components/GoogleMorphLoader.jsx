@@ -28,7 +28,7 @@ function IconoLectura({ reduce }) {
       strokeWidth={1.5}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-9 w-9 text-white dark:text-neutral-950"
+      className="h-9 w-9 text-white"
       aria-hidden
     >
       <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
@@ -50,7 +50,7 @@ function IconoRadar({ reduce }) {
       fill="none"
       stroke="currentColor"
       strokeWidth={1.5}
-      className="h-9 w-9 text-white dark:text-neutral-950"
+      className="h-9 w-9 text-white"
       aria-hidden
     >
       <circle cx="12" cy="12" r="9" />
@@ -76,7 +76,7 @@ function IconoBalanza({ reduce }) {
       strokeWidth={1.5}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-9 w-9 text-white dark:text-neutral-950"
+      className="h-9 w-9 text-white"
       aria-hidden
     >
       <path d="M12 4.5V7" />
@@ -107,7 +107,7 @@ function IconoSello({ reduce }) {
       strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-9 w-9 text-white dark:text-neutral-950"
+      className="h-9 w-9 text-white"
       aria-hidden
     >
       <motion.circle
@@ -148,7 +148,7 @@ export default function GoogleMorphLoader({ stageIndex = 0, className = "" }) {
                 : { d: SHAPES, scale: [1, 0.88, 1.12, 0.94, 1], rotate: [0, 45, 90, 180, 270, 360] }
             }
             transition={reduce ? { duration: 0.3 } : morphLoop}
-            className="fill-neutral-950 drop-shadow-[0_4px_16px_rgba(0,0,0,0.15)] dark:fill-white dark:drop-shadow-[0_4px_16px_rgba(255,255,255,0.25)]"
+            className="fill-neutral-950 drop-shadow-[0_4px_16px_rgba(0,0,0,0.15)]"
           />
         </svg>
 

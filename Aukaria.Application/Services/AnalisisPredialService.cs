@@ -36,21 +36,25 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
         Guid empresaId,
         CancellationToken cancellationToken = default)
     {
-        string? fmi = await _pdfExtractorService.ExtraerFmiRapidoAsync(pdfStream, cancellationToken);
-        string textoTemprano = await _pdfExtractorService.ExtraerTextoRapidoAsync(pdfStream, cancellationToken: cancellationToken);
-        ClasificacionDocumentoDto clasificacion = _documentClassifierService.Clasificar(textoTemprano);
+        ExtraccionPreAnalisisDto extraccion = await _pdfExtractorService.ExtraerPreAnalisisAsync(pdfStream, cancellationToken);
+        ClasificacionDocumentoDto clasificacion = _documentClassifierService.Clasificar(extraccion.TextoExtraido);
 
-        AnalisisPredial? analisisPrevio = string.IsNullOrWhiteSpace(fmi)
+        AnalisisPredial? analisisPrevio = string.IsNullOrWhiteSpace(extraccion.MatriculaFMI)
             ? null
-            : await _repository.ObtenerUltimoPorFmiAsync(fmi, empresaId, cancellationToken);
+            : await _repository.ObtenerUltimoPorFmiAsync(extraccion.MatriculaFMI, empresaId, cancellationToken);
 
         return new PreAnalisisFmiResponseDto
         {
-            MatriculaFMI = fmi ?? string.Empty,
+            MatriculaFMI = extraccion.MatriculaFMI,
             ExistePrevio = analisisPrevio is not null,
             FechaUltimoAnalisis = analisisPrevio?.FechaAnalisis,
             AnalisisIdPrevio = analisisPrevio?.Id,
-            ClasificacionDocumento = clasificacion
+            ClasificacionDocumento = clasificacion,
+            CedulaCatastral = extraccion.CedulaCatastral,
+            Nupre = extraccion.Nupre,
+            Orip = extraccion.Orip,
+            NombrePredio = extraccion.NombrePredio,
+            Municipio = extraccion.Municipio
         };
     }
 

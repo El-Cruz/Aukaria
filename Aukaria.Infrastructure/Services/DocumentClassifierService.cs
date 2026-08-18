@@ -32,8 +32,16 @@ public sealed class DocumentClassifierService : IDocumentClassifierService
         new(@"COMPRAVENTA", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)
     ];
 
+    private static readonly Regex[] PatronesResolucion =
+    [
+        new(@"RESOLUCION(?:\s+ADMINISTRATIVA)?", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),
+        new(@"ACTO\s+ADMINISTRATIVO", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),
+        new(@"EXPEDIENTE\s+(?:SANCIONATORIO|ADMINISTRATIVO)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),
+        new(@"SUPERINTENDENCIA\s+DE\s+NOTARIADO\s+Y\s+REGISTRO", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)
+    ];
+
     private static readonly Regex PatronFmi =
-        new(@"\b\d{3}-\d{1,6}\b", RegexOptions.CultureInvariant);
+        new(@"(?<![\d-])\b[A-Z0-9]{1,3}\s*-\s*\d{4,8}(?![\d-])", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     private static readonly Regex PatronConsultaVur =
         new(@"(?:CONSULTA|REPORTE|VUR)[^\d]{0,12}([\dA-Z-]{4,20})", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
@@ -58,19 +66,7 @@ public sealed class DocumentClassifierService : IDocumentClassifierService
         List<string> hitsCtl = Coincidencias(texto, PatronesCtl);
         List<string> hitsVur = Coincidencias(texto, PatronesVur);
         List<string> hitsEscritura = Coincidencias(texto, PatronesEscritura);
-
-        if (EsCtl(hitsCtl) ||
-            (hitsCtl.Count == 1 && PatronFmi.IsMatch(texto) && !EsVur(hitsVur) && !EsEscritura(hitsEscritura)))
-        {
-            string fmi = ExtraerPrimera(texto, PatronFmi) ?? string.Empty;
-            return new ClasificacionDocumentoDto
-            {
-                TipoDocumento = TipoDocumentoJuridico.CTL,
-                NombreTipoDocumento = TipoDocumentoJuridico.CTL.ObtenerNombre(),
-                IdentificadorExtraido = string.IsNullOrWhiteSpace(fmi) ? "CTL SNR" : fmi,
-                ResumenDeteccion = ResumenCon("CTL", hitsCtl)
-            };
-        }
+        List<string> hitsResolucion = Coincidencias(texto, PatronesResolucion);
 
         if (EsVur(hitsVur) || EsVurUnicoFuerte(hitsVur))
         {
@@ -88,6 +84,30 @@ public sealed class DocumentClassifierService : IDocumentClassifierService
                 NombreTipoDocumento = TipoDocumentoJuridico.VUR.ObtenerNombre(),
                 IdentificadorExtraido = identificador,
                 ResumenDeteccion = ResumenCon("VUR", hitsVur)
+            };
+        }
+
+        if (EsResolucion(hitsResolucion))
+        {
+            return new ClasificacionDocumentoDto
+            {
+                TipoDocumento = TipoDocumentoJuridico.ResolucionActoAdministrativo,
+                NombreTipoDocumento = TipoDocumentoJuridico.ResolucionActoAdministrativo.ObtenerNombre(),
+                IdentificadorExtraido = string.Empty,
+                ResumenDeteccion = ResumenCon("Resolución / Acto Administrativo", hitsResolucion)
+            };
+        }
+
+        if (EsCtl(hitsCtl) ||
+            (hitsCtl.Count == 1 && PatronFmi.IsMatch(texto) && !EsVur(hitsVur) && !EsEscritura(hitsEscritura) && !EsResolucion(hitsResolucion)))
+        {
+            string fmi = ExtraerPrimera(texto, PatronFmi) ?? string.Empty;
+            return new ClasificacionDocumentoDto
+            {
+                TipoDocumento = TipoDocumentoJuridico.CTL,
+                NombreTipoDocumento = TipoDocumentoJuridico.CTL.ObtenerNombre(),
+                IdentificadorExtraido = string.IsNullOrWhiteSpace(fmi) ? "CTL SNR" : fmi,
+                ResumenDeteccion = ResumenCon("CTL", hitsCtl)
             };
         }
 
@@ -113,9 +133,9 @@ public sealed class DocumentClassifierService : IDocumentClassifierService
             };
         }
 
-        string resumen = hitsCtl.Count + hitsVur.Count + hitsEscritura.Count == 0
-            ? "No se identificaron indicios de CTL, VUR o Escritura Pública. Se asigna documento inmobiliario general."
-            : $"Indicios insuficientes ({hitsCtl.Count + hitsVur.Count + hitsEscritura.Count} de 2+ por tipo). Se asigna documento inmobiliario general.";
+        string resumen = hitsCtl.Count + hitsVur.Count + hitsEscritura.Count + hitsResolucion.Count == 0
+            ? "No se identificaron indicios de CTL, VUR, Escritura Pública o Resolución. Se asigna documento inmobiliario general."
+            : $"Indicios insuficientes ({hitsCtl.Count + hitsVur.Count + hitsEscritura.Count + hitsResolucion.Count} de 2+ por tipo). Se asigna documento inmobiliario general.";
 
         return CrearGeneral(resumen);
     }
@@ -130,6 +150,8 @@ public sealed class DocumentClassifierService : IDocumentClassifierService
     private static bool EsEscritura(List<string> hits) =>
         hits.Count >= 2 ||
         hits.Any(h => h.Equals("ESCRITURA PUBLICA", StringComparison.OrdinalIgnoreCase));
+
+    private static bool EsResolucion(List<string> hits) => hits.Count >= 2;
 
     private static ClasificacionDocumentoDto CrearGeneral(string resumen)
     {
