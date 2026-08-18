@@ -24,10 +24,11 @@ export const EMPRESA_ID = "11111111-1111-1111-1111-111111111111"
 export const USUARIO_ID = "22222222-2222-2222-2222-222222222222"
 
 const TIMEOUT_MS = 60000
+const ANALISIS_TIMEOUT_MS = 240000
 
-async function request(path, options = {}, tipoRespuesta = "json") {
+async function request(path, options = {}, tipoRespuesta = "json", timeoutMs = TIMEOUT_MS) {
   const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS)
+  const timeout = setTimeout(() => controller.abort(), timeoutMs)
 
   let response
   try {
@@ -98,7 +99,7 @@ export async function procesarAnalisisCtl({
   formData.append("tipoDocumento", tipoDocumento)
   formData.append("empresaId", empresaId)
   formData.append("usuarioId", usuarioId)
-  return request("/procesar", { method: "POST", body: formData })
+  return request("/procesar", { method: "POST", body: formData }, "json", ANALISIS_TIMEOUT_MS)
 }
 
 export async function descargarReporteWord(analisisId, matriculaFmi) {

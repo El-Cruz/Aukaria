@@ -23,7 +23,7 @@ public static class DependencyInjection
         services.AddScoped<IDocumentClassifierService, DocumentClassifierService>();
         services.AddHttpClient<IClaudeApiService, ClaudeApiService>(client =>
         {
-            client.Timeout = TimeSpan.FromMinutes(3);
+            client.Timeout = TimeSpan.FromMinutes(5);
         });
         services.AddScoped<IReportGeneratorService, ReportGeneratorService>();
         services.AddScoped<IAnalisisPredialRepository, AnalisisPredialRepository>();

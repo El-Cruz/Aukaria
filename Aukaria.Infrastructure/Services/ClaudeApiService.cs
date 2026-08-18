@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -13,7 +14,7 @@ public sealed class ClaudeApiService : IClaudeApiService
 {
     private const string Endpoint = "https://api.anthropic.com/v1/messages";
     private const string AnthropicVersion = "2023-06-01";
-    private const int MaxTokens = 64000;
+    private const int MaxTokens = 32000;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -73,11 +74,16 @@ public sealed class ClaudeApiService : IClaudeApiService
 
         _logger.LogInformation("Iniciando llamada a la API de Anthropic (modelo: {Modelo}).", modelo);
 
+        var stopwatch = Stopwatch.StartNew();
         using HttpResponseMessage response = await _httpClient.SendAsync(httpRequest, cancellationToken);
+        stopwatch.Stop();
+
+        _logger.LogInformation(
+            "Llamada a la API de Anthropic finalizada. Estado HTTP: {Estado}. Duración: {DuracionMs} ms.",
+            (int)response.StatusCode,
+            stopwatch.ElapsedMilliseconds);
 
         string responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        _logger.LogInformation("Llamada a la API de Anthropic finalizada. Estado HTTP: {Estado}.", (int)response.StatusCode);
 
         if (!response.IsSuccessStatusCode)
         {
