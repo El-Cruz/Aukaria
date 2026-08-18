@@ -71,6 +71,10 @@ export default function PdfUploadZone({ onAnalyze = () => {} }) {
           fmi: res.MatriculaFMI || "",
           analisisIdPrevio: res.AnalisisIdPrevio ?? null,
           clasificacion: res.ClasificacionDocumento ?? null,
+          orip: res.Orip || "",
+          nombrePredio: res.NombrePredio || "",
+          municipio: res.Municipio || "",
+          cedulaCatastral: res.CedulaCatastral || "",
         })
       })
       .catch((err) => {
@@ -330,6 +334,7 @@ export default function PdfUploadZone({ onAnalyze = () => {} }) {
                             matriculaFmi: pre?.fmi || "",
                             analisisIdPrevio: pre?.analisisIdPrevio ?? null,
                             tipoDocumento: pre?.clasificacion?.TipoDocumento || "CTL",
+                            preAnalisis: pre,
                           })
                         }
                         className="rounded-full bg-black px-6 py-2.5 text-sm font-semibold text-white shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:bg-neutral-900"

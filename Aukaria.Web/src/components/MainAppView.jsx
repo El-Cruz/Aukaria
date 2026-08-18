@@ -41,6 +41,7 @@ export default function MainAppView({
   modo = "workspace",
   usuario = null,
   analisis = null,
+  preAnalisisData = null,
   historial = [],
   onAnalyze = () => {},
   onReabrir = () => {},
@@ -222,7 +223,7 @@ export default function MainAppView({
                   exit={{ opacity: 0, y: -12 }}
                   transition={spring}
                 >
-                  <AnalysisDashboard analisis={analisis} onDownload={onDownload} />
+                  <AnalysisDashboard analisis={analisis} preAnalisisData={preAnalisisData} onDownload={onDownload} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -232,6 +233,7 @@ export default function MainAppView({
             <RightSidebar
               modo={modo}
               analisis={analisis}
+              preAnalisisData={preAnalisisData}
               usuario={usuario}
               onDownload={onDownload}
               onLogout={onLogout}
@@ -288,6 +290,7 @@ export default function MainAppView({
               <RightSidebar
                 modo={modo}
                 analisis={analisis}
+                preAnalisisData={preAnalisisData}
                 usuario={usuario}
                 onDownload={onDownload}
                 onLogout={onLogout}

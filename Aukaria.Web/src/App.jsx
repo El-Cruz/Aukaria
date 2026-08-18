@@ -10,6 +10,35 @@ import { descargarReporteWord, procesarAnalisisCtl } from "./services/apiService
 const fade = { duration: 0.3 }
 const spring = { type: "spring", stiffness: 400, damping: 30 }
 
+function extraerInfoPredio(res) {
+  const r = res?.Resultado ?? res?.resultado ?? {}
+  const info = r?.informacionGeneral || r?.capitulo1 || r
+  const v = (obj, ...keys) => {
+    for (const k of keys) {
+      const val = obj?.[k]
+      if (val !== undefined && val !== null && String(val).trim() !== "") return String(val).trim()
+    }
+    return ""
+  }
+  return {
+    matricula:
+      v(info, "MatriculaFMI", "matriculaFMI", "FolioMatricula", "folioMatricula", "matricula") ||
+      v(r, "MatriculaFMI", "matriculaFMI", "FolioMatricula", "folioMatricula", "matricula") ||
+      v(res, "MatriculaFMI", "matriculaFMI"),
+    nombrePredio:
+      v(info, "NombrePredio", "nombrePredio") ||
+      v(r, "NombrePredio", "nombrePredio") ||
+      v(res, "NombrePredio", "nombrePredio"),
+    municipio: v(info, "Municipio", "municipio") || v(r, "Municipio", "municipio"),
+    departamento: v(info, "Departamento", "departamento") || v(r, "Departamento", "departamento"),
+    orip:
+      v(info, "ORIP", "orip", "oficinaRegistro", "OficinaRegistro") ||
+      v(r, "ORIP", "orip", "oficinaRegistro", "OficinaRegistro"),
+    cedulaCatastral:
+      v(info, "CedulaCatastral", "cedulaCatastral") || v(r, "CedulaCatastral", "cedulaCatastral"),
+  }
+}
+
 function ErrorBanner({ message, onClose }) {
   return (
     <motion.div
@@ -61,6 +90,7 @@ function App() {
   const [usuario, setUsuario] = useState(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [resultado, setResultado] = useState(null)
+  const [preAnalisisData, setPreAnalisisData] = useState(null)
   const [historial, setHistorial] = useState([])
   const [errorMsg, setErrorMsg] = useState("")
   const errorTimerRef = useRef(null)
@@ -83,6 +113,16 @@ function App() {
         tipoDocumento: meta?.tipoDocumento || "CTL",
       })
       setResultado(res)
+      const info = extraerInfoPredio(res)
+      setPreAnalisisData((prev) => ({
+        ...(prev || {}),
+        matricula: info.matricula || meta?.preAnalisis?.fmi || prev?.matricula || "",
+        nombrePredio: info.nombrePredio || meta?.preAnalisis?.nombrePredio || prev?.nombrePredio || "",
+        municipio: info.municipio || meta?.preAnalisis?.municipio || prev?.municipio || "",
+        departamento: info.departamento || prev?.departamento || "",
+        orip: info.orip || meta?.preAnalisis?.orip || prev?.orip || "",
+        cedulaCatastral: info.cedulaCatastral || meta?.preAnalisis?.cedulaCatastral || prev?.cedulaCatastral || "",
+      }))
       setHistorial((prev) => [res, ...prev.filter((h) => h.Id !== res.Id)].slice(0, 6))
       setIsProcessing(false)
       setPaso("dashboard")
@@ -116,13 +156,20 @@ function App() {
     const estudio = historial.find((h) => h.Id === id)
     if (estudio) {
       setResultado(estudio)
+      setPreAnalisisData(extraerInfoPredio(estudio))
       setPaso("dashboard")
     }
+  }
+
+  const handleNuevoEstudio = () => {
+    setPreAnalisisData(null)
+    setPaso("app")
   }
 
   const handleLogout = () => {
     setUsuario(null)
     pendienteRef.current = null
+    setPreAnalisisData(null)
     setPaso("landing")
   }
 
@@ -131,7 +178,9 @@ function App() {
     try {
       await descargarReporteWord(
         resultado.Id,
-        resultado.MatriculaFMI || resultado.Resultado?.MatriculaFMI,
+        resultado.MatriculaFMI ||
+          resultado.Resultado?.MatriculaFMI ||
+          preAnalisisData?.matricula,
       )
     } catch (err) {
       notificar(err.message || "No se pudo descargar el reporte.")
@@ -160,11 +209,12 @@ function App() {
               <MainAppView
                 modo={modo}
                 analisis={resultado}
+                preAnalisisData={preAnalisisData}
                 historial={historial}
                 usuario={usuario}
                 onAnalyze={runAnalysis}
                 onReabrir={handleReabrir}
-                onNuevoEstudio={() => setPaso("app")}
+                onNuevoEstudio={handleNuevoEstudio}
                 onDownload={handleDownload}
                 onLogout={handleLogout}
               />

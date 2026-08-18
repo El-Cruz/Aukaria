@@ -138,13 +138,51 @@ function mapAlerta(item) {
   }
 }
 
-export default function AnalysisDashboard({ analisis = null, viability = "viable", onDownload }) {
+export default function AnalysisDashboard({ analisis = null, viability = "viable", onDownload, preAnalisisData = null }) {
   const reduce = useReducedMotion()
   const [firmaSolicitada, setFirmaSolicitada] = useState(false)
   const r = analisis?.Resultado ?? null
+  const infoGeneral = r?.informacionGeneral || r?.capitulo1 || r || {}
 
-  const predio = analisis?.NombrePredio || r?.NombrePredio || "Finca La Esperanza"
-  const fmi = analisis?.MatriculaFMI || r?.MatriculaFMI || "196-2053"
+  const matriculaDefinitiva =
+    infoGeneral.MatriculaFMI ||
+    infoGeneral.matriculaFMI ||
+    infoGeneral.FolioMatricula ||
+    infoGeneral.folioMatricula ||
+    analisis?.MatriculaFMI ||
+    preAnalisisData?.matricula ||
+    "Sin Información"
+
+  const nombrePredioDefinitivo =
+    infoGeneral.NombrePredio ||
+    infoGeneral.nombrePredio ||
+    analisis?.NombrePredio ||
+    preAnalisisData?.nombrePredio ||
+    "Predio No Identificado"
+
+  const oripDefinitiva =
+    infoGeneral.ORIP ||
+    infoGeneral.orip ||
+    infoGeneral.oficinaRegistro ||
+    infoGeneral.OficinaRegistro ||
+    analisis?.ORIP ||
+    preAnalisisData?.orip ||
+    "Sin Información"
+
+  const departamentoDefinitivo =
+    infoGeneral.Departamento ||
+    infoGeneral.departamento ||
+    preAnalisisData?.departamento ||
+    "Sin Información"
+
+  const municipioDefinitivo =
+    infoGeneral.Municipio ||
+    infoGeneral.municipio ||
+    preAnalisisData?.municipio ||
+    "Sin Información"
+
+  const predio = nombrePredioDefinitivo
+  const fmi = matriculaDefinitiva
   const viabilidad = viabilidadKey(analisis?.Viabilidad || r?.Viabilidad || viability)
   const tipo = resolvedorTipo(analisis?.TipoDocumento)
 
@@ -178,8 +216,8 @@ export default function AnalysisDashboard({ analisis = null, viability = "viable
             { label: "Área Registrada", value: (r?.AreaRegistrada || "").trim() || "No reportada" },
           ]
         : (() => {
-            const dp = (r?.Departamento || "").trim()
-            const mp = (r?.Municipio || "").trim()
+            const dp = departamentoDefinitivo !== "Sin Información" ? departamentoDefinitivo : ""
+            const mp = municipioDefinitivo !== "Sin Información" ? municipioDefinitivo : ""
             const estadoFolio = (r?.EstadoFolio || "").trim()
             const folioDot = /(activo|abierto|vigente)/i.test(estadoFolio)
               ? "bg-emerald-500"
@@ -187,10 +225,10 @@ export default function AnalysisDashboard({ analisis = null, viability = "viable
             const fecha = analisis?.FechaAnalisis ? new Date(analisis.FechaAnalisis) : null
             const fechaTexto = fecha && !Number.isNaN(fecha.getTime()) ? fecha.toLocaleDateString("es-CO") : "—"
             return [
-              { label: "ORIP / Círculo de Registro", value: (r?.ORIP || "").trim() || "No registrado" },
+              { label: "ORIP / Círculo de Registro", value: oripDefinitiva },
               {
                 label: "Departamento · Municipio",
-                value: dp || mp ? [dp, mp].filter(Boolean).join(" · ") : "No registrado",
+                value: dp || mp ? [dp, mp].filter(Boolean).join(" · ") : "Sin Información",
               },
               { label: "Área Registrada", value: (r?.AreaRegistrada || "").trim() || "No registrada" },
               { label: "Propietario Actual", value: (r?.PropietarioActual || "").trim() || "No registrado" },
@@ -225,7 +263,7 @@ export default function AnalysisDashboard({ analisis = null, viability = "viable
   const v = VIABILITY[viabilidad] ?? VIABILITY.viable
 
   const fmiLinea = (() => {
-    const fmiReal = analisis ? analisis?.MatriculaFMI || r?.MatriculaFMI || "" : "196-2053"
+    const fmiReal = fmi !== "Sin Información" ? fmi : ""
     if (!fmiReal) return "Documento analizado por Aukaria Legal"
     return `FMI ${fmiReal} · ${tipo.key === "CTL" ? "Matrícula Inmobiliaria SNR" : "Aukaria Legal"}`
   })()

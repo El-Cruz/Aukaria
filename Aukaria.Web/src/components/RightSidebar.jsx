@@ -66,6 +66,7 @@ export default function RightSidebar({
   movil = false,
   usuario = null,
   onLogout = () => {},
+  preAnalisisData = null,
 }) {
   const reduce = useReducedMotion()
   const [copiado, setCopiado] = useState(false)
@@ -76,9 +77,26 @@ export default function RightSidebar({
   const [feedback, setFeedback] = useState("")
 
   const r = analisis?.Resultado ?? null
-  const fmi = analisis?.MatriculaFMI || r?.MatriculaFMI || "196-2053"
-  const orip = (r?.ORIP || "").trim() || "Cuenca"
-  const propietario = (r?.PropietarioActual || "").trim() || "Torres Cárdenas Juan"
+  const infoGeneral = r?.informacionGeneral || r?.capitulo1 || r || {}
+
+  const fmi =
+    infoGeneral.MatriculaFMI ||
+    infoGeneral.matriculaFMI ||
+    infoGeneral.FolioMatricula ||
+    infoGeneral.folioMatricula ||
+    analisis?.MatriculaFMI ||
+    preAnalisisData?.matricula ||
+    "Sin Información"
+  const orip = (
+    infoGeneral.ORIP ||
+    infoGeneral.orip ||
+    infoGeneral.oficinaRegistro ||
+    infoGeneral.OficinaRegistro ||
+    analisis?.ORIP ||
+    preAnalisisData?.orip ||
+    "Sin Información"
+  ).trim()
+  const propietario = (infoGeneral.PropietarioActual || r?.PropietarioActual || "").trim() || "Sin Información"
   const viabilidad = viabilidadKey(analisis?.Viabilidad || r?.Viabilidad)
   const v = VIABILITY[viabilidad] ?? VIABILITY.viable
   const tipo = resolvedorTipo(analisis?.TipoDocumento)
