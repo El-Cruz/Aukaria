@@ -1,4 +1,5 @@
 using Aukaria.Application.DTOs.Requests;
+using Aukaria.Application.DTOs.Responses;
 using Aukaria.Application.Exceptions;
 using Aukaria.Application.Interfaces;
 using Aukaria.Domain.Enums;
@@ -93,8 +94,11 @@ public sealed class AnalisisPredialController : ControllerBase
     {
         try
         {
-            byte[] bytes = await _analisisService.DescargarReporteWordAsync(id, cancellationToken);
-            return File(bytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", $"Informe_Juridico_Predial_{id}.docx");
+            ReporteWordDto reporte = await _analisisService.DescargarReporteWordAsync(id, cancellationToken);
+            return File(
+                reporte.Archivo,
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                reporte.NombreArchivo);
         }
         catch (KeyNotFoundException)
         {

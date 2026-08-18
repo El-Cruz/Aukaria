@@ -7,5 +7,5 @@ public interface IAnalisisPredialService
 {
     Task<PreAnalisisFmiResponseDto> PreAnalizarFmiAsync(Stream pdfStream, Guid empresaId, CancellationToken cancellationToken = default);
     Task<AnalisisPredialResponseDto> ProcesarAnalisisCtlAsync(SolicitudAnalisisRequestDto solicitud, Stream pdfStream, CancellationToken cancellationToken = default);
-    Task<byte[]> DescargarReporteWordAsync(Guid analisisId, CancellationToken cancellationToken = default);
+    Task<ReporteWordDto> DescargarReporteWordAsync(Guid analisisId, CancellationToken cancellationToken = default);
 }

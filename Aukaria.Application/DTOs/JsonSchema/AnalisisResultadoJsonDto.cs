@@ -23,4 +23,30 @@ public class AnalisisResultadoJsonDto
     public List<string> Otorgantes { get; set; } = new();
     public string Cuantia { get; set; } = string.Empty;
     public string Linderos { get; set; } = string.Empty;
+
+    public string CedulaCatastral { get; set; } = string.Empty;
+    public string Nupre { get; set; } = string.Empty;
+    public string FolioMatriz { get; set; } = string.Empty;
+    public string FoliosDerivados { get; set; } = string.Empty;
+    public string FechaExpedicionCertificado { get; set; } = string.Empty;
+
+    public string OrigenCabidaActual { get; set; } = string.Empty;
+    public string ConclusionPredial { get; set; } = string.Empty;
+    public string AreaSegunFmi { get; set; } = string.Empty;
+    public string AreaAdjudicacionInicial { get; set; } = string.Empty;
+    public string DesenglobesVentasParciales { get; set; } = string.Empty;
+    public string AreaRemanenteReal { get; set; } = string.Empty;
+
+    public string LinderosDescripcion { get; set; } = string.Empty;
+    public string SoporteDocumentalLinderos { get; set; } = string.Empty;
+
+    public List<TitularDto> Titulares { get; set; } = new();
+    public string RegimenPropiedadAnalisis { get; set; } = string.Empty;
+
+    public List<TradicionActoDto> TradicionActos { get; set; } = new();
+    public string CertificacionTracto { get; set; } = string.Empty;
+
+    public string DiagnosticoEjecutivo { get; set; } = string.Empty;
+
+    public List<string> DocumentosAnalizados { get; set; } = new();
 }

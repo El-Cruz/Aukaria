@@ -104,8 +104,8 @@ export async function procesarAnalisisCtl({
 export async function descargarReporteWord(analisisId, matriculaFmi) {
   const blob = await request(`/descargar-word/${analisisId}`, { method: "GET" }, "blob")
   const nombre = matriculaFmi
-    ? `Estudio_Predial_${matriculaFmi}.docx`
-    : `Estudio_Predial_${analisisId}.docx`
+    ? `Informe_Juridico_Predial_FMI_${matriculaFmi}.docx`
+    : `Informe_Juridico_Predial_${analisisId}.docx`
   const url = URL.createObjectURL(blob)
   const link = document.createElement("a")
   link.href = url

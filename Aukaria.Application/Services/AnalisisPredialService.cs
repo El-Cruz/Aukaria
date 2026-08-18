@@ -104,7 +104,7 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
         };
     }
 
-    public async Task<byte[]> DescargarReporteWordAsync(
+    public async Task<ReporteWordDto> DescargarReporteWordAsync(
         Guid analisisId,
         CancellationToken cancellationToken = default)
     {
@@ -118,7 +118,22 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
         AnalisisResultadoJsonDto resultadoDto = JsonSerializer.Deserialize<AnalisisResultadoJsonDto>(analisis.ResultadoJson)
             ?? new AnalisisResultadoJsonDto();
 
-        return await _reportGeneratorService.GenerarReporteWordAsync(resultadoDto, cancellationToken);
+        byte[] bytes = await _reportGeneratorService.GenerarReporteWordAsync(resultadoDto, cancellationToken);
+
+        return new ReporteWordDto
+        {
+            Archivo = bytes,
+            NombreArchivo = ConstruirNombreArchivo(resultadoDto.MatriculaFMI, analisisId)
+        };
+    }
+
+    private static string ConstruirNombreArchivo(string matriculaFmi, Guid analisisId)
+    {
+        string fmi = new string((matriculaFmi ?? string.Empty).Where(c => !System.IO.Path.GetInvalidFileNameChars().Contains(c)).ToArray()).Trim();
+
+        return string.IsNullOrWhiteSpace(fmi)
+            ? $"Informe_Juridico_Predial_{analisisId}.docx"
+            : $"Informe_Juridico_Predial_FMI_{fmi}.docx";
     }
 
     private static EstadoViabilidad MapearViabilidad(string viabilidad)
