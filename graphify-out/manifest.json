@@ -1,0 +1,620 @@
+{
+  ".agents/skills/systematic-debugging/condition-based-waiting-example.ts": {
+    "mtime": 1786809146.8936775,
+    "seen": 1787150452.943448,
+    "ast_hash": "8e502a8c1e9c7de15967202615d241d5",
+    "semantic_hash": "8e502a8c1e9c7de15967202615d241d5"
+  },
+  ".agents/skills/systematic-debugging/find-polluter.sh": {
+    "mtime": 1786809146.8956783,
+    "seen": 1787150452.9434536,
+    "ast_hash": "6bc3c264a76bd77f191f9a6226805b98",
+    "semantic_hash": "6bc3c264a76bd77f191f9a6226805b98"
+  },
+  ".claude/skills/systematic-debugging/condition-based-waiting-example.ts": {
+    "mtime": 1786809146.8936775,
+    "seen": 1787150452.943456,
+    "ast_hash": "8e502a8c1e9c7de15967202615d241d5",
+    "semantic_hash": "8e502a8c1e9c7de15967202615d241d5"
+  },
+  ".claude/skills/systematic-debugging/find-polluter.sh": {
+    "mtime": 1786809146.8956783,
+    "seen": 1787150452.9434571,
+    "ast_hash": "6bc3c264a76bd77f191f9a6226805b98",
+    "semantic_hash": "6bc3c264a76bd77f191f9a6226805b98"
+  },
+  "Aukaria/Aukaria.Api/Aukaria.Api.csproj": {
+    "mtime": 1786640351.7573185,
+    "seen": 1787150452.9434583,
+    "ast_hash": "33274ae94d00712228576dc8079e86c8",
+    "semantic_hash": "33274ae94d00712228576dc8079e86c8"
+  },
+  "Aukaria/Aukaria.Api/Controllers/AnalisisPredialController.cs": {
+    "mtime": 1787064992.9603245,
+    "seen": 1787150452.9434593,
+    "ast_hash": "dc861def88d9948c0eeed2dc60c6118d",
+    "semantic_hash": "dc861def88d9948c0eeed2dc60c6118d"
+  },
+  "Aukaria/Aukaria.Api/Program.cs": {
+    "mtime": 1786889976.3320894,
+    "seen": 1787150452.94346,
+    "ast_hash": "3e75352562a836578312321241317e3a",
+    "semantic_hash": "3e75352562a836578312321241317e3a"
+  },
+  "Aukaria/Aukaria.Api/Properties/launchSettings.json": {
+    "mtime": 1786487327.814338,
+    "seen": 1787150452.9434607,
+    "ast_hash": "07c66055c8c1e8318fe1643f73830601",
+    "semantic_hash": "07c66055c8c1e8318fe1643f73830601"
+  },
+  "Aukaria/Aukaria.Api/appsettings.Development.json": {
+    "mtime": 1786489992.2704084,
+    "seen": 1787150452.9434614,
+    "ast_hash": "309b421ff3305f0b9f3295e2f88e66fc",
+    "semantic_hash": "309b421ff3305f0b9f3295e2f88e66fc"
+  },
+  "Aukaria/Aukaria.Api/appsettings.json": {
+    "mtime": 1786475739.2461584,
+    "seen": 1787150452.9434621,
+    "ast_hash": "f7e65dde4e5533740a0d57ac9355c0e8",
+    "semantic_hash": "f7e65dde4e5533740a0d57ac9355c0e8"
+  },
+  "Aukaria/Aukaria.Application/Aukaria.Application.csproj": {
+    "mtime": 1786475994.854695,
+    "seen": 1787150452.943463,
+    "ast_hash": "409527ead0e7948d7544ee1cd1beea96",
+    "semantic_hash": "409527ead0e7948d7544ee1cd1beea96"
+  },
+  "Aukaria/Aukaria.Application/DTOs/ClasificacionDocumentoDto.cs": {
+    "mtime": 1786652844.8906024,
+    "seen": 1787150452.943464,
+    "ast_hash": "dfa7a7948b7b0404598ed00be152033d",
+    "semantic_hash": "dfa7a7948b7b0404598ed00be152033d"
+  },
+  "Aukaria/Aukaria.Application/DTOs/ExtraccionPreAnalisisDto.cs": {
+    "mtime": 1787063209.9109848,
+    "seen": 1787150452.943465,
+    "ast_hash": "98552e95cc0f4b47b6b5544f0a4758e8",
+    "semantic_hash": "98552e95cc0f4b47b6b5544f0a4758e8"
+  },
+  "Aukaria/Aukaria.Application/DTOs/JsonSchema/AlertaJuridicaDto.cs": {
+    "mtime": 1786481144.056073,
+    "seen": 1787150452.943466,
+    "ast_hash": "8cbccceee8d358f50bb5828198fec993",
+    "semantic_hash": "8cbccceee8d358f50bb5828198fec993"
+  },
+  "Aukaria/Aukaria.Application/DTOs/JsonSchema/AnalisisResultadoJsonDto.cs": {
+    "mtime": 1787064732.6271572,
+    "seen": 1787150452.9434667,
+    "ast_hash": "1c6567bfa98418211cbf920643be2e42",
+    "semantic_hash": "1c6567bfa98418211cbf920643be2e42"
+  },
+  "Aukaria/Aukaria.Application/DTOs/JsonSchema/AnotacionDto.cs": {
+    "mtime": 1787064712.867003,
+    "seen": 1787150452.9434676,
+    "ast_hash": "b4111572b0d8bfecd19b46dd13ee3223",
+    "semantic_hash": "b4111572b0d8bfecd19b46dd13ee3223"
+  },
+  "Aukaria/Aukaria.Application/DTOs/JsonSchema/TitularDto.cs": {
+    "mtime": 1787064703.3189583,
+    "seen": 1787150452.9434683,
+    "ast_hash": "2e9e1a7c1b9b7c01423c6bdaf2f52bc8",
+    "semantic_hash": "2e9e1a7c1b9b7c01423c6bdaf2f52bc8"
+  },
+  "Aukaria/Aukaria.Application/DTOs/JsonSchema/TradicionActoDto.cs": {
+    "mtime": 1787064703.8545377,
+    "seen": 1787150452.9434688,
+    "ast_hash": "3a9adcdc863480457ec0141d93ccb3b0",
+    "semantic_hash": "3a9adcdc863480457ec0141d93ccb3b0"
+  },
+  "Aukaria/Aukaria.Application/DTOs/Requests/PreAnalisisFmiRequestDto.cs": {
+    "mtime": 1786481144.4554043,
+    "seen": 1787150452.9434695,
+    "ast_hash": "dd6c2afc749599c9cb55112260105994",
+    "semantic_hash": "dd6c2afc749599c9cb55112260105994"
+  },
+  "Aukaria/Aukaria.Application/DTOs/Requests/SolicitudAnalisisRequestDto.cs": {
+    "mtime": 1786652905.2641425,
+    "seen": 1787150452.9434702,
+    "ast_hash": "79b0ec1c3cbc25a0004ec79ee8ba5352",
+    "semantic_hash": "79b0ec1c3cbc25a0004ec79ee8ba5352"
+  },
+  "Aukaria/Aukaria.Application/DTOs/Responses/AnalisisPredialResponseDto.cs": {
+    "mtime": 1787068939.0093665,
+    "seen": 1787150452.943471,
+    "ast_hash": "508e892b59078ca6a134951b20f77946",
+    "semantic_hash": "508e892b59078ca6a134951b20f77946"
+  },
+  "Aukaria/Aukaria.Application/DTOs/Responses/PreAnalisisFmiResponseDto.cs": {
+    "mtime": 1787063329.7197015,
+    "seen": 1787150452.9434717,
+    "ast_hash": "e2ca1b85d3e1ce7a775180c8cb680ad4",
+    "semantic_hash": "e2ca1b85d3e1ce7a775180c8cb680ad4"
+  },
+  "Aukaria/Aukaria.Application/DTOs/Responses/ReporteWordDto.cs": {
+    "mtime": 1787064707.429557,
+    "seen": 1787150452.9434729,
+    "ast_hash": "b0cc8bedc0763669171707af94472a9a",
+    "semantic_hash": "b0cc8bedc0763669171707af94472a9a"
+  },
+  "Aukaria/Aukaria.Application/Exceptions/PdfInvalidoException.cs": {
+    "mtime": 1786645314.9435036,
+    "seen": 1787150452.9434736,
+    "ast_hash": "23d44970712d5f1a6084705be690c6fa",
+    "semantic_hash": "23d44970712d5f1a6084705be690c6fa"
+  },
+  "Aukaria/Aukaria.Application/Interfaces/IAnalisisPredialRepository.cs": {
+    "mtime": 1786481425.0686462,
+    "seen": 1787150452.9434745,
+    "ast_hash": "b304ae732156aa3671a49fe99584f40c",
+    "semantic_hash": "b304ae732156aa3671a49fe99584f40c"
+  },
+  "Aukaria/Aukaria.Application/Interfaces/IAnalisisPredialService.cs": {
+    "mtime": 1787064956.2420917,
+    "seen": 1787150452.9434752,
+    "ast_hash": "2bf9ddf81e1dedceab04e5ae2714ec6c",
+    "semantic_hash": "2bf9ddf81e1dedceab04e5ae2714ec6c"
+  },
+  "Aukaria/Aukaria.Application/Interfaces/IClaudeApiService.cs": {
+    "mtime": 1786652878.990184,
+    "seen": 1787150452.943476,
+    "ast_hash": "6169de90a561fd98a4baecb926da7016",
+    "semantic_hash": "6169de90a561fd98a4baecb926da7016"
+  },
+  "Aukaria/Aukaria.Application/Interfaces/IDocumentClassifierService.cs": {
+    "mtime": 1786652846.825575,
+    "seen": 1787150452.9434764,
+    "ast_hash": "bc11d6b7171be7d44dcefce6b3791479",
+    "semantic_hash": "bc11d6b7171be7d44dcefce6b3791479"
+  },
+  "Aukaria/Aukaria.Application/Interfaces/IPdfExtractorService.cs": {
+    "mtime": 1787063233.973384,
+    "seen": 1787150452.9434774,
+    "ast_hash": "8478b1c527d05c3d90ef12f294ee2457",
+    "semantic_hash": "8478b1c527d05c3d90ef12f294ee2457"
+  },
+  "Aukaria/Aukaria.Application/Interfaces/IReportGeneratorService.cs": {
+    "mtime": 1786481424.6240935,
+    "seen": 1787150452.943478,
+    "ast_hash": "f65e18e0c332b95985a35b7929f9f1e5",
+    "semantic_hash": "f65e18e0c332b95985a35b7929f9f1e5"
+  },
+  "Aukaria/Aukaria.Application/Services/AnalisisPredialService.cs": {
+    "mtime": 1787068948.9767995,
+    "seen": 1787150452.9434788,
+    "ast_hash": "51070253510a764e4500a7d6bd9e1d2c",
+    "semantic_hash": "51070253510a764e4500a7d6bd9e1d2c"
+  },
+  "Aukaria/Aukaria.Domain/Aukaria.Domain.csproj": {
+    "mtime": 1786474752.2155275,
+    "seen": 1787150452.9434793,
+    "ast_hash": "a179c1fd32442fdc3ca095a8084e072a",
+    "semantic_hash": "a179c1fd32442fdc3ca095a8084e072a"
+  },
+  "Aukaria/Aukaria.Domain/Entities/AnalisisPredial.cs": {
+    "mtime": 1786652901.1354754,
+    "seen": 1787150452.94348,
+    "ast_hash": "2435b42e27795ebe1399f48ba480a4c9",
+    "semantic_hash": "2435b42e27795ebe1399f48ba480a4c9"
+  },
+  "Aukaria/Aukaria.Domain/Entities/Empresa.cs": {
+    "mtime": 1786481089.8437054,
+    "seen": 1787150452.9434805,
+    "ast_hash": "5a6d831dc6983dcd0cc0bc68aa64a254",
+    "semantic_hash": "5a6d831dc6983dcd0cc0bc68aa64a254"
+  },
+  "Aukaria/Aukaria.Domain/Entities/Usuario.cs": {
+    "mtime": 1786481090.3972764,
+    "seen": 1787150452.9434817,
+    "ast_hash": "e913918a82d8eb081bcaf9bb2278edbc",
+    "semantic_hash": "e913918a82d8eb081bcaf9bb2278edbc"
+  },
+  "Aukaria/Aukaria.Domain/Enums/EstadoViabilidad.cs": {
+    "mtime": 1786481069.9032018,
+    "seen": 1787150452.9434822,
+    "ast_hash": "0ff0530b0b48dbdb854136b33b5541f8",
+    "semantic_hash": "0ff0530b0b48dbdb854136b33b5541f8"
+  },
+  "Aukaria/Aukaria.Domain/Enums/PropositoAnalisis.cs": {
+    "mtime": 1786481070.6484232,
+    "seen": 1787150452.9434834,
+    "ast_hash": "3ca063f1d54fa9a5180c9599715b1310",
+    "semantic_hash": "3ca063f1d54fa9a5180c9599715b1310"
+  },
+  "Aukaria/Aukaria.Domain/Enums/RolUsuario.cs": {
+    "mtime": 1786481070.9460554,
+    "seen": 1787150452.943484,
+    "ast_hash": "1b1b78940acbf0a339e6791920b7b62a",
+    "semantic_hash": "1b1b78940acbf0a339e6791920b7b62a"
+  },
+  "Aukaria/Aukaria.Domain/Enums/TipoDocumentoJuridico.cs": {
+    "mtime": 1787063218.8441937,
+    "seen": 1787150452.943485,
+    "ast_hash": "8a15deab2a0fff7e65fbe1be6502d7ae",
+    "semantic_hash": "8a15deab2a0fff7e65fbe1be6502d7ae"
+  },
+  "Aukaria/Aukaria.Infrastructure/Aukaria.Infrastructure.csproj": {
+    "mtime": 1786808328.393108,
+    "seen": 1787150452.9434855,
+    "ast_hash": "19feea503a016214eadcba6baf90e630",
+    "semantic_hash": "19feea503a016214eadcba6baf90e630"
+  },
+  "Aukaria/Aukaria.Infrastructure/DependencyInjection.cs": {
+    "mtime": 1787066557.856038,
+    "seen": 1787150452.9434862,
+    "ast_hash": "6299499f130723cec7de12445e56c825",
+    "semantic_hash": "6299499f130723cec7de12445e56c825"
+  },
+  "Aukaria/Aukaria.Infrastructure/Migrations/20260815153804_InicialPostgres.Designer.cs": {
+    "mtime": 1786808284.6198525,
+    "seen": 1787150452.9434867,
+    "ast_hash": "e9a2e1e723eb41f94d80f3c1907f818f",
+    "semantic_hash": "e9a2e1e723eb41f94d80f3c1907f818f"
+  },
+  "Aukaria/Aukaria.Infrastructure/Migrations/20260815153804_InicialPostgres.cs": {
+    "mtime": 1786808284.6183455,
+    "seen": 1787150452.9434872,
+    "ast_hash": "5a1219d3cb20a44303880be1a6b4e3be",
+    "semantic_hash": "5a1219d3cb20a44303880be1a6b4e3be"
+  },
+  "Aukaria/Aukaria.Infrastructure/Migrations/AukariaDbContextModelSnapshot.cs": {
+    "mtime": 1786808284.6210065,
+    "seen": 1787150452.9434888,
+    "ast_hash": "fdc4c596a54497e59c01a635983b8360",
+    "semantic_hash": "fdc4c596a54497e59c01a635983b8360"
+  },
+  "Aukaria/Aukaria.Infrastructure/Persistence/AukariaDbContext.cs": {
+    "mtime": 1786486502.1705673,
+    "seen": 1787150452.9434893,
+    "ast_hash": "d8a1381a48bc50aeb230c21578c2699d",
+    "semantic_hash": "d8a1381a48bc50aeb230c21578c2699d"
+  },
+  "Aukaria/Aukaria.Infrastructure/Persistence/Configurations/AnalisisPredialConfiguration.cs": {
+    "mtime": 1786808225.1968298,
+    "seen": 1787150452.9434903,
+    "ast_hash": "8c250ff87f14faf9e0ddc94e03eaeb51",
+    "semantic_hash": "8c250ff87f14faf9e0ddc94e03eaeb51"
+  },
+  "Aukaria/Aukaria.Infrastructure/Repositories/AnalisisPredialRepository.cs": {
+    "mtime": 1786484647.493945,
+    "seen": 1787150452.9434907,
+    "ast_hash": "e0e2b452f5641aa421dccec4f2af08d5",
+    "semantic_hash": "e0e2b452f5641aa421dccec4f2af08d5"
+  },
+  "Aukaria/Aukaria.Infrastructure/Services/ClaudeApiService.cs": {
+    "mtime": 1787066648.047378,
+    "seen": 1787150452.9434912,
+    "ast_hash": "4472d36d2694879611d85393e76a095e",
+    "semantic_hash": "4472d36d2694879611d85393e76a095e"
+  },
+  "Aukaria/Aukaria.Infrastructure/Services/DocumentClassifierService.cs": {
+    "mtime": 1787064097.3118553,
+    "seen": 1787150452.9434922,
+    "ast_hash": "0bd89d7e46347120ea071face2007442",
+    "semantic_hash": "0bd89d7e46347120ea071face2007442"
+  },
+  "Aukaria/Aukaria.Infrastructure/Services/LegalPromptBuilder.cs": {
+    "mtime": 1787064780.296742,
+    "seen": 1787150452.943493,
+    "ast_hash": "0d3bd557cce26faee50768640f52ecf8",
+    "semantic_hash": "0d3bd557cce26faee50768640f52ecf8"
+  },
+  "Aukaria/Aukaria.Infrastructure/Services/PdfExtractorService.cs": {
+    "mtime": 1787063956.0649943,
+    "seen": 1787150452.9434934,
+    "ast_hash": "3bab4885460dc7d25ffc8bcfd00fe6c1",
+    "semantic_hash": "3bab4885460dc7d25ffc8bcfd00fe6c1"
+  },
+  "Aukaria/Aukaria.Infrastructure/Services/ReportGeneratorService.cs": {
+    "mtime": 1787065360.529486,
+    "seen": 1787150452.9434943,
+    "ast_hash": "bcea577aa68763c3ed43ea3eeb9a743a",
+    "semantic_hash": "bcea577aa68763c3ed43ea3eeb9a743a"
+  },
+  "Aukaria/Aukaria.Web/.oxlintrc.json": {
+    "mtime": 1786557005.568978,
+    "seen": 1787150452.9434948,
+    "ast_hash": "5e6e3cea3e89137071c142dd7835b0ef",
+    "semantic_hash": "5e6e3cea3e89137071c142dd7835b0ef"
+  },
+  "Aukaria/Aukaria.Web/package.json": {
+    "mtime": 1786641849.5185854,
+    "seen": 1787150452.9434958,
+    "ast_hash": "b06b2ec2c4894c83953144233ed91c6b",
+    "semantic_hash": "b06b2ec2c4894c83953144233ed91c6b"
+  },
+  "Aukaria/Aukaria.Web/src/App.jsx": {
+    "mtime": 1787068956.7398229,
+    "seen": 1787150452.9434962,
+    "ast_hash": "8294d592a522d3283dcd9519aced13b2",
+    "semantic_hash": "8294d592a522d3283dcd9519aced13b2"
+  },
+  "Aukaria/Aukaria.Web/src/components/AnalysisDashboard.jsx": {
+    "mtime": 1787068959.9956822,
+    "seen": 1787150452.943497,
+    "ast_hash": "167dd176b7253dca5327f8086633d5e9",
+    "semantic_hash": "167dd176b7253dca5327f8086633d5e9"
+  },
+  "Aukaria/Aukaria.Web/src/components/AnnotationsTimeline.jsx": {
+    "mtime": 1786644349.4729939,
+    "seen": 1787150452.9434977,
+    "ast_hash": "a056f3d59cfebf835eed7c926963207f",
+    "semantic_hash": "a056f3d59cfebf835eed7c926963207f"
+  },
+  "Aukaria/Aukaria.Web/src/components/GoogleMorphLoader.jsx": {
+    "mtime": 1787062802.7994971,
+    "seen": 1787150452.9434981,
+    "ast_hash": "a67a9c1e66895b8cd9844f10710078a8",
+    "semantic_hash": "a67a9c1e66895b8cd9844f10710078a8"
+  },
+  "Aukaria/Aukaria.Web/src/components/LandingPage.jsx": {
+    "mtime": 1786803080.785295,
+    "seen": 1787150452.943499,
+    "ast_hash": "86266a78a35edf192182a466f8d2bd7a",
+    "semantic_hash": "86266a78a35edf192182a466f8d2bd7a"
+  },
+  "Aukaria/Aukaria.Web/src/components/LanguageSelector.jsx": {
+    "mtime": 1786804081.6950686,
+    "seen": 1787150452.9434996,
+    "ast_hash": "aae55c5a9efd2cf756bfa1f5654853e6",
+    "semantic_hash": "aae55c5a9efd2cf756bfa1f5654853e6"
+  },
+  "Aukaria/Aukaria.Web/src/components/LoginModal.jsx": {
+    "mtime": 1786647754.389823,
+    "seen": 1787150452.9435003,
+    "ast_hash": "1507c16464f4d6a5b315e3d97d7c2a5a",
+    "semantic_hash": "1507c16464f4d6a5b315e3d97d7c2a5a"
+  },
+  "Aukaria/Aukaria.Web/src/components/MainAppView.jsx": {
+    "mtime": 1787068420.2289166,
+    "seen": 1787150452.9435008,
+    "ast_hash": "cb907ed5988245a4ebae7868bdadb216",
+    "semantic_hash": "cb907ed5988245a4ebae7868bdadb216"
+  },
+  "Aukaria/Aukaria.Web/src/components/Navbar.jsx": {
+    "mtime": 1786803084.2399397,
+    "seen": 1787150452.9435015,
+    "ast_hash": "6167bd51f039ac60dfb518377bbe4e71",
+    "semantic_hash": "6167bd51f039ac60dfb518377bbe4e71"
+  },
+  "Aukaria/Aukaria.Web/src/components/PdfUploadZone.jsx": {
+    "mtime": 1787068407.9070845,
+    "seen": 1787150452.9435027,
+    "ast_hash": "d6cfd57a9c02946a968140ef1ddea658",
+    "semantic_hash": "d6cfd57a9c02946a968140ef1ddea658"
+  },
+  "Aukaria/Aukaria.Web/src/components/ProcessingOverlay.jsx": {
+    "mtime": 1786898592.6790788,
+    "seen": 1787150452.9435034,
+    "ast_hash": "42e0a7f50e450f458f51477d7f866f97",
+    "semantic_hash": "42e0a7f50e450f458f51477d7f866f97"
+  },
+  "Aukaria/Aukaria.Web/src/components/RightSidebar.jsx": {
+    "mtime": 1787068439.862455,
+    "seen": 1787150452.9435039,
+    "ast_hash": "49c48a306bf91dcd2359f7230e49bec3",
+    "semantic_hash": "49c48a306bf91dcd2359f7230e49bec3"
+  },
+  "Aukaria/Aukaria.Web/src/components/VariantPreview.jsx": {
+    "mtime": 1786634558.4366176,
+    "seen": 1787150452.9435046,
+    "ast_hash": "5eaa6eb84f56bdf1b8f6603b12be5ef9",
+    "semantic_hash": "5eaa6eb84f56bdf1b8f6603b12be5ef9"
+  },
+  "Aukaria/Aukaria.Web/src/main.jsx": {
+    "mtime": 1786557005.6960185,
+    "seen": 1787150452.9435058,
+    "ast_hash": "e13723e2574429d9a6d849727e3ff695",
+    "semantic_hash": "e13723e2574429d9a6d849727e3ff695"
+  },
+  "Aukaria/Aukaria.Web/src/services/apiService.js": {
+    "mtime": 1787066547.472414,
+    "seen": 1787150452.9435065,
+    "ast_hash": "81d5af6c9e42ab51042e9db8410f1247",
+    "semantic_hash": "81d5af6c9e42ab51042e9db8410f1247"
+  },
+  "Aukaria/Aukaria.Web/src/utils/tiposDocumento.js": {
+    "mtime": 1786653070.3321397,
+    "seen": 1787150452.9435072,
+    "ast_hash": "dde8137a21319ea0e1262fc6527a3f0b",
+    "semantic_hash": "dde8137a21319ea0e1262fc6527a3f0b"
+  },
+  "Aukaria/Aukaria.Web/vercel.json": {
+    "mtime": 1786889980.382476,
+    "seen": 1787150452.9435081,
+    "ast_hash": "7a964e0c645aef282f058c9df273fd37",
+    "semantic_hash": "7a964e0c645aef282f058c9df273fd37"
+  },
+  "Aukaria/Aukaria.Web/vite.config.js": {
+    "mtime": 1786640354.119998,
+    "seen": 1787150452.943509,
+    "ast_hash": "5b641ab5f85eff4b0b9acec3417ca9b5",
+    "semantic_hash": "5b641ab5f85eff4b0b9acec3417ca9b5"
+  },
+  "Aukaria/Aukaria.slnx": {
+    "mtime": 1786475994.901145,
+    "seen": 1787150452.9435098,
+    "ast_hash": "716f3e9fc7def3ba4b6b619c2ae79d95",
+    "semantic_hash": "716f3e9fc7def3ba4b6b619c2ae79d95"
+  },
+  "Aukaria/railway.json": {
+    "mtime": 1786718448.142863,
+    "seen": 1787150452.9435105,
+    "ast_hash": "da98f860385ce60ee3e5c262280f3ce9",
+    "semantic_hash": "da98f860385ce60ee3e5c262280f3ce9"
+  },
+  "skills-lock.json": {
+    "mtime": 1786809147.7443697,
+    "seen": 1787150452.9435112,
+    "ast_hash": "da9f2f5766be7937f4dd7e05f265a5a5",
+    "semantic_hash": "da9f2f5766be7937f4dd7e05f265a5a5"
+  },
+  ".agents/skills/animate/RECIPES.md": {
+    "mtime": 1786554079.7910197,
+    "seen": 1787150452.9435117,
+    "ast_hash": "278b01cdc80a6ec30b97e35f2e046c28",
+    "semantic_hash": "278b01cdc80a6ec30b97e35f2e046c28"
+  },
+  ".agents/skills/animate/SKILL.md": {
+    "mtime": 1786554079.7920263,
+    "seen": 1787150452.9435127,
+    "ast_hash": "73d2706a2532d5abd4835d8dc7337435",
+    "semantic_hash": "73d2706a2532d5abd4835d8dc7337435"
+  },
+  ".agents/skills/apple-design/SKILL.md": {
+    "mtime": 1786554079.7957683,
+    "seen": 1787150452.9435132,
+    "ast_hash": "ce2d2df8d26e4596d27c541c99454c6a",
+    "semantic_hash": "ce2d2df8d26e4596d27c541c99454c6a"
+  },
+  ".agents/skills/review-animations/SKILL.md": {
+    "mtime": 1786554079.8117232,
+    "seen": 1787150452.943514,
+    "ast_hash": "fabbd73388563cc48379e7f57bb9bdd9",
+    "semantic_hash": "fabbd73388563cc48379e7f57bb9bdd9"
+  },
+  ".agents/skills/review-animations/STANDARDS.md": {
+    "mtime": 1786554079.8128304,
+    "seen": 1787150452.9435148,
+    "ast_hash": "87d07efe01db0af87187e601f707198f",
+    "semantic_hash": "87d07efe01db0af87187e601f707198f"
+  },
+  ".agents/skills/systematic-debugging/CREATION-LOG.md": {
+    "mtime": 1786809146.8916745,
+    "seen": 1787150452.9435155,
+    "ast_hash": "b7ba553678c10cc2234dc9ae193d5347",
+    "semantic_hash": "b7ba553678c10cc2234dc9ae193d5347"
+  },
+  ".agents/skills/systematic-debugging/SKILL.md": {
+    "mtime": 1786809146.8926778,
+    "seen": 1787150452.9435165,
+    "ast_hash": "fddf3bab43d22be55daa60a1175e7874",
+    "semantic_hash": "fddf3bab43d22be55daa60a1175e7874"
+  },
+  ".agents/skills/systematic-debugging/condition-based-waiting.md": {
+    "mtime": 1786809146.8946779,
+    "seen": 1787150452.9435172,
+    "ast_hash": "c64d669f2490aa489c514304c9ad46d3",
+    "semantic_hash": "c64d669f2490aa489c514304c9ad46d3"
+  },
+  ".agents/skills/systematic-debugging/defense-in-depth.md": {
+    "mtime": 1786809146.8956783,
+    "seen": 1787150452.9435182,
+    "ast_hash": "002a0c9e8bee8fc29f85d7a434916977",
+    "semantic_hash": "002a0c9e8bee8fc29f85d7a434916977"
+  },
+  ".agents/skills/systematic-debugging/root-cause-tracing.md": {
+    "mtime": 1786809146.8966768,
+    "seen": 1787150452.9435189,
+    "ast_hash": "7e96b2fe346c89d4f2300341529178cc",
+    "semantic_hash": "7e96b2fe346c89d4f2300341529178cc"
+  },
+  ".agents/skills/systematic-debugging/test-academic.md": {
+    "mtime": 1786809146.8966768,
+    "seen": 1787150452.9435198,
+    "ast_hash": "272ab1d95e755a7ff9479d547168eef9",
+    "semantic_hash": "272ab1d95e755a7ff9479d547168eef9"
+  },
+  ".agents/skills/systematic-debugging/test-pressure-1.md": {
+    "mtime": 1786809146.8976786,
+    "seen": 1787150452.9435213,
+    "ast_hash": "3d8805e8946e3889d4de0e906af66c47",
+    "semantic_hash": "3d8805e8946e3889d4de0e906af66c47"
+  },
+  ".agents/skills/systematic-debugging/test-pressure-2.md": {
+    "mtime": 1786809146.8986802,
+    "seen": 1787150452.9435217,
+    "ast_hash": "237f40dfd0b48af48d239ab3af499f7b",
+    "semantic_hash": "237f40dfd0b48af48d239ab3af499f7b"
+  },
+  ".agents/skills/systematic-debugging/test-pressure-3.md": {
+    "mtime": 1786809146.8986802,
+    "seen": 1787150452.943523,
+    "ast_hash": "42ea1bd281ca8d837f5dd45143762b95",
+    "semantic_hash": "42ea1bd281ca8d837f5dd45143762b95"
+  },
+  ".claude/skills/systematic-debugging/CREATION-LOG.md": {
+    "mtime": 1786809146.8916745,
+    "seen": 1787150452.9435236,
+    "ast_hash": "b7ba553678c10cc2234dc9ae193d5347",
+    "semantic_hash": "b7ba553678c10cc2234dc9ae193d5347"
+  },
+  ".claude/skills/systematic-debugging/SKILL.md": {
+    "mtime": 1786809146.8926778,
+    "seen": 1787150452.9435244,
+    "ast_hash": "fddf3bab43d22be55daa60a1175e7874",
+    "semantic_hash": "fddf3bab43d22be55daa60a1175e7874"
+  },
+  ".claude/skills/systematic-debugging/condition-based-waiting.md": {
+    "mtime": 1786809146.8946779,
+    "seen": 1787150452.943525,
+    "ast_hash": "c64d669f2490aa489c514304c9ad46d3",
+    "semantic_hash": "c64d669f2490aa489c514304c9ad46d3"
+  },
+  ".claude/skills/systematic-debugging/defense-in-depth.md": {
+    "mtime": 1786809146.8956783,
+    "seen": 1787150452.9435256,
+    "ast_hash": "002a0c9e8bee8fc29f85d7a434916977",
+    "semantic_hash": "002a0c9e8bee8fc29f85d7a434916977"
+  },
+  ".claude/skills/systematic-debugging/root-cause-tracing.md": {
+    "mtime": 1786809146.8966768,
+    "seen": 1787150452.9435265,
+    "ast_hash": "7e96b2fe346c89d4f2300341529178cc",
+    "semantic_hash": "7e96b2fe346c89d4f2300341529178cc"
+  },
+  ".claude/skills/systematic-debugging/test-academic.md": {
+    "mtime": 1786809146.8966768,
+    "seen": 1787150452.9435272,
+    "ast_hash": "272ab1d95e755a7ff9479d547168eef9",
+    "semantic_hash": "272ab1d95e755a7ff9479d547168eef9"
+  },
+  ".claude/skills/systematic-debugging/test-pressure-1.md": {
+    "mtime": 1786809146.8976786,
+    "seen": 1787150452.943528,
+    "ast_hash": "3d8805e8946e3889d4de0e906af66c47",
+    "semantic_hash": "3d8805e8946e3889d4de0e906af66c47"
+  },
+  ".claude/skills/systematic-debugging/test-pressure-2.md": {
+    "mtime": 1786809146.8986802,
+    "seen": 1787150452.9435284,
+    "ast_hash": "237f40dfd0b48af48d239ab3af499f7b",
+    "semantic_hash": "237f40dfd0b48af48d239ab3af499f7b"
+  },
+  ".claude/skills/systematic-debugging/test-pressure-3.md": {
+    "mtime": 1786809146.8986802,
+    "seen": 1787150452.9435291,
+    "ast_hash": "42ea1bd281ca8d837f5dd45143762b95",
+    "semantic_hash": "42ea1bd281ca8d837f5dd45143762b95"
+  },
+  "AGENTS.md": {
+    "mtime": 1786808344.9651053,
+    "seen": 1787150452.9435298,
+    "ast_hash": "8a82a8e9fa67963226c27660cbb82196",
+    "semantic_hash": "8a82a8e9fa67963226c27660cbb82196"
+  },
+  "Aukaria/Aukaria.Web/README.md": {
+    "mtime": 1786557005.711626,
+    "seen": 1787150452.9435306,
+    "ast_hash": "75eb386f17caf77fd6fe3ce1d90968ee",
+    "semantic_hash": "75eb386f17caf77fd6fe3ce1d90968ee"
+  },
+  "Aukaria/Aukaria.Web/index.html": {
+    "mtime": 1786557145.1904113,
+    "seen": 1787150452.9435313,
+    "ast_hash": "06b594772615336efdc63595be1b46f3",
+    "semantic_hash": "06b594772615336efdc63595be1b46f3"
+  },
+  "Aukaria/Aukaria.Web/public/favicon.svg": {
+    "mtime": 1786557005.852872,
+    "seen": 1787150452.943532,
+    "ast_hash": "7e840862161341271697daa99a40d76b",
+    "semantic_hash": "7e840862161341271697daa99a40d76b"
+  },
+  "Aukaria/Aukaria.Web/public/icons.svg": {
+    "mtime": 1786557005.9299603,
+    "seen": 1787150452.9435327,
+    "ast_hash": "3b4fcfcf393eca4d264dca4a4663bc37",
+    "semantic_hash": "3b4fcfcf393eca4d264dca4a4663bc37"
+  }
+}
