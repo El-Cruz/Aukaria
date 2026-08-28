@@ -5,6 +5,7 @@ import LandingPage from "./components/LandingPage"
 import MainAppView from "./components/MainAppView"
 import LoginModal from "./components/LoginModal"
 import ProcessingOverlay from "./components/ProcessingOverlay"
+import TopographyBackground from "./components/TopographyBackground"
 import { descargarReporteWord, procesarAnalisisCtl } from "./services/apiService"
 
 const fade = { duration: 0.3 }
@@ -197,7 +198,8 @@ function App() {
     const modo = paso === "dashboard" ? "dashboard" : "workspace"
 
   return (
-    <div className="min-h-screen bg-neutral-100/80 text-neutral-900 antialiased selection:bg-black selection:text-white">
+    <div className="relative min-h-screen bg-neutral-100/80 text-neutral-900 antialiased selection:bg-[var(--brand-g1)] selection:text-white">
+      <TopographyBackground />
       <AnimatePresence mode="wait">
         {paso === "landing" ? (
           <motion.div
@@ -206,11 +208,12 @@ function App() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={fade}
+            className="relative z-10"
           >
             <LandingPage onAnalyze={handleAnalyze} onLogin={() => setPaso("login")} />
           </motion.div>
         ) : (
-          <motion.div key="app" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={fade}>
+          <motion.div key="app" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={fade} className="relative z-10">
             <Navbar usuario={usuario} onLogout={handleLogout} />
             <main className="w-full pb-24 pt-6 md:pt-8">
               <MainAppView

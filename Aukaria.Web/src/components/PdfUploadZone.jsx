@@ -123,7 +123,7 @@ export default function PdfUploadZone({ onAnalyze = () => {} }) {
           setIsDragging(false)
           acceptFile(e.dataTransfer.files?.[0])
         }}
-        className={`relative overflow-hidden rounded-3xl p-8 text-center outline-none focus-visible:ring-2 focus-visible:ring-black transition-colors duration-150 ${
+        className={`relative overflow-hidden rounded-3xl p-8 text-center outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] transition-colors duration-150 ${
           isDragging ? "bg-white/90 backdrop-blur-3xl" : "bg-white/70 backdrop-blur-2xl"
         }`}
       >
@@ -154,7 +154,7 @@ export default function PdfUploadZone({ onAnalyze = () => {} }) {
               transition={fade}
             >
               <div className="mx-auto flex h-[4.5rem] w-16 flex-col items-center justify-center gap-1.5 rounded-2xl bg-black/5">
-                <PdfIcon className="h-8 w-8 text-neutral-700" />
+                <PdfIcon className="h-8 w-8 text-[var(--icon)]" />
                 <span className="font-mono text-[10px] font-bold leading-none tracking-wide text-neutral-500">
                   PDF
                 </span>
@@ -189,7 +189,7 @@ export default function PdfUploadZone({ onAnalyze = () => {} }) {
             >
               <div className="flex items-center gap-4 text-left">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-black/5">
-                  <PdfIcon className="h-6 w-6 text-neutral-700" />
+                  <PdfIcon className="h-6 w-6 text-[var(--icon)]" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-black">{file.name}</p>
@@ -218,7 +218,7 @@ export default function PdfUploadZone({ onAnalyze = () => {} }) {
                       <span aria-hidden>&lt; 500 ms</span>
                     </div>
                     <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/5">
-                      <motion.div style={{ width }} className="h-full rounded-full bg-black" />
+                      <motion.div style={{ width }} className="h-full rounded-full bg-[var(--cta)]" />
                     </div>
                   </motion.div>
                 )}
@@ -253,7 +253,7 @@ export default function PdfUploadZone({ onAnalyze = () => {} }) {
                         whileTap={{ scale: 0.97 }}
                         transition={spring}
                         onClick={() => acceptFile(file)}
-                        className="rounded-full bg-black px-5 py-2.5 text-sm font-semibold text-white"
+                        className="rounded-full bg-[var(--cta)] px-5 py-2.5 text-sm font-semibold text-white"
                       >
                         Reintentar
                       </motion.button>
@@ -337,7 +337,7 @@ export default function PdfUploadZone({ onAnalyze = () => {} }) {
                             preAnalisis: pre,
                           })
                         }
-                        className="rounded-full bg-black px-6 py-2.5 text-sm font-semibold text-white shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:bg-neutral-900"
+                        className="rounded-full bg-[var(--cta)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_4px_16px_color-mix(in_srgb,var(--cta)_30%,transparent)] hover:bg-[var(--cta-hover)]"
                       >
                         Iniciar Diagnóstico Jurídico →
                       </motion.button>

@@ -154,11 +154,11 @@ function AnnotationCard({ a }) {
           setOpen((o) => !o)
         }
       }}
-      className="cursor-pointer rounded-2xl border border-black/10 bg-white/60 p-5 text-left outline-none backdrop-blur-xl focus-visible:ring-2 focus-visible:ring-black"
+      className="cursor-pointer rounded-2xl border border-black/10 bg-white/60 p-5 text-left outline-none backdrop-blur-xl focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
     >
       <header>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-xs font-bold tracking-wider text-black">
+          <span className="font-mono text-xs font-bold tracking-wider text-[var(--brand-g1)]">
             ANOTACIÓN #{String(a.nro).padStart(2, "0")}
           </span>
           <span className="font-mono text-xs text-neutral-500">{a.fecha}</span>
@@ -264,7 +264,7 @@ export default function AnnotationsTimeline({ annotations = ANNOTATIONS }) {
               onClick={() => setActive(f.id)}
               whileTap={{ scale: 0.97 }}
               transition={pillSpring}
-              className={`relative rounded-full px-3.5 py-1.5 text-xs font-semibold outline-none focus-visible:ring-2 focus-visible:ring-black ${
+              className={`relative rounded-full px-3.5 py-1.5 text-xs font-semibold outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] ${
                 isActive ? "text-white" : "text-neutral-600 hover:text-black"
               }`}
             >
@@ -272,7 +272,7 @@ export default function AnnotationsTimeline({ annotations = ANNOTATIONS }) {
                 <motion.span
                   layoutId="activeFilter"
                   transition={pillSpring}
-                  className="absolute inset-0 rounded-full bg-black"
+                  className="absolute inset-0 rounded-full bg-[var(--cta)]"
                 />
               )}
               <span className="relative z-10">{f.label}</span>

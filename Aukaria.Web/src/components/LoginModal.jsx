@@ -54,7 +54,7 @@ export default function LoginModal({ onClose, onLogin }) {
   }
 
   const campoBase =
-    "w-full rounded-2xl border border-black/10 bg-black/5 px-4 py-3 text-sm text-black placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-black/20"
+    "w-full rounded-2xl border border-black/10 bg-black/5 px-4 py-3 text-sm text-black placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)]"
 
   return (
     <motion.div
@@ -133,7 +133,7 @@ export default function LoginModal({ onClose, onLogin }) {
             disabled={cargando}
             whileTap={{ scale: 0.97 }}
             transition={springBtn}
-            className="mt-1 flex items-center justify-center gap-1.5 rounded-full bg-black px-7 py-3 text-sm font-semibold text-white shadow-[0_4px_16px_rgba(0,0,0,0.25)] transition-colors duration-150 hover:bg-neutral-900 disabled:opacity-70"
+            className="mt-1 flex items-center justify-center gap-1.5 rounded-full bg-[var(--cta)] px-7 py-3 text-sm font-semibold text-white shadow-[0_4px_16px_color-mix(in_srgb,var(--cta)_35%,transparent)] transition-colors duration-150 hover:bg-[var(--cta-hover)] disabled:opacity-70"
           >
             {cargando ? "Validando credenciales…" : "Iniciar Sesión →"}
           </motion.button>

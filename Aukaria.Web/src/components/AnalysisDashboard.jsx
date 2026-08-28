@@ -284,7 +284,7 @@ export default function AnalysisDashboard({ analisis = null, viability = "viable
       >
         <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--link-hover)]">
               {tipo.nombre}
             </p>
             <h1 className="mt-2 text-3xl font-black tracking-tighter text-black md:text-4xl">
@@ -310,7 +310,7 @@ export default function AnalysisDashboard({ analisis = null, viability = "viable
               type="button"
               onClick={onDownload}
               whileTap={{ scale: 0.97 }}
-              className="rounded-full bg-black px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(0,0,0,0.25)] transition-transform duration-150 hover:scale-105"
+              className="rounded-full bg-[var(--cta)] px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_20px_color-mix(in_srgb,var(--cta)_35%,transparent)] transition-transform duration-150 hover:scale-105"
             >
               Descargar Reporte Word (.docx)
             </motion.button>
@@ -323,7 +323,7 @@ export default function AnalysisDashboard({ analisis = null, viability = "viable
             >
               <svg
                 viewBox="0 0 24 24"
-                className="h-3.5 w-3.5"
+                className="h-3.5 w-3.5 text-[var(--icon)]"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth={2}
@@ -357,10 +357,10 @@ export default function AnalysisDashboard({ analisis = null, viability = "viable
         variants={item}
         className="rounded-3xl border border-black/10 bg-white/70 p-6 shadow-sm backdrop-blur-2xl"
       >
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400">
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--link-hover)]">
           Ficha Técnica Predial
         </p>
-        <h2 className="mt-2 text-xl font-black tracking-tight text-black">
+        <h2 className="mt-2 text-xl font-black tracking-tight text-[var(--brand-g1)]">
           {tipo.key === "EscrituraPublica"
             ? "Datos del otorgamiento"
             : tipo.key === "VUR"
@@ -390,10 +390,10 @@ export default function AnalysisDashboard({ analisis = null, viability = "viable
         variants={item}
         className="rounded-3xl border border-black/10 bg-white/70 p-6 shadow-sm backdrop-blur-2xl md:p-8"
       >
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400">
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--link-hover)]">
           Resumen Ejecutivo Jurídico
         </p>
-        <h2 className="mt-2 text-xl font-black tracking-tight text-black">
+        <h2 className="mt-2 text-xl font-black tracking-tight text-[var(--brand-g1)]">
           Diagnóstico técnico del certificado
         </h2>
 
@@ -411,10 +411,10 @@ export default function AnalysisDashboard({ analisis = null, viability = "viable
           variants={item}
           className="rounded-3xl border border-black/10 bg-white/70 p-6 shadow-sm backdrop-blur-2xl md:p-8"
         >
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--link-hover)]">
             {tipo.nombre} · {fmi}
           </p>
-          <h2 className="mt-2 text-xl font-black tracking-tight text-black md:text-2xl">
+          <h2 className="mt-2 text-xl font-black tracking-tight text-[var(--brand-g1)] md:text-2xl">
             {tipo.key === "EscrituraPublica"
               ? "Matriz de Anotaciones Relacionadas"
               : "Estructura Traditiva & Matriz de Anotaciones"}
@@ -427,10 +427,10 @@ export default function AnalysisDashboard({ analisis = null, viability = "viable
 
       <motion.div variants={item} className="flex flex-col gap-4">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--link-hover)]">
             Alertas Jurídicas
           </p>
-          <h2 className="mt-2 text-xl font-black tracking-tight text-black">
+          <h2 className="mt-2 text-xl font-black tracking-tight text-[var(--brand-g1)]">
             Riesgos detectados y gestión recomendada
           </h2>
         </div>

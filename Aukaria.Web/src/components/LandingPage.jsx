@@ -2,6 +2,7 @@ import { useReducedMotion } from "framer-motion"
 import { motion } from "framer-motion"
 import LanguageSelector from "./LanguageSelector"
 import PdfUploadZone from "./PdfUploadZone"
+import ColombiaFlag from "./ColombiaFlag"
 
 const spring = { type: "spring", bounce: 0, duration: 0.4 }
 const fadeUp = { duration: 0.5, ease: [0.22, 0.61, 0.36, 1] }
@@ -91,7 +92,7 @@ const FEATURES = [
 
 function FeatureIcon({ index }) {
   const common = {
-    className: "h-6 w-6 text-black",
+    className: "h-6 w-6 text-[var(--icon)]",
     fill: "none",
     stroke: "currentColor",
     strokeWidth: 1.75,
@@ -136,7 +137,7 @@ export default function LandingPage({ onAnalyze = () => {}, onLogin = () => {} }
     <div className="relative">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[38rem] bg-[radial-gradient(58%_46%_at_50%_0%,rgba(0,0,0,0.05),transparent)]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[38rem] bg-(image:--hero-glow)"
       />
 
       <motion.header
@@ -152,10 +153,11 @@ export default function LandingPage({ onAnalyze = () => {}, onLogin = () => {} }
             className="flex items-baseline gap-2"
             aria-label="Aukaria — inicio"
           >
-            <span className="text-xl font-black tracking-tighter text-black">AUKARIA</span>
+            <span className="brand-gradient text-xl font-black tracking-tighter">AUKARIA</span>
             <span className="rounded border border-black/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-neutral-500">
               B2B SaaS
             </span>
+            <ColombiaFlag className="h-3.5 w-[1.15rem] self-center" />
           </a>
 
           <div className="ml-auto hidden items-center gap-7 md:flex">
@@ -164,7 +166,7 @@ export default function LandingPage({ onAnalyze = () => {}, onLogin = () => {} }
                 key={link.id}
                 href={`#${link.id}`}
                 onClick={scrollToSection(link.id)}
-                className="text-sm font-medium text-neutral-600 transition-colors duration-150 hover:text-black"
+                className="text-sm font-medium text-neutral-600 transition-colors duration-150 hover:text-[var(--link-hover)]"
               >
                 {link.label}
               </a>
@@ -217,7 +219,7 @@ export default function LandingPage({ onAnalyze = () => {}, onLogin = () => {} }
             className="mx-auto mt-10 max-w-2xl rounded-3xl border border-black/10 bg-white/80 p-6 shadow-2xl backdrop-blur-3xl md:p-8"
           >
             <div className="mb-6 flex items-center gap-3">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-black text-xs font-bold text-white">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--cta)] text-xs font-bold text-white">
                 CTL
               </span>
               <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-500">
@@ -341,7 +343,7 @@ export default function LandingPage({ onAnalyze = () => {}, onLogin = () => {} }
                 <button
                   type="button"
                   onClick={onLogin}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-black px-7 py-3 text-sm font-semibold text-white shadow-[0_4px_16px_rgba(0,0,0,0.25)] transition-colors duration-150 hover:bg-neutral-900"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[var(--cta)] px-7 py-3 text-sm font-semibold text-white shadow-[0_4px_16px_color-mix(in_srgb,var(--cta)_35%,transparent)] transition-colors duration-150 hover:bg-[var(--cta-hover)]"
                 >
                   Probar Gratis <span aria-hidden>→</span>
                 </button>
@@ -361,23 +363,24 @@ export default function LandingPage({ onAnalyze = () => {}, onLogin = () => {} }
       <footer className="border-t border-black/10 bg-white/60 backdrop-blur-2xl">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-6 px-4 py-10 md:flex-row md:gap-8 md:px-8">
           <div className="flex items-baseline gap-2">
-            <span className="text-lg font-black tracking-tighter text-black">AUKARIA</span>
+            <span className="brand-gradient text-lg font-black tracking-tighter">AUKARIA</span>
             <span className="rounded border border-black/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-neutral-500">
               B2B SaaS
             </span>
+            <ColombiaFlag className="h-3.5 w-[1.15rem] self-center" />
           </div>
 
           <nav className="flex flex-wrap items-center justify-center gap-6 text-sm text-neutral-500">
-            <a href="#planes" onClick={scrollToSection("planes")} className="transition-colors duration-150 hover:text-black">
+            <a href="#planes" onClick={scrollToSection("planes")} className="transition-colors duration-150 hover:text-[var(--link-hover)]">
               Términos
             </a>
-            <a href="#planes" onClick={scrollToSection("planes")} className="transition-colors duration-150 hover:text-black">
+            <a href="#planes" onClick={scrollToSection("planes")} className="transition-colors duration-150 hover:text-[var(--link-hover)]">
               Privacidad
             </a>
-            <a href="#planes" onClick={scrollToSection("planes")} className="transition-colors duration-150 hover:text-black">
+            <a href="#planes" onClick={scrollToSection("planes")} className="transition-colors duration-150 hover:text-[var(--link-hover)]">
               Seguridad
             </a>
-            <a href="#planes" onClick={scrollToSection("planes")} className="transition-colors duration-150 hover:text-black">
+            <a href="#planes" onClick={scrollToSection("planes")} className="transition-colors duration-150 hover:text-[var(--link-hover)]">
               Contacto
             </a>
           </nav>

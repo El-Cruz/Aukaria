@@ -113,14 +113,12 @@ export default function MainAppView({
                   >
                     <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                       <div className="min-w-0">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-400">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-[var(--link-hover)]">
                           Panel de Gestión Predial · B2B
                         </p>
                         <h1 className="mt-2 text-2xl font-black tracking-tighter text-black md:text-4xl">
                           Bienvenido,{" "}
-                          <span className="bg-gradient-to-r from-neutral-900 to-neutral-500 bg-clip-text text-transparent">
-                            {nombre}
-                          </span>{" "}
+                          <span className="brand-gradient">{nombre}</span>{" "}
                           <span aria-hidden className="text-neutral-300">|</span> Panel de Gestión Predial
                         </h1>
                         <p className="mt-2 max-w-xl text-sm text-neutral-600 md:text-[15px]">
@@ -152,7 +150,7 @@ export default function MainAppView({
                   >
                     <div className="flex flex-wrap items-end justify-between gap-3">
                       <div>
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-400">
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-[var(--link-hover)]">
                           Ficha de Actividad Reciente
                         </p>
                         <h2 className="mt-1.5 text-xl font-black tracking-tight text-black">
@@ -192,7 +190,7 @@ export default function MainAppView({
                                 transition={spring}
                                 className="flex w-full items-center gap-4 rounded-2xl border border-black/10 bg-white/60 p-4 text-left backdrop-blur-xl transition-colors duration-150 hover:bg-white"
                               >
-                                <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-black/5 font-mono text-[10px] font-bold text-neutral-600 sm:flex">
+                                <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-black/5 font-mono text-[10px] font-bold text-[var(--icon)] sm:flex">
                                   {String(i + 1).padStart(2, "0")}
                                 </span>
                                 <span className="min-w-0 flex-1 leading-tight">
@@ -310,7 +308,7 @@ function StatChip({ etiqueta, valor, dot = "" }) {
       <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-neutral-400">
         {etiqueta}
       </span>
-      <span className="flex items-center gap-1.5 font-mono text-xs font-bold text-black">
+      <span className="flex items-center gap-1.5 font-mono text-xs font-bold text-[var(--brand-g1)]">
         {dot && <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />}
         {valor}
       </span>

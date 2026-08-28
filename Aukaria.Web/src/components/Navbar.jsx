@@ -1,5 +1,6 @@
 import { motion } from "framer-motion"
 import LanguageSelector from "./LanguageSelector"
+import ColombiaFlag from "./ColombiaFlag"
 
 const spring = { type: "spring", stiffness: 400, damping: 25 }
 
@@ -23,17 +24,18 @@ export default function Navbar({ usuario = null, onLogout = () => {} }) {
     >
       <nav className="mx-auto flex h-14 max-w-[1700px] items-center gap-3 px-6">
         <div className="flex items-baseline gap-2">
-          <span className="text-xl font-black tracking-tighter text-black">AUKARIA</span>
+          <span className="brand-gradient text-xl font-black tracking-tighter">AUKARIA</span>
           <span className="rounded border border-black/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-neutral-500">
             v1.0 B2B
           </span>
+          <ColombiaFlag className="h-3 w-3.5 self-center" />
         </div>
 
         <div className="ml-auto flex items-center gap-3">
           <LanguageSelector className="hidden sm:block" />
 
           <div className="flex items-center gap-2 rounded-full border border-black/10 bg-white/60 py-1 pl-1 pr-3">
-            <span className="flex h-6 w-6 select-none items-center justify-center rounded-full bg-black text-[10px] font-bold text-white">
+            <span className="flex h-6 w-6 select-none items-center justify-center rounded-full bg-[var(--cta)] text-[10px] font-bold text-white">
               {iniciales}
             </span>
             <span className="hidden leading-tight lg:block">

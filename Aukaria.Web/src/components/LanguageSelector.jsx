@@ -85,7 +85,7 @@ export default function LanguageSelector({ className = "" }) {
                     }}
                     className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm transition-colors duration-150 ${
                       activa
-                        ? "bg-black text-white"
+                        ? "bg-[var(--cta)] text-white"
                         : "text-neutral-700 hover:bg-black/5"
                     } ${lang.pronto ? "cursor-not-allowed opacity-45" : ""}`}
                   >

@@ -51,7 +51,7 @@ function Chip({ children, activo = false, onClick }) {
       transition={spring}
       onClick={onClick}
       className={`rounded-full px-3 py-1 text-xs font-medium transition-colors duration-150 ${
-        activo ? "bg-black text-white" : "bg-black/5 text-neutral-700 hover:bg-black/10"
+        activo ? "bg-[var(--cta)] text-white" : "bg-black/5 text-neutral-700 hover:bg-black/10"
       }`}
     >
       {children}
@@ -192,7 +192,7 @@ export default function RightSidebar({
         <>
           {/* Bloque A — Acciones del Resultado */}
           <div className="space-y-3">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-400">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-[var(--link-hover)]">
               Acciones Rápidas
             </p>
             <motion.button
@@ -200,7 +200,7 @@ export default function RightSidebar({
               whileTap={{ scale: 0.98 }}
               transition={spring}
               onClick={onDownload}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-black px-5 py-3 text-sm font-semibold text-white shadow-[0_6px_18px_rgba(0,0,0,0.22)] transition-colors duration-150 hover:bg-neutral-900"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--cta)] px-5 py-3 text-sm font-semibold text-white shadow-[0_6px_18px_color-mix(in_srgb,var(--cta)_35%,transparent)] transition-colors duration-150 hover:bg-[var(--cta-hover)]"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -230,7 +230,7 @@ export default function RightSidebar({
                   <>
                     <svg
                       viewBox="0 0 24 24"
-                      className="h-3.5 w-3.5"
+                      className="h-3.5 w-3.5 text-[var(--icon)]"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth={2}
@@ -257,7 +257,7 @@ export default function RightSidebar({
                   <>
                     <svg
                       viewBox="0 0 24 24"
-                      className="h-3.5 w-3.5"
+                      className="h-3.5 w-3.5 text-[var(--icon)]"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth={2}
@@ -278,7 +278,7 @@ export default function RightSidebar({
           {/* Bloque B — Metadatos Prediales & Créditos */}
           <div className="space-y-4 rounded-2xl border border-black/10 bg-white/70 p-5 backdrop-blur-xl">
             <div className="flex items-center justify-between gap-2">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-400">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-[var(--link-hover)]">
                 Viabilidad
               </span>
               <span
@@ -329,7 +329,7 @@ export default function RightSidebar({
           {/* Bolsa de Créditos B2B */}
           <div className="space-y-4 rounded-2xl border border-black/10 bg-white/70 p-5 backdrop-blur-xl">
             <div className="flex items-center justify-between gap-2">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-400">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-[var(--link-hover)]">
                 Bolsa de Créditos
               </span>
               <span className="rounded-full border border-black/10 bg-white/60 px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-widest text-neutral-500">
@@ -356,7 +356,7 @@ export default function RightSidebar({
 
           {/* Barra de Acciones Rápidas */}
           <div className="space-y-2.5 rounded-2xl border border-black/10 bg-white/70 p-5 backdrop-blur-xl">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-400">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-[var(--link-hover)]">
               Operaciones
             </p>
             <motion.button
@@ -366,7 +366,7 @@ export default function RightSidebar({
               onClick={() => accionRapida("Configuración de empresa → acceso concedido ✓")}
               className={botonSecundario}
             >
-              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-[var(--icon)]" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="3" />
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
               </svg>
@@ -379,7 +379,7 @@ export default function RightSidebar({
               onClick={() => accionRapida("Centro de soporte Aukaria · SLA 24/7 ✓")}
               className={botonSecundario}
             >
-              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-[var(--icon)]" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <path d="m4.93 4.93 4.24 4.24M14.83 14.83l4.24 4.24M17.63 17.63l4.24 4.24m-4.24-4.24a4 4 0 1 0-5.66-5.66m5.66 5.66-5.66-5.66M4.93 19.07l8.49-8.49" />
               </svg>
@@ -421,7 +421,7 @@ function CreditosProgress({ usados, total }) {
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
           transition={{ ...spring, delay: 0.2 }}
-          className="h-full rounded-full bg-black"
+          className="h-full rounded-full bg-[var(--cta)]"
         />
       </div>
     </div>
@@ -432,7 +432,7 @@ function AsistenteIA({ preguntas, mensajes, consulta, escribiendo, setConsulta, 
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black text-[10px] font-bold text-white">
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--cta)] text-[10px] font-bold text-white">
           CP
         </span>
         <p
@@ -469,14 +469,14 @@ function AsistenteIA({ preguntas, mensajes, consulta, escribiendo, setConsulta, 
           onChange={(e) => setConsulta(e.target.value)}
           placeholder="Pregunta sobre el sistema o el predio…"
           aria-label="Consulta al asistente jurídico"
-          className="w-full rounded-2xl border border-black/10 bg-black/5 px-4 py-2 text-sm text-black placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-black/20"
+          className="w-full rounded-2xl border border-black/10 bg-black/5 px-4 py-2 text-sm text-black placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)]"
         />
         <motion.button
           type="submit"
           whileTap={{ scale: 0.95 }}
           transition={spring}
           aria-label="Enviar consulta"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black text-white transition-colors duration-150 hover:bg-neutral-900"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--cta)] text-white transition-colors duration-150 hover:bg-[var(--cta-hover)]"
         >
           <svg
             viewBox="0 0 24 24"
@@ -502,7 +502,7 @@ function AsistenteIA({ preguntas, mensajes, consulta, escribiendo, setConsulta, 
               transition={spring}
               className={`rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${
                 m.rol === "usuario"
-                  ? "ml-6 bg-black text-white"
+                  ? "ml-6 bg-[var(--cta)] text-white"
                   : "mr-6 border border-black/10 bg-white/70 backdrop-blur-xl text-neutral-700"
               }`}
             >
@@ -548,7 +548,7 @@ function PerfilSesion({ usuario, iniciales, onLogout }) {
         onClick={onLogout}
         className="flex w-full items-center justify-center gap-2 rounded-full border border-black/10 bg-white/60 px-4 py-2.5 text-xs font-semibold text-neutral-700 transition-colors duration-150 hover:bg-black hover:text-white"
       >
-        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-[var(--icon)]" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
         </svg>
         Cerrar Sesión
