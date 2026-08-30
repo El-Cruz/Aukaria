@@ -1,11 +1,11 @@
-using Aukaria.Application.DTOs.JsonSchema;
+using Aukaria.Application.DTOs;
 using Aukaria.Domain.Enums;
 
 namespace Aukaria.Application.Interfaces;
 
 public interface IClaudeApiService
 {
-    Task<AnalisisResultadoJsonDto> AnalizarDocumentoAsync(
+    Task<ClaudeAnalisisResultadoDto> AnalizarDocumentoAsync(
         string textoDocumento,
         PropositoAnalisis proposito,
         TipoDocumentoJuridico tipoDocumento,

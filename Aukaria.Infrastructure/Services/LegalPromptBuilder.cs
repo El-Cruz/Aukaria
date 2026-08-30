@@ -207,10 +207,5 @@ public static class LegalPromptBuilder
     private static readonly string PlantillaUser = string.Concat(
         "DOCUMENTO PARA ANÁLISIS:\n---\n",
         "{DOCUMENTO}",
-        "\n---\n\nAPLICA ESTRICTAMENTE LA SIGUIENTE ESTRUCTURA DE 10 CAPÍTULOS DEL INFORME JURÍDICO PREDIAL BAJO LA LEY 1274 DE 2009:\n\n",
-        CapEstructura,
-        "\n\n",
-        InstruccionesSalida,
-        "\n\n",
-        EsquemaJson);
+        "\n---\n\nAnaliza estrictamente el documento según las instrucciones y el esquema JSON definidos en el mensaje del sistema.");
 }

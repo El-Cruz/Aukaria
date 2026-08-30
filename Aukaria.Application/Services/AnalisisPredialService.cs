@@ -64,11 +64,12 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
         CancellationToken cancellationToken = default)
     {
         string textoCtl = await _pdfExtractorService.ExtraerTextoCompletoAsync(pdfStream, cancellationToken);
-        AnalisisResultadoJsonDto resultado = await _claudeApiService.AnalizarDocumentoAsync(
+        ClaudeAnalisisResultadoDto resultadoClaude = await _claudeApiService.AnalizarDocumentoAsync(
             textoCtl,
             solicitud.Proposito,
             solicitud.TipoDocumento,
             cancellationToken);
+        AnalisisResultadoJsonDto resultado = resultadoClaude.Resultado;
 
         var analisis = new AnalisisPredial
         {
@@ -84,7 +85,7 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
             ResumenEjecutivo = resultado.ResumenEjecutivo,
             ResultadoJson = JsonSerializer.Serialize(resultado),
             FechaAnalisis = DateTime.UtcNow,
-            ConsumoTokens = 0
+            ConsumoTokens = resultadoClaude.TotalTokens
         };
 
         await _repository.AgregarAsync(analisis, cancellationToken);

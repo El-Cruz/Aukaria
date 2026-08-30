@@ -2,11 +2,14 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Aukaria.Application.DTOs;
 using Aukaria.Application.DTOs.JsonSchema;
 using Aukaria.Application.Interfaces;
 using Aukaria.Domain.Enums;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Polly;
+using Polly.Retry;
 
 namespace Aukaria.Infrastructure.Services;
 
@@ -14,7 +17,7 @@ public sealed class ClaudeApiService : IClaudeApiService
 {
     private const string Endpoint = "https://api.anthropic.com/v1/messages";
     private const string AnthropicVersion = "2023-06-01";
-    private const int MaxTokens = 32000;
+    private const int MaxTokensDefault = 12000;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -25,15 +28,17 @@ public sealed class ClaudeApiService : IClaudeApiService
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
     private readonly ILogger<ClaudeApiService> _logger;
+    private readonly ResiliencePipeline<string> _resiliencePipeline;
 
     public ClaudeApiService(HttpClient httpClient, IConfiguration configuration, ILogger<ClaudeApiService> logger)
     {
         _httpClient = httpClient;
         _configuration = configuration;
         _logger = logger;
+        _resiliencePipeline = CrearPipelineResiliencia();
     }
 
-    public async Task<AnalisisResultadoJsonDto> AnalizarDocumentoAsync(
+    public async Task<ClaudeAnalisisResultadoDto> AnalizarDocumentoAsync(
         string textoDocumento,
         PropositoAnalisis proposito,
         TipoDocumentoJuridico tipoDocumento,
@@ -49,11 +54,12 @@ public sealed class ClaudeApiService : IClaudeApiService
         _logger.LogInformation("Clave de API de Anthropic leída correctamente.");
 
         string modelo = _configuration["Anthropic:Model"] ?? "claude-sonnet-5";
+        int maxTokens = ObtenerMaxTokens();
 
         var request = new AnthropicRequest
         {
             Model = modelo,
-            MaxTokens = MaxTokens,
+            MaxTokens = maxTokens,
             System = LegalPromptBuilder.ConstruirSystemPrompt(proposito, tipoDocumento),
             Messages =
             [
@@ -62,6 +68,37 @@ public sealed class ClaudeApiService : IClaudeApiService
         };
 
         string requestJson = JsonSerializer.Serialize(request, JsonOptions);
+
+        _logger.LogInformation("Iniciando llamada a la API de Anthropic (modelo: {Modelo}, max_tokens: {MaxTokens}).", modelo, maxTokens);
+
+        var stopwatch = Stopwatch.StartNew();
+
+        string responseBody = await _resiliencePipeline.ExecuteAsync(
+            async token => await EjecutarLlamadaAsync(apiKey, requestJson, token),
+            cancellationToken);
+
+        stopwatch.Stop();
+
+        AnthropicResponse parsed = DeserializarRespuesta(responseBody);
+        AnalisisResultadoJsonDto resultado = DeserializarResultado(parsed);
+
+        _logger.LogInformation(
+            "Análisis de Anthropic completado en {DuracionMs} ms (modelo: {Modelo}). Tokens: entrada {InputTokens}, salida {OutputTokens}.",
+            stopwatch.ElapsedMilliseconds,
+            modelo,
+            parsed.Usage?.InputTokens ?? 0,
+            parsed.Usage?.OutputTokens ?? 0);
+
+        return new ClaudeAnalisisResultadoDto
+        {
+            Resultado = resultado,
+            InputTokens = parsed.Usage?.InputTokens ?? 0,
+            OutputTokens = parsed.Usage?.OutputTokens ?? 0
+        };
+    }
+
+    private async Task<string> EjecutarLlamadaAsync(string apiKey, string requestJson, CancellationToken cancellationToken)
+    {
         using var requestContent = new StringContent(requestJson, Encoding.UTF8, "application/json");
 
         using var httpRequest = new HttpRequestMessage(HttpMethod.Post, Endpoint)
@@ -72,18 +109,16 @@ public sealed class ClaudeApiService : IClaudeApiService
         httpRequest.Headers.Add("anthropic-version", AnthropicVersion);
         httpRequest.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
-        _logger.LogInformation("Iniciando llamada a la API de Anthropic (modelo: {Modelo}).", modelo);
-
-        var stopwatch = Stopwatch.StartNew();
+        var intentoStopwatch = Stopwatch.StartNew();
         using HttpResponseMessage response = await _httpClient.SendAsync(httpRequest, cancellationToken);
-        stopwatch.Stop();
+
+        string responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+        intentoStopwatch.Stop();
 
         _logger.LogInformation(
             "Llamada a la API de Anthropic finalizada. Estado HTTP: {Estado}. Duración: {DuracionMs} ms.",
             (int)response.StatusCode,
-            stopwatch.ElapsedMilliseconds);
-
-        string responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            intentoStopwatch.ElapsedMilliseconds);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -92,8 +127,18 @@ public sealed class ClaudeApiService : IClaudeApiService
                 $"La API de Anthropic devolvió el estado {(int)response.StatusCode} ({response.ReasonPhrase}). Detalle: {responseBody}");
         }
 
-        AnthropicResponse? parsed = JsonSerializer.Deserialize<AnthropicResponse>(responseBody, JsonOptions);
-        string contenido = parsed?.Content.FirstOrDefault(bloque =>
+        return responseBody;
+    }
+
+    private AnthropicResponse DeserializarRespuesta(string responseBody)
+    {
+        return JsonSerializer.Deserialize<AnthropicResponse>(responseBody, JsonOptions)
+            ?? throw new JsonException("La respuesta de la API de Anthropic no pudo deserializarse.");
+    }
+
+    private static AnalisisResultadoJsonDto DeserializarResultado(AnthropicResponse parsed)
+    {
+        string contenido = parsed.Content.FirstOrDefault(bloque =>
                 string.Equals(bloque.Type, "text", StringComparison.OrdinalIgnoreCase) &&
                 !string.IsNullOrWhiteSpace(bloque.Text))
             ?.Text
@@ -117,6 +162,34 @@ public sealed class ClaudeApiService : IClaudeApiService
             throw new JsonException(
                 $"La API de Anthropic devolvió un JSON que no cumple el esquema AnalisisResultadoJsonDto. Detalle: {ex.Message}", ex);
         }
+    }
+
+    private int ObtenerMaxTokens()
+    {
+        string? valor = _configuration["Anthropic:MaxTokens"];
+        if (int.TryParse(valor, out int result) && result > 0)
+        {
+            return result;
+        }
+        return MaxTokensDefault;
+    }
+
+    private ResiliencePipeline<string> CrearPipelineResiliencia()
+    {
+        var retryOptions = new RetryStrategyOptions<string>
+        {
+            ShouldHandle = new PredicateBuilder<string>()
+                .Handle<HttpRequestException>()
+                .Handle<TaskCanceledException>(ex => !ex.CancellationToken.IsCancellationRequested),
+            MaxRetryAttempts = 3,
+            Delay = TimeSpan.FromSeconds(1),
+            BackoffType = DelayBackoffType.Exponential,
+            UseJitter = true
+        };
+
+        return new ResiliencePipelineBuilder<string>()
+            .AddRetry(retryOptions)
+            .Build();
     }
 
     private static string LimpiarFencesMarkdown(string contenido)
@@ -166,6 +239,9 @@ public sealed class ClaudeApiService : IClaudeApiService
 
         [JsonPropertyName("content")]
         public List<AnthropicContentBlock> Content { get; set; } = [];
+
+        [JsonPropertyName("usage")]
+        public AnthropicUsage? Usage { get; set; }
     }
 
     private sealed class AnthropicContentBlock
@@ -175,5 +251,14 @@ public sealed class ClaudeApiService : IClaudeApiService
 
         [JsonPropertyName("text")]
         public string Text { get; set; } = string.Empty;
+    }
+
+    private sealed class AnthropicUsage
+    {
+        [JsonPropertyName("input_tokens")]
+        public int InputTokens { get; set; }
+
+        [JsonPropertyName("output_tokens")]
+        public int OutputTokens { get; set; }
     }
 }
