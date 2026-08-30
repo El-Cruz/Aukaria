@@ -1,4 +1,5 @@
 using Aukaria.Application.DTOs;
+using Aukaria.Application.DTOs.Responses;
 using Aukaria.Domain.Enums;
 
 namespace Aukaria.Application.Interfaces;
@@ -9,5 +10,12 @@ public interface IClaudeApiService
         string textoDocumento,
         PropositoAnalisis proposito,
         TipoDocumentoJuridico tipoDocumento,
+        CancellationToken cancellationToken = default);
+
+    Task<ClaudeAnalisisResultadoDto> AnalizarDocumentoStreamingAsync(
+        string textoDocumento,
+        PropositoAnalisis proposito,
+        TipoDocumentoJuridico tipoDocumento,
+        Action<ProgresoAnalisisDto> onProgreso,
         CancellationToken cancellationToken = default);
 }

@@ -123,7 +123,7 @@ function StepRow({ label, state, reduce }) {
   )
 }
 
-export default function ProcessingOverlay({ onComplete, autoCompletar = true }) {
+export default function ProcessingOverlay({ onComplete, autoCompletar = true, progreso = null }) {
   const reduce = useReducedMotion()
   const [done, setDone] = useState(1)
   const [msgTick, setMsgTick] = useState(0)
@@ -149,14 +149,26 @@ export default function ProcessingOverlay({ onComplete, autoCompletar = true }) 
     return () => clearInterval(id)
   }, [autoCompletar])
 
+  const esReal = progreso !== null
+  const pct = esReal ? (progreso?.Porcentaje ?? 0) : 0
+
+  const propsEtapa = esReal
+    ? { done: 1 + (progreso?.Etapa === "extracting" ? 0 : progreso?.Etapa === "analyzing" ? 1 : progreso?.Etapa === "saving" ? 2 : 3) }
+    : {}
+
   const activeMsg = autoCompletar
     ? done < STEPS.length
       ? STEPS[done].msg
       : DONE_MSG
-    : STEPS[1 + (msgTick % 3)].msg
+    : esReal
+      ? progreso?.Mensaje || STEPS[1 + (msgTick % 3)].msg
+      : STEPS[1 + (msgTick % 3)].msg
   const stageIndex = autoCompletar
     ? Math.min(done, STEPS.length) - 1
-    : 1 + (msgTick % 3)
+    : esReal
+      ? 1 + (msgTick % 3)
+      : 1 + (msgTick % 3)
+  const doneCount = esReal ? propsEtapa.done : done
 
   return (
     <motion.div
@@ -200,9 +212,25 @@ export default function ProcessingOverlay({ onComplete, autoCompletar = true }) 
           </AnimatePresence>
         </div>
 
+        {esReal && (
+          <div className="mt-3">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-200/70">
+              <motion.div
+                className="h-full rounded-full bg-black"
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(pct, 100)}%` }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+            <p className="mt-1.5 text-right font-mono text-[10px] font-bold text-neutral-500">
+              {Math.min(pct, 100)}%
+            </p>
+          </div>
+        )}
+
         <ul className="mt-4 flex flex-col gap-3">
           {STEPS.map((s, i) => {
-            const state = i < done ? "done" : i === done ? "active" : "pending"
+            const state = i < doneCount ? "done" : i === doneCount ? "active" : "pending"
             return <StepRow key={s.label} label={s.label} state={state} reduce={reduce} />
           })}
         </ul>

@@ -6,7 +6,7 @@ import MainAppView from "./components/MainAppView"
 import LoginModal from "./components/LoginModal"
 import ProcessingOverlay from "./components/ProcessingOverlay"
 import TopographyBackground from "./components/TopographyBackground"
-import { descargarReporteWord, procesarAnalisisCtl } from "./services/apiService"
+import { descargarReporteWord, procesarAnalisisCtlStreaming } from "./services/apiService"
 
 const fade = { duration: 0.3 }
 const spring = { type: "spring", stiffness: 400, damping: 30 }
@@ -100,6 +100,7 @@ function App() {
   const [resultado, setResultado] = useState(null)
   const [preAnalisisData, setPreAnalisisData] = useState(null)
   const [historial, setHistorial] = useState([])
+  const [progresoAnalisis, setProgresoAnalisis] = useState(null)
   const [errorMsg, setErrorMsg] = useState("")
   const errorTimerRef = useRef(null)
   const pendienteRef = useRef(null)
@@ -112,14 +113,17 @@ function App() {
 
   const runAnalysis = async (file, meta) => {
     setErrorMsg("")
+    setProgresoAnalisis(null)
     setIsProcessing(true)
     try {
-      const res = await procesarAnalisisCtl({
+      const res = await procesarAnalisisCtlStreaming({
         archivoPdf: file,
         matriculaFmi: meta?.matriculaFmi || "",
         proposito: "CompraVenta",
         tipoDocumento: meta?.tipoDocumento || "CTL",
+        onProgreso: (progreso) => setProgresoAnalisis(progreso),
       })
+      setProgresoAnalisis(null)
       setResultado(res)
       const info = extraerInfoPredio(res)
       setPreAnalisisData((prev) => ({
@@ -135,6 +139,7 @@ function App() {
       setIsProcessing(false)
       setPaso("dashboard")
     } catch (err) {
+      setProgresoAnalisis(null)
       setIsProcessing(false)
       notificar(err.message || "Error al procesar el análisis jurídico.")
     }
@@ -240,7 +245,9 @@ function App() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {isProcessing && <ProcessingOverlay onComplete={() => {}} autoCompletar={false} />}
+        {isProcessing && (
+          <ProcessingOverlay onComplete={() => {}} autoCompletar={false} progreso={progresoAnalisis} />
+        )}
       </AnimatePresence>
 
       <AnimatePresence>

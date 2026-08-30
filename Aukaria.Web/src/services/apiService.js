@@ -116,3 +116,70 @@ export async function descargarReporteWord(analisisId, matriculaFmi) {
   link.remove()
   setTimeout(() => URL.revokeObjectURL(url), 1500)
 }
+
+export async function procesarAnalisisCtlStreaming({
+  archivoPdf,
+  matriculaFmi,
+  proposito = "CompraVenta",
+  tipoDocumento = "CTL",
+  empresaId = EMPRESA_ID,
+  usuarioId = USUARIO_ID,
+  onProgreso,
+}) {
+  const formData = new FormData()
+  formData.append("archivoPdf", archivoPdf)
+  formData.append("matriculaFmi", matriculaFmi ?? "")
+  formData.append("proposito", proposito)
+  formData.append("tipoDocumento", tipoDocumento)
+  formData.append("empresaId", empresaId)
+  formData.append("usuarioId", usuarioId)
+
+  const response = await fetch(`${API_BASE}/procesar-sse`, { method: "POST", body: formData })
+
+  if (!response.ok || !response.body) {
+    throw new Error(`[HTTP ${response.status}] No se pudo iniciar el análisis en streaming.`)
+  }
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ""
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+
+    let idx
+    while ((idx = buffer.indexOf("\n\n")) !== -1) {
+      const bloque = buffer.slice(0, idx)
+      buffer = buffer.slice(idx + 2)
+      const evento = parsearBloqueSse(bloque)
+      if (!evento) continue
+
+      if (evento.tipo === "progreso") {
+        onProgreso?.(evento.datos)
+      } else if (evento.tipo === "resultado") {
+        return evento.datos
+      } else if (evento.tipo === "error") {
+        throw new Error(evento.datos?.detalle || "Error durante el análisis.")
+      }
+    }
+  }
+
+  throw new Error("La conexión de streaming finalizó sin resultado.")
+}
+
+function parsearBloqueSse(bloque) {
+  let tipo = ""
+  let data = ""
+  for (const linea of bloque.split("\n")) {
+    if (linea.startsWith("event:")) tipo = linea.slice(6).trim()
+    else if (linea.startsWith("data:")) data = linea.slice(5).trim()
+  }
+  if (!tipo || !data) return null
+  try {
+    return { tipo, datos: JSON.parse(data) }
+  } catch {
+    return null
+  }
+}

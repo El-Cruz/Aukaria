@@ -69,8 +69,57 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
             solicitud.Proposito,
             solicitud.TipoDocumento,
             cancellationToken);
-        AnalisisResultadoJsonDto resultado = resultadoClaude.Resultado;
 
+        return await PersistirYConstruirRespuestaAsync(solicitud, resultadoClaude.Resultado, resultadoClaude.TotalTokens, cancellationToken);
+    }
+
+    public async Task<AnalisisPredialResponseDto> ProcesarAnalisisCtlStreamingAsync(
+        SolicitudAnalisisRequestDto solicitud,
+        Stream pdfStream,
+        Action<ProgresoAnalisisDto> onProgreso,
+        CancellationToken cancellationToken = default)
+    {
+        onProgreso(new ProgresoAnalisisDto { Etapa = "extracting", Porcentaje = 1, Mensaje = "Extrayendo texto del documento..." });
+
+        string textoCtl = await _pdfExtractorService.ExtraerTextoCompletoAsync(pdfStream, cancellationToken);
+        int ultimoProgreso = -1;
+
+        void ReportarProgresoClaude(ProgresoAnalisisDto progreso)
+        {
+            progreso.Porcentaje = Math.Clamp(progreso.Porcentaje, 25, 90);
+            if (progreso.Porcentaje > ultimoProgreso)
+            {
+                ultimoProgreso = progreso.Porcentaje;
+                onProgreso(progreso);
+            }
+        }
+
+        ClaudeAnalisisResultadoDto resultadoClaude = await _claudeApiService.AnalizarDocumentoStreamingAsync(
+            textoCtl,
+            solicitud.Proposito,
+            solicitud.TipoDocumento,
+            ReportarProgresoClaude,
+            cancellationToken);
+
+        onProgreso(new ProgresoAnalisisDto { Etapa = "saving", Porcentaje = 95, Mensaje = "Guardando el análisis..." });
+
+        AnalisisPredialResponseDto respuesta = await PersistirYConstruirRespuestaAsync(
+            solicitud,
+            resultadoClaude.Resultado,
+            resultadoClaude.TotalTokens,
+            cancellationToken);
+
+        onProgreso(new ProgresoAnalisisDto { Etapa = "done", Porcentaje = 100, Mensaje = "Análisis completado." });
+
+        return respuesta;
+    }
+
+    private async Task<AnalisisPredialResponseDto> PersistirYConstruirRespuestaAsync(
+        SolicitudAnalisisRequestDto solicitud,
+        AnalisisResultadoJsonDto resultado,
+        int consumoTokens,
+        CancellationToken cancellationToken)
+    {
         var analisis = new AnalisisPredial
         {
             Id = Guid.NewGuid(),
@@ -85,7 +134,7 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
             ResumenEjecutivo = resultado.ResumenEjecutivo,
             ResultadoJson = JsonSerializer.Serialize(resultado),
             FechaAnalisis = DateTime.UtcNow,
-            ConsumoTokens = resultadoClaude.TotalTokens
+            ConsumoTokens = consumoTokens
         };
 
         await _repository.AgregarAsync(analisis, cancellationToken);
