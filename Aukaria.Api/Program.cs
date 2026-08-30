@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +31,14 @@ builder.Services.AddCors(options =>
 });
 
 builder.Configuration.AddEnvironmentVariables();
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
@@ -96,6 +105,8 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
+
+app.UseForwardedHeaders();
 
 app.UseExceptionHandler(errorApp =>
 {
