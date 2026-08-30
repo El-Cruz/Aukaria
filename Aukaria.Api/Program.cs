@@ -1,8 +1,15 @@
+using System.Security.Claims;
 using System.Text.Json.Serialization;
+using Aukaria.Api.Auth;
 using Aukaria.Application.Interfaces;
 using Aukaria.Application.Services;
+using Aukaria.Domain.Entities;
 using Aukaria.Infrastructure;
 using Aukaria.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,9 +18,14 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AukariaProductionCors", policy =>
     {
-        policy.AllowAnyOrigin()
+        string[] origenes = (builder.Configuration["Cors:AllowedOrigins"]
+                ?? "http://localhost:5173,http://localhost:3000")
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        policy.WithOrigins(origenes)
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -49,6 +61,8 @@ builder.Services.AddHttpLogging(logging =>
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<IAnalisisPredialService, AnalisisPredialService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddAukariaAuth(builder.Configuration);
 
 var app = builder.Build();
 
@@ -131,6 +145,7 @@ app.UseHttpLogging();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

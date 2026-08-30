@@ -47,6 +47,7 @@ export default function MainAppView({
   onReabrir = () => {},
   onNuevoEstudio = () => {},
   onDownload = () => {},
+  onEnviarPorCorreo = () => {},
   onLogout = () => {},
 }) {
   const reduce = useReducedMotion()
@@ -221,7 +222,7 @@ export default function MainAppView({
                   exit={{ opacity: 0, y: -12 }}
                   transition={spring}
                 >
-                  <AnalysisDashboard analisis={analisis} preAnalisisData={preAnalisisData} onDownload={onDownload} />
+                  <AnalysisDashboard analisis={analisis} preAnalisisData={preAnalisisData} onDownload={onDownload} onEnviarPorCorreo={onEnviarPorCorreo} />
                 </motion.div>
               )}
             </AnimatePresence>

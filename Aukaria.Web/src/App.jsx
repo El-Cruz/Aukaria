@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import Navbar from "./components/Navbar"
 import LandingPage from "./components/LandingPage"
@@ -6,7 +6,13 @@ import MainAppView from "./components/MainAppView"
 import LoginModal from "./components/LoginModal"
 import ProcessingOverlay from "./components/ProcessingOverlay"
 import TopographyBackground from "./components/TopographyBackground"
-import { descargarReporteWord, procesarAnalisisCtlStreaming } from "./services/apiService"
+import {
+  descargarReporteWord,
+  procesarAnalisisCtlStreaming,
+  obtenerUsuarioActual,
+  enviarReporteWord,
+  cerrarSesion,
+} from "./services/apiService"
 
 const fade = { duration: 0.3 }
 const spring = { type: "spring", stiffness: 400, damping: 30 }
@@ -93,6 +99,26 @@ function ErrorBanner({ message, onClose }) {
   )
 }
 
+function normalizarUsuario(dto) {
+  const rol =
+    String(dto?.Rol || dto?.rol || "").toLowerCase() === "adminempresa"
+      ? "Admin Legal"
+      : "Analista Jurídico"
+  return {
+    ...dto,
+    id: dto?.Id,
+    empresaId: dto?.EmpresaId,
+    usuarioId: dto?.Id,
+    nombre: dto?.Nombre || dto?.nombre || "Analista",
+    email: dto?.Email || dto?.email || "",
+    empresa: dto?.EmpresaNombre || dto?.empresa || "Empresa Demo S.A.S.",
+    rol,
+    proveedor: dto?.Provider || dto?.provider || "local",
+    creditosUsados: 1,
+    creditosTotal: 50,
+  }
+}
+
 function App() {
   const [paso, setPaso] = useState("landing")
   const [usuario, setUsuario] = useState(null)
@@ -104,6 +130,14 @@ function App() {
   const [errorMsg, setErrorMsg] = useState("")
   const errorTimerRef = useRef(null)
   const pendienteRef = useRef(null)
+
+  useEffect(() => {
+    obtenerUsuarioActual().then((dto) => {
+      if (dto) {
+        setUsuario(normalizarUsuario(dto))
+      }
+    })
+  }, [])
 
   const notificar = (message) => {
     setErrorMsg(message)
@@ -121,6 +155,8 @@ function App() {
         matriculaFmi: meta?.matriculaFmi || "",
         proposito: "CompraVenta",
         tipoDocumento: meta?.tipoDocumento || "CTL",
+        empresaId: usuario?.empresaId,
+        usuarioId: usuario?.usuarioId,
         onProgreso: (progreso) => setProgresoAnalisis(progreso),
       })
       setProgresoAnalisis(null)
@@ -155,7 +191,7 @@ function App() {
   }
 
   const handleLogin = (data) => {
-    setUsuario(data)
+    setUsuario(normalizarUsuario(data))
     const pendiente = pendienteRef.current
     pendienteRef.current = null
     if (pendiente) {
@@ -179,7 +215,12 @@ function App() {
     setPaso("app")
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await cerrarSesion()
+    } catch {
+      /* ignora errores al cerrar sesión */
+    }
     setUsuario(null)
     pendienteRef.current = null
     setPreAnalisisData(null)
@@ -197,6 +238,16 @@ function App() {
       )
     } catch (err) {
       notificar(err.message || "No se pudo descargar el reporte.")
+    }
+  }
+
+  const handleEnviarPorCorreo = async () => {
+    if (!resultado) return
+    try {
+      await enviarReporteWord(resultado.Id)
+      notificar("Reporte enviado a tu correo.")
+    } catch (err) {
+      notificar(err.message || "No se pudo enviar el reporte por correo.")
     }
   }
 
@@ -231,6 +282,7 @@ function App() {
                 onReabrir={handleReabrir}
                 onNuevoEstudio={handleNuevoEstudio}
                 onDownload={handleDownload}
+                onEnviarPorCorreo={handleEnviarPorCorreo}
                 onLogout={handleLogout}
               />
             </main>

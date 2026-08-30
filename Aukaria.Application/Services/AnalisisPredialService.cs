@@ -16,19 +16,22 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
     private readonly IClaudeApiService _claudeApiService;
     private readonly IDocumentClassifierService _documentClassifierService;
     private readonly IReportGeneratorService _reportGeneratorService;
+    private readonly IEmailService _emailService;
 
     public AnalisisPredialService(
         IAnalisisPredialRepository repository,
         IPdfExtractorService pdfExtractorService,
         IClaudeApiService claudeApiService,
         IDocumentClassifierService documentClassifierService,
-        IReportGeneratorService reportGeneratorService)
+        IReportGeneratorService reportGeneratorService,
+        IEmailService emailService)
     {
         _repository = repository;
         _pdfExtractorService = pdfExtractorService;
         _claudeApiService = claudeApiService;
         _documentClassifierService = documentClassifierService;
         _reportGeneratorService = reportGeneratorService;
+        _emailService = emailService;
     }
 
     public async Task<PreAnalisisFmiResponseDto> PreAnalizarFmiAsync(
@@ -179,6 +182,19 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
             Archivo = bytes,
             NombreArchivo = ConstruirNombreArchivo(resultadoDto.MatriculaFMI, analisisId)
         };
+    }
+
+    public async Task EnviarReportePorCorreoAsync(Guid analisisId, string destinatario, CancellationToken cancellationToken = default)
+    {
+        AnalisisPredial? analisis = await _repository.ObtenerPorIdAsync(analisisId, cancellationToken);
+        if (analisis is null)
+        {
+            throw new KeyNotFoundException("El análisis predial solicitado no existe.");
+        }
+
+        ReporteWordDto reporte = await DescargarReporteWordAsync(analisisId, cancellationToken);
+        string fmi = analisis.MatriculaFMI;
+        await _emailService.EnviarReporteAsync(destinatario, reporte.NombreArchivo, reporte.Archivo, fmi, cancellationToken);
     }
 
     private static string ConstruirNombreArchivo(string matriculaFmi, Guid analisisId)

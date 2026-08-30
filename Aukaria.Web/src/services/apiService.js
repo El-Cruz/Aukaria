@@ -18,6 +18,9 @@ const API_BASE = ROOT_URL.includes("/api/AnalisisPredial")
   ? ROOT_URL
   : `${ROOT_URL}/api/AnalisisPredial`
 
+// Base para los endpoints de autenticación (/api/auth)
+const AUTH_BASE = `${ROOT_URL}/api/auth`
+
 console.log("[Aukaria API Service] URL Base configurada:", API_BASE)
 
 export const EMPRESA_ID = "11111111-1111-1111-1111-111111111111"
@@ -26,13 +29,44 @@ export const USUARIO_ID = "22222222-2222-2222-2222-222222222222"
 const TIMEOUT_MS = 60000
 const ANALISIS_TIMEOUT_MS = 240000
 
+async function authRequest(path, options = {}) {
+  const response = await fetch(`${AUTH_BASE}${path}`, {
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    ...options,
+  })
+
+  const texto = await response.text()
+  let data = null
+  if (texto) {
+    try {
+      data = JSON.parse(texto)
+    } catch {
+      data = texto
+    }
+  }
+
+  if (!response.ok) {
+    const mensaje =
+      (typeof data === "string" && data) ||
+      data?.mensaje ||
+      data?.message ||
+      `[HTTP ${response.status}] Error de autenticación.`
+    throw new Error(mensaje)
+  }
+
+  return data
+}
+
 async function request(path, options = {}, tipoRespuesta = "json", timeoutMs = TIMEOUT_MS) {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), timeoutMs)
 
+  const fetchOptions = { signal: controller.signal, credentials: "include", ...options }
+
   let response
   try {
-    response = await fetch(`${API_BASE}${path}`, { signal: controller.signal, ...options })
+    response = await fetch(`${API_BASE}${path}`, fetchOptions)
   } catch (err) {
     if (err?.name === "AbortError") {
       throw new Error("La solicitud tardó demasiado. Reintenta la operación.")
@@ -134,7 +168,11 @@ export async function procesarAnalisisCtlStreaming({
   formData.append("empresaId", empresaId)
   formData.append("usuarioId", usuarioId)
 
-  const response = await fetch(`${API_BASE}/procesar-sse`, { method: "POST", body: formData })
+  const response = await fetch(`${API_BASE}/procesar-sse`, {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+  })
 
   if (!response.ok || !response.body) {
     throw new Error(`[HTTP ${response.status}] No se pudo iniciar el análisis en streaming.`)
@@ -182,4 +220,34 @@ function parsearBloqueSse(bloque) {
   } catch {
     return null
   }
+}
+
+// --- Autenticación ---
+
+export function iniciarGoogle(returnUrl) {
+  window.location.href = `${AUTH_BASE}/login-google${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ""}`
+}
+
+export function iniciarMicrosoft(returnUrl) {
+  window.location.href = `${AUTH_BASE}/login-microsoft${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ""}`
+}
+
+export const solicitarOtp = (email) =>
+  authRequest("/solicitar-otp", { method: "POST", body: JSON.stringify({ email }) })
+
+export const verificarOtp = (payload) =>
+  authRequest("/verificar-otp", { method: "POST", body: JSON.stringify(payload) })
+
+export async function obtenerUsuarioActual() {
+  try {
+    return await authRequest("/me")
+  } catch {
+    return null
+  }
+}
+
+export const cerrarSesion = () => authRequest("/logout", { method: "POST" })
+
+export async function enviarReporteWord(analisisId) {
+  return request(`/envia-word/${analisisId}`, { method: "POST" })
 }

@@ -1,56 +1,80 @@
 import { useState } from "react"
 import { motion, useReducedMotion } from "framer-motion"
+import { iniciarGoogle, iniciarMicrosoft, solicitarOtp, verificarOtp, EMPRESA_ID } from "../services/apiService"
 
 const spring = { type: "spring", bounce: 0, duration: 0.45 }
 const springBtn = { type: "spring", stiffness: 500, damping: 30 }
 
+const MODOS = {
+  login: { titulo: "Iniciar sesión", botonCodigo: "Enviar código", requiereNombre: false },
+  registro: { titulo: "Crear cuenta", botonCodigo: "Crear cuenta y enviar código", requiereNombre: true },
+}
+
 export default function LoginModal({ onClose, onLogin }) {
   const reduce = useReducedMotion()
+  const [modo, setModo] = useState("login")
   const [correo, setCorreo] = useState("")
-  const [contrasena, setContrasena] = useState("")
+  const [nombre, setNombre] = useState("")
+  const [codigo, setCodigo] = useState("")
+  const [paso, setPaso] = useState("correo") // correo | otp
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState("")
+  const [info, setInfo] = useState("")
 
-  const derivarUsuario = (email, proveedor) => {
-    const parte = email.split("@")[0] || "analista"
-    const nombre = parte
-      .replace(/[._-]+/g, " ")
-      .replace(/\b\w/g, (c) => c.toUpperCase())
-    return {
-      nombre,
-      email,
-      empresa: "Constructora Aurora S.A.S.",
-      rol: proveedor === "azure" ? "Admin Legal" : "Analista Jurídico",
-      proveedor,
-      creditosUsados: 1,
-      creditosTotal: 50,
-    }
-  }
+  const conf = MODOS[modo]
 
-  const ingresar = (evento) => {
+  const enviarCodigo = async (evento) => {
     evento?.preventDefault()
     setError("")
-    if (!correo.trim() || !contrasena) {
-      setError("Ingresa tu correo y contraseña corporativos.")
+    if (!correo.trim() || !correo.includes("@")) {
+      setError("Ingresa un correo válido.")
+      return
+    }
+    if (conf.requiereNombre && !nombre.trim()) {
+      setError("Ingresa tu nombre para crear la cuenta.")
       return
     }
     setCargando(true)
-    window.setTimeout(() => {
-      onLogin(derivarUsuario(correo.trim(), "azure"))
-    }, reduce ? 50 : 700)
+    try {
+      await solicitarOtp(correo.trim())
+      setInfo(`Te enviamos un código a ${correo.trim()}. Revísalo e ingrésalo abajo.`)
+      setPaso("otp")
+      setCargando(false)
+    } catch (err) {
+      setError(err.message || "No se pudo enviar el código.")
+      setCargando(false)
+    }
   }
 
-  const ingresarOAuth = (proveedor) => {
+  const verificar = async (evento) => {
+    evento?.preventDefault()
     setError("")
+    setInfo("")
+    if (!codigo.trim()) {
+      setError("Ingresa el código de verificación.")
+      return
+    }
     setCargando(true)
-    window.setTimeout(() => {
-      onLogin(
-        derivarUsuario(
-          proveedor === "azure" ? "laura.torres@constructoraaurora.com" : "marco.ruiz@constructoraaurora.com",
-          proveedor,
-        ),
-      )
-    }, reduce ? 50 : 800)
+    try {
+      const usuario = await verificarOtp({
+        email: correo.trim(),
+        codigoOtp: codigo.trim(),
+        nombre: nombre.trim(),
+        empresaId: EMPRESA_ID,
+        esRegistro: modo === "registro",
+      })
+      onLogin(usuario)
+    } catch (err) {
+      setError(err.message || "Código incorrecto o expirado.")
+      setCargando(false)
+    }
+  }
+
+  const volver = () => {
+    setError("")
+    setInfo("")
+    setCodigo("")
+    setPaso("correo")
   }
 
   const campoBase =
@@ -90,88 +114,152 @@ export default function LoginModal({ onClose, onLogin }) {
           <span className="mt-1 rounded border border-black/20 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-neutral-500">
             Multitenant B2B · SNR
           </span>
-          <h2 className="mt-5 text-xl font-bold tracking-tight text-black">Acceso Corporativo B2B</h2>
+          <h2 className="mt-5 text-xl font-bold tracking-tight text-black">{conf.titulo}</h2>
           <p className="mt-1.5 text-xs text-neutral-500">
-            Tu cuenta de empresa notarial está protegida por inicio de sesión único (SSO).
+            Accede con tu cuenta corporativa o con tu correo verificando un código.
           </p>
         </header>
 
-        <form onSubmit={ingresar} className="mt-7 flex flex-col gap-3.5">
-          <label className="flex flex-col gap-1.5">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500">
-              Correo Corporativo
-            </span>
-            <input
-              type="email"
-              required
-              value={correo}
-              onChange={(e) => setCorreo(e.target.value)}
-              placeholder="nombre@empresa.com.co"
-              autoComplete="email"
-              className={campoBase}
-            />
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500">
-              Contraseña
-            </span>
-            <input
-              type="password"
-              required
-              value={contrasena}
-              onChange={(e) => setContrasena(e.target.value)}
-              placeholder="••••••••"
-              autoComplete="current-password"
-              className={campoBase}
-            />
-          </label>
+        {paso === "correo" ? (
+          <form onSubmit={enviarCodigo} className="mt-7 flex flex-col gap-3.5">
+            <div className="flex items-center gap-1 rounded-full bg-black/5 p-1">
+              {Object.entries(MODOS).map(([clave, m]) => (
+                <button
+                  key={clave}
+                  type="button"
+                  onClick={() => {
+                    setModo(clave)
+                    setError("")
+                  }}
+                  className={`flex-1 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors duration-150 ${
+                    modo === clave ? "bg-white text-black shadow" : "text-neutral-500 hover:text-black"
+                  }`}
+                >
+                  {m.titulo}
+                </button>
+              ))}
+            </div>
 
-          {error && <p className="text-xs font-medium text-red-600">{error}</p>}
+            {conf.requiereNombre && (
+              <label className="flex flex-col gap-1.5">
+                <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500">
+                  Nombre completo
+                </span>
+                <input
+                  type="text"
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  placeholder="Nombre del analista"
+                  autoComplete="name"
+                  className={campoBase}
+                />
+              </label>
+            )}
 
-          <motion.button
-            type="submit"
-            disabled={cargando}
-            whileTap={{ scale: 0.97 }}
-            transition={springBtn}
-            className="mt-1 flex items-center justify-center gap-1.5 rounded-full bg-[var(--cta)] px-7 py-3 text-sm font-semibold text-white shadow-[0_4px_16px_color-mix(in_srgb,var(--cta)_35%,transparent)] transition-colors duration-150 hover:bg-[var(--cta-hover)] disabled:opacity-70"
-          >
-            {cargando ? "Validando credenciales…" : "Iniciar Sesión →"}
-          </motion.button>
-        </form>
+            <label className="flex flex-col gap-1.5">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500">
+                Correo Corporativo
+              </span>
+              <input
+                type="email"
+                required
+                value={correo}
+                onChange={(e) => setCorreo(e.target.value)}
+                placeholder="nombre@empresa.com.co"
+                autoComplete="email"
+                className={campoBase}
+              />
+            </label>
 
-        <div className="my-6 flex items-center gap-3">
-          <span className="h-px flex-1 bg-black/10" />
-          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-neutral-400">o SSO</span>
-          <span className="h-px flex-1 bg-black/10" />
-        </div>
+            {error && <p className="text-xs font-medium text-red-600">{error}</p>}
 
-        <div className="flex flex-col gap-2.5">
-          <motion.button
-            type="button"
-            disabled={cargando}
-            onClick={() => ingresarOAuth("azure")}
-            whileTap={{ scale: 0.97 }}
-            transition={springBtn}
-            className="flex items-center justify-center gap-2.5 rounded-full border border-black/10 bg-white/70 px-5 py-3 text-sm font-semibold text-neutral-700 transition-colors duration-150 hover:bg-white hover:text-black disabled:opacity-70"
-          >
-            <AzureIcon />
-            Continuar con Microsoft Azure AD / Single Sign-On
-          </motion.button>
-          <motion.button
-            type="button"
-            disabled={cargando}
-            onClick={() => ingresarOAuth("google")}
-            whileTap={{ scale: 0.97 }}
-            transition={springBtn}
-            className="flex items-center justify-center gap-2.5 rounded-full border border-black/10 bg-white/70 px-5 py-3 text-sm font-semibold text-neutral-700 transition-colors duration-150 hover:bg-white hover:text-black disabled:opacity-70"
-          >
-            <GoogleIcon />
-            Continuar con Google Workspace
-          </motion.button>
-        </div>
+            <motion.button
+              type="submit"
+              disabled={cargando}
+              whileTap={{ scale: 0.97 }}
+              transition={springBtn}
+              className="mt-1 flex items-center justify-center gap-1.5 rounded-full bg-[var(--cta)] px-7 py-3 text-sm font-semibold text-white shadow-[0_4px_16px_color-mix(in_srgb,var(--cta)_35%,transparent)] transition-colors duration-150 hover:bg-[var(--cta-hover)] disabled:opacity-70"
+            >
+              {cargando ? "Enviando…" : conf.botonCodigo}
+            </motion.button>
+          </form>
+        ) : (
+          <form onSubmit={verificar} className="mt-7 flex flex-col gap-3.5">
+            {info && <p className="text-xs font-medium text-emerald-700">{info}</p>}
+            <label className="flex flex-col gap-1.5">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500">
+                Código de verificación
+              </span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={codigo}
+                onChange={(e) => setCodigo(e.target.value)}
+                placeholder="000000"
+                autoFocus
+                className={`${campoBase} text-center tracking-[0.4em]`}
+              />
+            </label>
+
+            {error && <p className="text-xs font-medium text-red-600">{error}</p>}
+
+            <motion.button
+              type="submit"
+              disabled={cargando}
+              whileTap={{ scale: 0.97 }}
+              transition={springBtn}
+              className="mt-1 flex items-center justify-center gap-1.5 rounded-full bg-[var(--cta)] px-7 py-3 text-sm font-semibold text-white shadow-[0_4px_16px_color-mix(in_srgb,var(--cta)_35%,transparent)] transition-colors duration-150 hover:bg-[var(--cta-hover)] disabled:opacity-70"
+            >
+              {cargando ? "Verificando…" : "Verificar e ingresar"}
+            </motion.button>
+
+            <button
+              type="button"
+              onClick={volver}
+              className="text-center text-xs font-semibold text-neutral-500 transition-colors duration-150 hover:text-black"
+            >
+              ← Volver y cambiar correo
+            </button>
+          </form>
+        )}
+
+        {paso === "correo" && (
+          <>
+            <div className="my-6 flex items-center gap-3">
+              <span className="h-px flex-1 bg-black/10" />
+              <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-neutral-400">o SSO</span>
+              <span className="h-px flex-1 bg-black/10" />
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              <motion.button
+                type="button"
+                disabled={cargando}
+                onClick={() => iniciarMicrosoft()}
+                whileTap={{ scale: 0.97 }}
+                transition={springBtn}
+                className="flex items-center justify-center gap-2.5 rounded-full border border-black/10 bg-white/70 px-5 py-3 text-sm font-semibold text-neutral-700 transition-colors duration-150 hover:bg-white hover:text-black disabled:opacity-70"
+              >
+                <AzureIcon />
+                Continuar con Microsoft
+              </motion.button>
+              <motion.button
+                type="button"
+                disabled={cargando}
+                onClick={() => iniciarGoogle()}
+                whileTap={{ scale: 0.97 }}
+                transition={springBtn}
+                className="flex items-center justify-center gap-2.5 rounded-full border border-black/10 bg-white/70 px-5 py-3 text-sm font-semibold text-neutral-700 transition-colors duration-150 hover:bg-white hover:text-black disabled:opacity-70"
+              >
+                <GoogleIcon />
+                Continuar con Google
+              </motion.button>
+            </div>
+          </>
+        )}
 
         <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-widest text-neutral-400">
-          SSL cifrado · Samsung SDN Colombia · RFC 9000
+          SSL cifrado · Acceso SSO y OTP
         </p>
       </motion.div>
     </motion.div>

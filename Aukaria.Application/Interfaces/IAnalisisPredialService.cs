@@ -13,4 +13,5 @@ public interface IAnalisisPredialService
         Func<ProgresoAnalisisDto, Task> onProgreso,
         CancellationToken cancellationToken = default);
     Task<ReporteWordDto> DescargarReporteWordAsync(Guid analisisId, CancellationToken cancellationToken = default);
+    Task EnviarReportePorCorreoAsync(Guid analisisId, string destinatario, CancellationToken cancellationToken = default);
 }

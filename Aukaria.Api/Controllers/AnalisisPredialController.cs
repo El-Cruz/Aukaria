@@ -1,8 +1,11 @@
+using System.Security.Claims;
+using Aukaria.Api.Auth;
 using Aukaria.Application.DTOs.Requests;
 using Aukaria.Application.DTOs.Responses;
 using Aukaria.Application.Exceptions;
 using Aukaria.Application.Interfaces;
 using Aukaria.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using System.Text.Json;
@@ -45,7 +48,7 @@ public sealed class AnalisisPredialController : ControllerBase
         using var stream = archivoPdf.OpenReadStream();
         try
         {
-            var resultado = await _analisisService.PreAnalizarFmiAsync(stream, empresaId, cancellationToken);
+            var resultado = await _analisisService.PreAnalizarFmiAsync(stream, ObtenerEmpresaId(empresaId), cancellationToken);
             return Ok(resultado);
         }
         catch (PdfInvalidoException)
@@ -75,13 +78,15 @@ public sealed class AnalisisPredialController : ControllerBase
             return BadRequest("El archivo debe estar en formato PDF.");
         }
 
+        var (empresaReal, usuarioReal) = ObtenerContexto(empresaId, usuarioId);
+
         var solicitud = new SolicitudAnalisisRequestDto
         {
             MatriculaFMI = matriculaFmi ?? string.Empty,
             Proposito = proposito,
             TipoDocumento = tipoDocumento,
-            EmpresaId = empresaId,
-            UsuarioId = usuarioId
+            EmpresaId = empresaReal,
+            UsuarioId = usuarioReal
         };
 
         using var stream = archivoPdf.OpenReadStream();
@@ -124,13 +129,15 @@ public sealed class AnalisisPredialController : ControllerBase
             return;
         }
 
+        var (empresaReal, usuarioReal) = ObtenerContexto(empresaId, usuarioId);
+
         var solicitud = new SolicitudAnalisisRequestDto
         {
             MatriculaFMI = matriculaFmi ?? string.Empty,
             Proposito = proposito,
             TipoDocumento = tipoDocumento,
-            EmpresaId = empresaId,
-            UsuarioId = usuarioId
+            EmpresaId = empresaReal,
+            UsuarioId = usuarioReal
         };
 
         using var stream = archivoPdf.OpenReadStream();
@@ -192,5 +199,45 @@ public sealed class AnalisisPredialController : ControllerBase
         {
             return NotFound("El análisis predial especificado no fue encontrado.");
         }
+    }
+
+    [Authorize]
+    [HttpPost("envia-word/{id:guid}")]
+    public async Task<IActionResult> EnviarReporteWord(Guid id, CancellationToken cancellationToken = default)
+    {
+        string? email = User.FindFirstValue(ClaimTypes.Email);
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return Unauthorized("No hay un correo asociado a la sesión.");
+        }
+
+        try
+        {
+            await _analisisService.EnviarReportePorCorreoAsync(id, email, cancellationToken);
+            return Ok(new { mensaje = $"Reporte enviado a {email}." });
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound("El análisis predial especificado no fue encontrado.");
+        }
+    }
+
+    private (Guid empresaId, Guid usuarioId) ObtenerContexto(Guid empresaFallback, Guid usuarioFallback)
+    {
+        Guid empresaId = ObtenerEmpresaId(empresaFallback);
+        Guid usuarioId = ObtenerUsuarioId(usuarioFallback);
+        return (empresaId, usuarioId);
+    }
+
+    private Guid ObtenerEmpresaId(Guid fallback)
+    {
+        string? empresaClaim = User.FindFirstValue(AukariaAuthExtensions.ClaimEmpresaId);
+        return Guid.TryParse(empresaClaim, out Guid id) ? id : fallback;
+    }
+
+    private Guid ObtenerUsuarioId(Guid fallback)
+    {
+        string? sub = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return Guid.TryParse(sub, out Guid id) ? id : fallback;
     }
 }

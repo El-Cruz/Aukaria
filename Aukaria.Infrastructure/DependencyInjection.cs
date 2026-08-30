@@ -1,4 +1,5 @@
 using Aukaria.Application.Interfaces;
+using Aukaria.Application.Options;
 using Aukaria.Infrastructure.Persistence;
 using Aukaria.Infrastructure.Repositories;
 using Aukaria.Infrastructure.Services;
@@ -19,6 +20,8 @@ public static class DependencyInjection
                 ? "Host=localhost;Port=5432;Database=aukaria_dev;Username=postgres;Password=postgres"
                 : connectionString));
 
+        services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
+
         services.AddScoped<IPdfExtractorService, PdfExtractorService>();
         services.AddScoped<IDocumentClassifierService, DocumentClassifierService>();
         services.AddHttpClient<IClaudeApiService, ClaudeApiService>(client =>
@@ -27,6 +30,9 @@ public static class DependencyInjection
         });
         services.AddScoped<IReportGeneratorService, ReportGeneratorService>();
         services.AddScoped<IAnalisisPredialRepository, AnalisisPredialRepository>();
+        services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+        services.AddSingleton<IOtpStore, InMemoryOtpStore>();
+        services.AddScoped<IEmailService, EmailService>();
 
         return services;
     }
