@@ -56,14 +56,14 @@ export default function LoginModal({ onClose, onLogin }) {
     }
     setCargando(true)
     try {
-      const usuario = await verificarOtp({
+      const res = await verificarOtp({
         email: correo.trim(),
         codigoOtp: codigo.trim(),
         nombre: nombre.trim(),
         empresaId: EMPRESA_ID,
         esRegistro: modo === "registro",
       })
-      onLogin(usuario)
+      onLogin(res?.usuario ?? res)
     } catch (err) {
       setError(err.message || "Código incorrecto o expirado.")
       setCargando(false)

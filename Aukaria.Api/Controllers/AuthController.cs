@@ -7,6 +7,7 @@ using Aukaria.Application.Interfaces;
 using Aukaria.Domain.Entities;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -88,15 +89,11 @@ public sealed class AuthController : ControllerBase
         {
             UsuarioSesionDto usuario = await _authService.VerificarOtpAsync(request, cancellationToken);
 
-            var principal = AukariaAuthExtensions.ConstruirPrincipal(
+            var jwt = HttpContext.RequestServices.GetRequiredService<JwtTokenService>();
+            string token = jwt.Generar(
                 new IniciarSesionUsuario(usuario.Id, usuario.Nombre, usuario.Email, usuario.EmpresaId));
 
-            await HttpContext.SignInAsync(
-                AukariaAuthExtensions.SessionScheme,
-                principal,
-                new AuthenticationProperties { IsPersistent = true, AllowRefresh = true });
-
-            return Ok(usuario);
+            return Ok(new { token, usuario });
         }
         catch (OtpInvalidoException ex)
         {
@@ -138,9 +135,8 @@ public sealed class AuthController : ControllerBase
 
     [Authorize]
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout()
+    public IActionResult Logout()
     {
-        await HttpContext.SignOutAsync(AukariaAuthExtensions.SessionScheme);
         return Ok(new { mensaje = "Sesión cerrada." });
     }
 }

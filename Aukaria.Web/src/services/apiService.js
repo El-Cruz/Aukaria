@@ -29,12 +29,40 @@ export const USUARIO_ID = "22222222-2222-2222-2222-222222222222"
 const TIMEOUT_MS = 60000
 const ANALISIS_TIMEOUT_MS = 240000
 
+const TOKEN_KEY = "aukaria_token"
+
+export function guardarToken(token) {
+  if (token) localStorage.setItem(TOKEN_KEY, token)
+  else localStorage.removeItem(TOKEN_KEY)
+}
+
+export function obtenerToken() {
+  return typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) || null : null
+}
+
+export function capturarTokenDeUrl() {
+  const match = window.location.search?.match(/[?&]token=([^&]+)/)
+  if (!match) return null
+  try {
+    const token = decodeURIComponent(match[1])
+    const url = window.location.origin + window.location.pathname
+    window.history.replaceState({}, "", url)
+    return token
+  } catch {
+    return null
+  }
+}
+
+function conToken(opciones = {}) {
+  const token = obtenerToken()
+  if (!token) return opciones
+  const headers = new Headers(opciones.headers || {})
+  headers.set("Authorization", `Bearer ${token}`)
+  return { ...opciones, headers }
+}
+
 async function authRequest(path, options = {}) {
-  const response = await fetch(`${AUTH_BASE}${path}`, {
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  })
+  const response = await fetch(`${AUTH_BASE}${path}`, conToken(options))
 
   const texto = await response.text()
   let data = null
@@ -62,7 +90,7 @@ async function request(path, options = {}, tipoRespuesta = "json", timeoutMs = T
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), timeoutMs)
 
-  const fetchOptions = { signal: controller.signal, credentials: "include", ...options }
+  const fetchOptions = { signal: controller.signal, ...conToken(options) }
 
   let response
   try {
@@ -168,11 +196,10 @@ export async function procesarAnalisisCtlStreaming({
   formData.append("empresaId", empresaId)
   formData.append("usuarioId", usuarioId)
 
-  const response = await fetch(`${API_BASE}/procesar-sse`, {
+  const response = await fetch(`${API_BASE}/procesar-sse`, conToken({
     method: "POST",
     body: formData,
-    credentials: "include",
-  })
+  }))
 
   if (!response.ok || !response.body) {
     throw new Error(`[HTTP ${response.status}] No se pudo iniciar el análisis en streaming.`)
@@ -233,12 +260,26 @@ export function iniciarMicrosoft(returnUrl) {
 }
 
 export const solicitarOtp = (email) =>
-  authRequest("/solicitar-otp", { method: "POST", body: JSON.stringify({ email }) })
+  authRequest("/solicitar-otp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  })
 
-export const verificarOtp = (payload) =>
-  authRequest("/verificar-otp", { method: "POST", body: JSON.stringify(payload) })
+export const verificarOtp = async (payload) => {
+  const res = await authRequest("/verificar-otp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+  if (res?.token) guardarToken(res.token)
+  return res
+}
 
 export async function obtenerUsuarioActual() {
+  const tokenUrl = capturarTokenDeUrl()
+  if (tokenUrl) guardarToken(tokenUrl)
+  if (!obtenerToken()) return null
   try {
     return await authRequest("/me")
   } catch {
@@ -246,7 +287,14 @@ export async function obtenerUsuarioActual() {
   }
 }
 
-export const cerrarSesion = () => authRequest("/logout", { method: "POST" })
+export const cerrarSesion = async () => {
+  const token = obtenerToken()
+  try {
+    if (token) await authRequest("/logout", { method: "POST" })
+  } finally {
+    guardarToken(null)
+  }
+}
 
 export async function enviarReporteWord(analisisId) {
   return request(`/envia-word/${analisisId}`, { method: "POST" })

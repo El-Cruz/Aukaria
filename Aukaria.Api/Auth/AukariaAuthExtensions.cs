@@ -1,36 +1,45 @@
 using System.Security.Claims;
 using Aukaria.Application.Interfaces;
 using Aukaria.Domain.Entities;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Aukaria.Api.Auth;
 
 public static class AukariaAuthExtensions
 {
-    public const string SessionScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    public const string SessionScheme = "Aukaria.Jwt";
     public const string ClaimEmpresaId = "EmpresaId";
 
     public static IServiceCollection AddAukariaAuth(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddSingleton<JwtTokenService>();
+
         var googleClientId = configuration["Authentication:Google:ClientId"] ?? string.Empty;
         var googleClientSecret = configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
         var microsoftClientId = configuration["Authentication:Microsoft:ClientId"] ?? string.Empty;
         var microsoftClientSecret = configuration["Authentication:Microsoft:ClientSecret"] ?? string.Empty;
 
         var authenticationBuilder = services.AddAuthentication(SessionScheme)
-            .AddCookie(SessionScheme, cookie =>
+            .AddJwtBearer(SessionScheme, jwt =>
             {
-                cookie.Cookie.Name = "Aukaria.Auth";
-                cookie.Cookie.SameSite = SameSiteMode.None;
-                cookie.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                cookie.Cookie.HttpOnly = true;
-                cookie.SlidingExpiration = true;
-                cookie.ExpireTimeSpan = TimeSpan.FromDays(7);
-                cookie.LoginPath = "/api/auth/login";
+                jwt.RequireHttpsMetadata = false;
+                jwt.SaveToken = true;
+                jwt.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = configuration["Authentication:Jwt:Issuer"] ?? "Aukaria.Api",
+                    ValidateAudience = true,
+                    ValidAudience = configuration["Authentication:Jwt:Audience"] ?? "Aukaria.Web",
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                        System.Text.Encoding.UTF8.GetBytes(
+                            configuration["Authentication:Jwt:Secret"]
+                            ?? "DevOnlySecret_NoUsarEnProduccion_1234567890")),
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromSeconds(30)
+                };
             });
 
         if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
@@ -86,33 +95,19 @@ public static class AukariaAuthExtensions
             return;
         }
 
-        context.Identity?.AddClaim(new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()));
-        context.Identity?.AddClaim(new Claim(ClaimTypes.Name, usuario.Nombre));
-        context.Identity?.AddClaim(new Claim(ClaimTypes.Email, usuario.Email));
-        context.Identity?.AddClaim(new Claim(ClaimEmpresaId, usuario.EmpresaId.ToString()));
+        var jwt = context.HttpContext.RequestServices.GetRequiredService<JwtTokenService>();
+        string token = jwt.Generar(
+            new IniciarSesionUsuario(usuario.Id, usuario.Nombre, usuario.Email, usuario.EmpresaId));
 
         string frontend = configuration["Authentication:RedirectToFrontend"] ?? "/";
-        context.Properties.RedirectUri = frontend;
+        string separador = frontend.Contains('?') ? "&" : "?";
+        context.Properties.RedirectUri = $"{frontend}{separador}token={Uri.EscapeDataString(token)}";
     }
 
     public static Guid ObtenerEmpresaIdPorDefecto(IConfiguration configuration)
     {
         string valor = configuration["Authentication:EmpresaIdPorDefecto"] ?? "11111111-1111-1111-1111-111111111111";
         return Guid.TryParse(valor, out Guid id) ? id : Guid.Parse("11111111-1111-1111-1111-111111111111");
-    }
-
-    public static ClaimsPrincipal ConstruirPrincipal(IniciarSesionUsuario usuario)
-    {
-        var claims = new List<Claim>
-        {
-            new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-            new(ClaimTypes.Name, usuario.Nombre),
-            new(ClaimTypes.Email, usuario.Email),
-            new(ClaimEmpresaId, usuario.EmpresaId.ToString())
-        };
-
-        var identidad = new ClaimsIdentity(claims, SessionScheme);
-        return new ClaimsPrincipal(identidad);
     }
 }
 
