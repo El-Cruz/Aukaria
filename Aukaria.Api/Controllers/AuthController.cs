@@ -27,8 +27,13 @@ public sealed class AuthController : ControllerBase
     }
 
     [HttpGet("login-google")]
-    public IActionResult LoginGoogle([FromQuery] string? returnUrl = null)
+    public async Task<IActionResult> LoginGoogle([FromQuery] string? returnUrl = null)
     {
+        if (!await EsquemaRegistradoAsync(GoogleDefaults.AuthenticationScheme))
+        {
+            return BadRequest("El inicio de sesión con Google no está configurado.");
+        }
+
         string redirect = string.IsNullOrWhiteSpace(returnUrl)
             ? "/"
             : returnUrl;
@@ -37,13 +42,29 @@ public sealed class AuthController : ControllerBase
     }
 
     [HttpGet("login-microsoft")]
-    public IActionResult LoginMicrosoft([FromQuery] string? returnUrl = null)
+    public async Task<IActionResult> LoginMicrosoft([FromQuery] string? returnUrl = null)
     {
+        if (!await EsquemaRegistradoAsync(MicrosoftAccountDefaults.AuthenticationScheme))
+        {
+            return BadRequest("El inicio de sesión con Microsoft no está configurado.");
+        }
+
         string redirect = string.IsNullOrWhiteSpace(returnUrl)
             ? "/"
             : returnUrl;
         var props = new AuthenticationProperties { RedirectUri = redirect };
         return Challenge(props, MicrosoftAccountDefaults.AuthenticationScheme);
+    }
+
+    private async Task<bool> EsquemaRegistradoAsync(string scheme)
+    {
+        var provider = HttpContext.RequestServices.GetService<IAuthenticationSchemeProvider>();
+        if (provider is null)
+        {
+            return false;
+        }
+
+        return await provider.GetSchemeAsync(scheme) is not null;
     }
 
     [HttpPost("solicitar-otp")]

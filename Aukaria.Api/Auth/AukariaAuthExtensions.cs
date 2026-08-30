@@ -16,7 +16,12 @@ public static class AukariaAuthExtensions
 
     public static IServiceCollection AddAukariaAuth(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddAuthentication(SessionScheme)
+        var googleClientId = configuration["Authentication:Google:ClientId"] ?? string.Empty;
+        var googleClientSecret = configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
+        var microsoftClientId = configuration["Authentication:Microsoft:ClientId"] ?? string.Empty;
+        var microsoftClientSecret = configuration["Authentication:Microsoft:ClientSecret"] ?? string.Empty;
+
+        var authenticationBuilder = services.AddAuthentication(SessionScheme)
             .AddCookie(SessionScheme, cookie =>
             {
                 cookie.Cookie.Name = "Aukaria.Auth";
@@ -26,21 +31,29 @@ public static class AukariaAuthExtensions
                 cookie.SlidingExpiration = true;
                 cookie.ExpireTimeSpan = TimeSpan.FromDays(7);
                 cookie.LoginPath = "/api/auth/login";
-            })
-            .AddGoogle(GoogleDefaults.AuthenticationScheme, google =>
+            });
+
+        if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
+        {
+            authenticationBuilder.AddGoogle(GoogleDefaults.AuthenticationScheme, google =>
             {
-                google.ClientId = configuration["Authentication:Google:ClientId"] ?? string.Empty;
-                google.ClientSecret = configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
+                google.ClientId = googleClientId;
+                google.ClientSecret = googleClientSecret;
                 google.CallbackPath = "/api/auth/signin-google";
                 google.Events.OnCreatingTicket = ctx => CrearSesionDesdeProviderAsync(ctx, "google", configuration);
-            })
-            .AddMicrosoftAccount(MicrosoftAccountDefaults.AuthenticationScheme, microsoft =>
+            });
+        }
+
+        if (!string.IsNullOrWhiteSpace(microsoftClientId) && !string.IsNullOrWhiteSpace(microsoftClientSecret))
+        {
+            authenticationBuilder.AddMicrosoftAccount(MicrosoftAccountDefaults.AuthenticationScheme, microsoft =>
             {
-                microsoft.ClientId = configuration["Authentication:Microsoft:ClientId"] ?? string.Empty;
-                microsoft.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"] ?? string.Empty;
+                microsoft.ClientId = microsoftClientId;
+                microsoft.ClientSecret = microsoftClientSecret;
                 microsoft.CallbackPath = "/api/auth/signin-microsoft";
                 microsoft.Events.OnCreatingTicket = ctx => CrearSesionDesdeProviderAsync(ctx, "microsoft", configuration);
             });
+        }
 
         return services;
     }
