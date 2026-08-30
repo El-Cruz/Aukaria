@@ -16,6 +16,6 @@ public interface IClaudeApiService
         string textoDocumento,
         PropositoAnalisis proposito,
         TipoDocumentoJuridico tipoDocumento,
-        Action<ProgresoAnalisisDto> onProgreso,
+        Func<ProgresoAnalisisDto, Task> onProgreso,
         CancellationToken cancellationToken = default);
 }

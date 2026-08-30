@@ -63,7 +63,7 @@ public sealed class ClaudeApiService : IClaudeApiService
         string textoDocumento,
         PropositoAnalisis proposito,
         TipoDocumentoJuridico tipoDocumento,
-        Action<ProgresoAnalisisDto> onProgreso,
+        Func<ProgresoAnalisisDto, Task> onProgreso,
         CancellationToken cancellationToken = default)
     {
         (string apiKey, string requestJsonBase) = ConstruirSolicitud(textoDocumento, proposito, tipoDocumento);
@@ -89,7 +89,7 @@ public sealed class ClaudeApiService : IClaudeApiService
             HttpCompletionOption.ResponseHeadersRead,
             cancellationToken);
 
-        onProgreso(new ProgresoAnalisisDto
+        await onProgreso(new ProgresoAnalisisDto
         {
             Etapa = "analyzing",
             Porcentaje = 2,
@@ -162,7 +162,7 @@ public sealed class ClaudeApiService : IClaudeApiService
             if (progreso > progresoReportado)
             {
                 progresoReportado = progreso;
-                onProgreso(new ProgresoAnalisisDto
+                await onProgreso(new ProgresoAnalisisDto
                 {
                     Etapa = "analyzing",
                     Porcentaje = progreso,

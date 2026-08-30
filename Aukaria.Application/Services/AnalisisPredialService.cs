@@ -76,21 +76,21 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
     public async Task<AnalisisPredialResponseDto> ProcesarAnalisisCtlStreamingAsync(
         SolicitudAnalisisRequestDto solicitud,
         Stream pdfStream,
-        Action<ProgresoAnalisisDto> onProgreso,
+        Func<ProgresoAnalisisDto, Task> onProgreso,
         CancellationToken cancellationToken = default)
     {
-        onProgreso(new ProgresoAnalisisDto { Etapa = "extracting", Porcentaje = 1, Mensaje = "Extrayendo texto del documento..." });
+        await onProgreso(new ProgresoAnalisisDto { Etapa = "extracting", Porcentaje = 1, Mensaje = "Extrayendo texto del documento..." });
 
         string textoCtl = await _pdfExtractorService.ExtraerTextoCompletoAsync(pdfStream, cancellationToken);
         int ultimoProgreso = -1;
 
-        void ReportarProgresoClaude(ProgresoAnalisisDto progreso)
+        async Task ReportarProgresoClaude(ProgresoAnalisisDto progreso)
         {
             progreso.Porcentaje = Math.Clamp(progreso.Porcentaje, 25, 90);
             if (progreso.Porcentaje > ultimoProgreso)
             {
                 ultimoProgreso = progreso.Porcentaje;
-                onProgreso(progreso);
+                await onProgreso(progreso);
             }
         }
 
@@ -101,7 +101,7 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
             ReportarProgresoClaude,
             cancellationToken);
 
-        onProgreso(new ProgresoAnalisisDto { Etapa = "saving", Porcentaje = 95, Mensaje = "Guardando el análisis..." });
+        await onProgreso(new ProgresoAnalisisDto { Etapa = "saving", Porcentaje = 95, Mensaje = "Guardando el análisis..." });
 
         AnalisisPredialResponseDto respuesta = await PersistirYConstruirRespuestaAsync(
             solicitud,
@@ -109,7 +109,7 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
             resultadoClaude.TotalTokens,
             cancellationToken);
 
-        onProgreso(new ProgresoAnalisisDto { Etapa = "done", Porcentaje = 100, Mensaje = "Análisis completado." });
+        await onProgreso(new ProgresoAnalisisDto { Etapa = "done", Porcentaje = 100, Mensaje = "Análisis completado." });
 
         return respuesta;
     }

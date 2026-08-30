@@ -139,7 +139,7 @@ public sealed class AnalisisPredialController : ControllerBase
             var resultado = await _analisisService.ProcesarAnalisisCtlStreamingAsync(
                 solicitud,
                 stream,
-                progreso => EnviarEventoSync("progreso", progreso),
+                progreso => EnviarEventoAsync("progreso", progreso),
                 cancellationToken);
 
             await EnviarEventoAsync("resultado", resultado);
@@ -156,13 +156,6 @@ public sealed class AnalisisPredialController : ControllerBase
         {
             await EnviarErrorAsync(ex.Message);
         }
-    }
-
-    private void EnviarEventoSync(string evento, object data)
-    {
-        byte[] bytes = ConstruirBloqueSse(evento, data);
-        Response.Body.Write(bytes);
-        Response.Body.Flush();
     }
 
     private async Task EnviarEventoAsync(string evento, object data)

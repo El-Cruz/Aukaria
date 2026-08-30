@@ -10,7 +10,7 @@ public interface IAnalisisPredialService
     Task<AnalisisPredialResponseDto> ProcesarAnalisisCtlStreamingAsync(
         SolicitudAnalisisRequestDto solicitud,
         Stream pdfStream,
-        Action<ProgresoAnalisisDto> onProgreso,
+        Func<ProgresoAnalisisDto, Task> onProgreso,
         CancellationToken cancellationToken = default);
     Task<ReporteWordDto> DescargarReporteWordAsync(Guid analisisId, CancellationToken cancellationToken = default);
 }
