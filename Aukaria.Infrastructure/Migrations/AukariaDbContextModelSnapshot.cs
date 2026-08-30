@@ -192,7 +192,7 @@ namespace Aukaria.Infrastructure.Migrations
                             Nombre = "Analista Predial Demo",
                             PasswordHash = "HashDemo123",
                             Provider = "",
-                            Rol = "AdminEmpresa",
+                            Rol = "AnalistaPredial",
                             SubjectId = ""
                         });
                 });

@@ -39,8 +39,11 @@ public class AukariaDbContext : DbContext
             Nombre = "Analista Predial Demo",
             Email = "demo@aukaria.co",
             PasswordHash = "HashDemo123",
-            Rol = RolUsuario.AdminEmpresa,
-            Activo = true
+            Rol = RolUsuario.AnalistaPredial,
+            Activo = true,
+            Provider = "",
+            SubjectId = "",
+            EmailConfirmado = false
         });
 
         base.OnModelCreating(modelBuilder);

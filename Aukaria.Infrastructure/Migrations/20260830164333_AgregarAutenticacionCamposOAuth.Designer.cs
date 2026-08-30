@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Aukaria.Infrastructure.Migrations
 {
     [DbContext(typeof(AukariaDbContext))]
-    [Migration("20260830145538_AgregarAutenticacionCamposOAuth")]
+    [Migration("20260830164333_AgregarAutenticacionCamposOAuth")]
     partial class AgregarAutenticacionCamposOAuth
     {
         /// <inheritdoc />
@@ -195,7 +195,7 @@ namespace Aukaria.Infrastructure.Migrations
                             Nombre = "Analista Predial Demo",
                             PasswordHash = "HashDemo123",
                             Provider = "",
-                            Rol = "AdminEmpresa",
+                            Rol = "AnalistaPredial",
                             SubjectId = ""
                         });
                 });
