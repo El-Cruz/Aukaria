@@ -33,10 +33,7 @@ public static class AukariaAuthExtensions
                     ValidateAudience = true,
                     ValidAudience = configuration["Authentication:Jwt:Audience"] ?? "Aukaria.Web",
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-                        System.Text.Encoding.UTF8.GetBytes(
-                            configuration["Authentication:Jwt:Secret"]
-                            ?? "DevOnlySecret_NoUsarEnProduccion_1234567890")),
+                    IssuerSigningKey = ObtenerClaveFirma(configuration),
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.FromSeconds(30)
                 };
@@ -108,6 +105,18 @@ public static class AukariaAuthExtensions
     {
         string valor = configuration["Authentication:EmpresaIdPorDefecto"] ?? "11111111-1111-1111-1111-111111111111";
         return Guid.TryParse(valor, out Guid id) ? id : Guid.Parse("11111111-1111-1111-1111-111111111111");
+    }
+
+    public static Microsoft.IdentityModel.Tokens.SymmetricSecurityKey ObtenerClaveFirma(IConfiguration configuration)
+    {
+        string secret = configuration["Authentication:Jwt:Secret"]
+                        ?? "DevOnlySecret_NoUsarEnProduccion_1234567890";
+        byte[] bytes = System.Text.Encoding.UTF8.GetBytes(secret);
+        if (bytes.Length < 32)
+        {
+            bytes = System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(secret));
+        }
+        return new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(bytes);
     }
 }
 

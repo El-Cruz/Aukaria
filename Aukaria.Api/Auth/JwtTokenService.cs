@@ -7,15 +7,14 @@ namespace Aukaria.Api.Auth;
 
 public sealed class JwtTokenService
 {
-    private readonly string _secret;
+    private readonly Microsoft.IdentityModel.Tokens.SymmetricSecurityKey _clave;
     private readonly string _issuer;
     private readonly string _audience;
     private readonly TimeSpan _expiracion;
 
     public JwtTokenService(IConfiguration configuration)
     {
-        _secret = configuration["Authentication:Jwt:Secret"]
-                  ?? "DevOnlySecret_NoUsarEnProduccion_1234567890";
+        _clave = AukariaAuthExtensions.ObtenerClaveFirma(configuration);
         _issuer = configuration["Authentication:Jwt:Issuer"] ?? "Aukaria.Api";
         _audience = configuration["Authentication:Jwt:Audience"] ?? "Aukaria.Web";
         double dias = double.TryParse(configuration["Authentication:Jwt:DiasExpiracion"], out double d) ? d : 7;
@@ -32,8 +31,7 @@ public sealed class JwtTokenService
             new(AukariaAuthExtensions.ClaimEmpresaId, usuario.EmpresaId.ToString())
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
-        var credenciales = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var credenciales = new SigningCredentials(_clave, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
             issuer: _issuer,
