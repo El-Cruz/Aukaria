@@ -87,10 +87,12 @@ async function authRequest(path, options = {}) {
 }
 
 async function request(path, options = {}, tipoRespuesta = "json", timeoutMs = TIMEOUT_MS) {
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), timeoutMs)
+  const tieneTimeout = timeoutMs > 0
+  const controller = tieneTimeout ? new AbortController() : null
+  const timeout = tieneTimeout ? setTimeout(() => controller.abort(), timeoutMs) : null
 
-  const fetchOptions = { signal: controller.signal, ...conToken(options) }
+  const fetchOptions = { ...conToken(options) }
+  if (controller) fetchOptions.signal = controller.signal
 
   let response
   try {
@@ -103,7 +105,7 @@ async function request(path, options = {}, tipoRespuesta = "json", timeoutMs = T
       `No se pudo conectar con la API (${API_BASE}). Verifica que el backend esté corriendo.`,
     )
   } finally {
-    clearTimeout(timeout)
+    if (timeout) clearTimeout(timeout)
   }
 
   if (!response.ok) {
@@ -305,5 +307,5 @@ export const cerrarSesion = async () => {
 }
 
 export async function enviarReporteWord(analisisId) {
-  return request(`/envia-word/${analisisId}`, { method: "POST" })
+  return request(`/envia-word/${analisisId}`, { method: "POST" }, "json", 0)
 }
