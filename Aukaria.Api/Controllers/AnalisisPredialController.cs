@@ -22,10 +22,12 @@ public sealed class AnalisisPredialController : ControllerBase
     };
 
     private readonly IAnalisisPredialService _analisisService;
+    private readonly ILogger<AnalisisPredialController> _logger;
 
-    public AnalisisPredialController(IAnalisisPredialService analisisService)
+    public AnalisisPredialController(IAnalisisPredialService analisisService, ILogger<AnalisisPredialController> logger)
     {
         _analisisService = analisisService;
+        _logger = logger;
     }
 
     [HttpPost("pre-analisis")]
@@ -206,6 +208,7 @@ public sealed class AnalisisPredialController : ControllerBase
     public async Task<IActionResult> EnviarReporteWord(Guid id, CancellationToken cancellationToken = default)
     {
         string? email = User.FindFirstValue(ClaimTypes.Email);
+        _logger.LogInformation("Recibida solicitud de envío de reporte por correo. AnalisisId={AnalisisId}, Email={Email}", id, email);
         if (string.IsNullOrWhiteSpace(email))
         {
             return Unauthorized("No hay un correo asociado a la sesión.");

@@ -136,7 +136,15 @@ async function request(path, options = {}, tipoRespuesta = "json", timeoutMs = T
     throw new Error(message)
   }
 
-  return tipoRespuesta === "blob" ? response.blob() : response.json()
+  if (tipoRespuesta === "blob") return response.blob()
+
+  const texto = await response.text()
+  if (!texto) return null
+  try {
+    return JSON.parse(texto)
+  } catch {
+    return texto
+  }
 }
 
 export async function preAnalizarCtl(archivoPdf, empresaId = EMPRESA_ID) {
