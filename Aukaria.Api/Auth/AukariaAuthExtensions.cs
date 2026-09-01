@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Aukaria.Application.Interfaces;
 using Aukaria.Domain.Entities;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.AspNetCore.Authentication.OAuth;
@@ -10,6 +11,7 @@ namespace Aukaria.Api.Auth;
 public static class AukariaAuthExtensions
 {
     public const string SessionScheme = "Aukaria.Jwt";
+    public const string OAuthCookieScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     public const string ClaimEmpresaId = "EmpresaId";
 
     public static IServiceCollection AddAukariaAuth(this IServiceCollection services, IConfiguration configuration)
@@ -22,6 +24,16 @@ public static class AukariaAuthExtensions
         var microsoftClientSecret = configuration["Authentication:Microsoft:ClientSecret"] ?? string.Empty;
 
         var authenticationBuilder = services.AddAuthentication(SessionScheme)
+            .AddCookie(OAuthCookieScheme, cookie =>
+            {
+                cookie.Cookie.Name = "Aukaria.OAuth";
+                cookie.Cookie.SameSite = SameSiteMode.None;
+                cookie.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                cookie.Cookie.HttpOnly = true;
+                cookie.SlidingExpiration = true;
+                cookie.ExpireTimeSpan = TimeSpan.FromDays(7);
+                cookie.LoginPath = "/api/auth/login";
+            })
             .AddJwtBearer(SessionScheme, jwt =>
             {
                 jwt.RequireHttpsMetadata = false;
@@ -46,6 +58,7 @@ public static class AukariaAuthExtensions
                 google.ClientId = googleClientId;
                 google.ClientSecret = googleClientSecret;
                 google.CallbackPath = "/api/auth/signin-google";
+                google.SignInScheme = OAuthCookieScheme;
                 google.Events.OnCreatingTicket = ctx => CrearSesionDesdeProviderAsync(ctx, "google", configuration);
             });
         }
@@ -57,6 +70,7 @@ public static class AukariaAuthExtensions
                 microsoft.ClientId = microsoftClientId;
                 microsoft.ClientSecret = microsoftClientSecret;
                 microsoft.CallbackPath = "/api/auth/signin-microsoft";
+                microsoft.SignInScheme = OAuthCookieScheme;
                 microsoft.Events.OnCreatingTicket = ctx => CrearSesionDesdeProviderAsync(ctx, "microsoft", configuration);
             });
         }
