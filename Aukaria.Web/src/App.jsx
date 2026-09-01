@@ -135,6 +135,7 @@ function App() {
     obtenerUsuarioActual().then((dto) => {
       if (dto) {
         setUsuario(normalizarUsuario(dto))
+        setPaso("app")
       }
     })
   }, [])
