@@ -1,6 +1,7 @@
 using Aukaria.Application.Interfaces;
 using Aukaria.Application.Options;
 using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
@@ -53,19 +54,26 @@ public sealed class EmailService : IEmailService
 
     private async Task EnviarAsync(MimeMessage mensaje, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(_options.Host) || string.IsNullOrWhiteSpace(_options.FromEmail))
+        if (string.IsNullOrWhiteSpace(_options.Host))
         {
-            _logger.LogWarning("EmailService no configurado (falta host o from). No se envió el correo.");
-            return;
+            throw new InvalidOperationException("Email no configurado: falta Email__Host.");
+        }
+        if (string.IsNullOrWhiteSpace(_options.FromEmail))
+        {
+            throw new InvalidOperationException("Email no configurado: falta Email__FromEmail (remitente verificado en Brevo).");
+        }
+        if (string.IsNullOrWhiteSpace(_options.Username) || string.IsNullOrWhiteSpace(_options.Password))
+        {
+            throw new InvalidOperationException("Email no configurado: faltan Email__Username o Email__Password (SMTP key de Brevo).");
         }
 
         using var cliente = new SmtpClient();
-        await cliente.ConnectAsync(_options.Host, _options.Port, _options.UseSsl, cancellationToken);
+        var opcionesSsl = _options.Port == 465
+            ? SecureSocketOptions.SslOnConnect
+            : SecureSocketOptions.StartTlsWhenAvailable;
+        await cliente.ConnectAsync(_options.Host, _options.Port, opcionesSsl, cancellationToken);
 
-        if (!string.IsNullOrWhiteSpace(_options.Username))
-        {
-            await cliente.AuthenticateAsync(_options.Username, _options.Password, cancellationToken);
-        }
+        await cliente.AuthenticateAsync(_options.Username, _options.Password, cancellationToken);
 
         await cliente.SendAsync(mensaje, cancellationToken);
         await cliente.DisconnectAsync(true, cancellationToken);

@@ -220,6 +220,10 @@ public sealed class AnalisisPredialController : ControllerBase
         {
             return NotFound("El análisis predial especificado no fue encontrado.");
         }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     private (Guid empresaId, Guid usuarioId) ObtenerContexto(Guid empresaFallback, Guid usuarioFallback)
