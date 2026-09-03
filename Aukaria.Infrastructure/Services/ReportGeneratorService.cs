@@ -166,7 +166,7 @@ public sealed class ReportGeneratorService : IReportGeneratorService
         foreach (TradicionActoDto acto in r.TradicionActos)
         {
             string numAnotacion = string.IsNullOrWhiteSpace(acto.NumeroAnotacion)
-                ? Valor(acto.Anotacion, "—")
+                ? "—"
                 : acto.NumeroAnotacion;
 
             string fecha = NoVacio(acto.Fecha) ? acto.Fecha : Valor(acto.Anio);
