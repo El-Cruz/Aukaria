@@ -19,10 +19,10 @@ public sealed class EmailService : IEmailService
         _logger = logger;
     }
 
-    public async Task EnviarOtpAsync(string destinatario, string codigoOtp, CancellationToken cancellationToken = default)
+    public async Task<bool> EnviarOtpAsync(string destinatario, string codigoOtp, CancellationToken cancellationToken = default)
     {
         var mensaje = new MimeMessage();
-        mensaje.From.Add(new MailboxAddress(_options.FromName, _options.FromEmail));
+        mensaje.From.Add(new MailboxAddress(_options.FromName, Remitente()));
         mensaje.To.Add(MailboxAddress.Parse(destinatario));
         mensaje.Subject = "Aukaria — Código de verificación";
 
@@ -31,13 +31,13 @@ public sealed class EmailService : IEmailService
             Text = $"Tu código de verificación de Aukaria es: {codigoOtp}\n\nEste código expira en 5 minutos."
         };
 
-        await EnviarAsync(mensaje, cancellationToken);
+        return await EnviarAsync(mensaje, destinatario, cancellationToken);
     }
 
-    public async Task EnviarReporteAsync(string destinatario, string nombreArchivo, byte[] adjunto, string fmi, CancellationToken cancellationToken = default)
+    public async Task<bool> EnviarReporteAsync(string destinatario, string nombreArchivo, byte[] adjunto, string fmi, CancellationToken cancellationToken = default)
     {
         var mensaje = new MimeMessage();
-        mensaje.From.Add(new MailboxAddress(_options.FromName, _options.FromEmail));
+        mensaje.From.Add(new MailboxAddress(_options.FromName, Remitente()));
         mensaje.To.Add(MailboxAddress.Parse(destinatario));
         mensaje.Subject = $"Informe Jurídico Predial — FMI {fmi}";
 
@@ -49,42 +49,60 @@ public sealed class EmailService : IEmailService
             FileName = nombreArchivo
         };
 
-        await EnviarAsync(mensaje, cancellationToken);
+        return await EnviarAsync(mensaje, destinatario, cancellationToken);
     }
 
-    private async Task EnviarAsync(MimeMessage mensaje, CancellationToken cancellationToken)
+    private async Task<bool> EnviarAsync(MimeMessage mensaje, string destinatario, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(_options.Host))
+        string host = _options.HostEfectivo;
+        string usuario = _options.UsuarioEfectivo;
+        string clave = _options.ClaveEfectiva;
+        int puerto = _options.Port > 0 ? _options.Port : _options.SmtpPort;
+
+        if (string.IsNullOrWhiteSpace(host))
         {
-            throw new InvalidOperationException("Email no configurado: falta Email__Host.");
+            _logger.LogWarning("[EMAIL] Credenciales SMTP no configuradas. Omitiendo envío a {Destinatario} (falta SMTP_HOST / Email:Host).", destinatario);
+            return false;
         }
-        if (string.IsNullOrWhiteSpace(_options.FromEmail))
+        if (string.IsNullOrWhiteSpace(Remitente()))
         {
-            throw new InvalidOperationException("Email no configurado: falta Email__FromEmail (remitente verificado en Brevo).");
+            _logger.LogWarning("[EMAIL] Credenciales SMTP no configuradas. Omitiendo envío a {Destinatario} (falta EMAIL_FROM / Email:FromEmail).", destinatario);
+            return false;
         }
-        if (string.IsNullOrWhiteSpace(_options.Username) || string.IsNullOrWhiteSpace(_options.Password))
+        if (string.IsNullOrWhiteSpace(usuario) || string.IsNullOrWhiteSpace(clave))
         {
-            throw new InvalidOperationException("Email no configurado: faltan Email__Username o Email__Password (SMTP key de Brevo).");
+            _logger.LogWarning("[EMAIL] Credenciales SMTP no configuradas. Omitiendo envío a {Destinatario} (falta SMTP_USER o SMTP_PASS).", destinatario);
+            return false;
         }
 
         using var cliente = new SmtpClient();
 
         try
         {
-            var opcionesSsl = _options.Port == 465
+            var opcionesSsl = puerto == 465
                 ? SecureSocketOptions.SslOnConnect
-                : SecureSocketOptions.StartTlsWhenAvailable;
-            await cliente.ConnectAsync(_options.Host, _options.Port, opcionesSsl, cancellationToken);
+                : SecureSocketOptions.StartTls;
 
-            await cliente.AuthenticateAsync(_options.Username, _options.Password, cancellationToken);
-
+            await cliente.ConnectAsync(host, puerto, opcionesSsl, cancellationToken);
+            await cliente.AuthenticateAsync(usuario, clave, cancellationToken);
             await cliente.SendAsync(mensaje, cancellationToken);
             await cliente.DisconnectAsync(true, cancellationToken);
+
+            _logger.LogInformation("[EMAIL] Correo enviado correctamente a {Destinatario} vía {Host}:{Puerto}", destinatario, host, puerto);
+            return true;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            _logger.LogWarning("[EMAIL] Envío a {Destinatario} cancelado por el cliente.", destinatario);
+            return false;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error enviando correo a {Destinatario}. Host: {Host}:{Port}", mensaje.To, _options.Host, _options.Port);
-            throw;
+            // No-bloqueante: un fallo de email nunca debe romper la petición HTTP principal.
+            _logger.LogError(ex, "[EMAIL ERROR] Falló el envío a {Destinatario}: {Mensaje}", destinatario, ex.Message);
+            return false;
         }
     }
+
+    private string Remitente() => _options.RemitenteEfectivo;
 }

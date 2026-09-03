@@ -5,6 +5,8 @@ import LandingPage from "./components/LandingPage"
 import MainAppView from "./components/MainAppView"
 import LoginModal from "./components/LoginModal"
 import ProcessingOverlay from "./components/ProcessingOverlay"
+import FloatingAnalysisTracker from "./components/FloatingAnalysisTracker"
+import CompletionToast from "./components/CompletionToast"
 import TopographyBackground from "./components/TopographyBackground"
 import {
   descargarReporteWord,
@@ -125,6 +127,32 @@ const tieneTokenInicial = (() => {
   try { return !!localStorage.getItem("aukaria_token") } catch { return false }
 })()
 
+function reproducirTonoCompletado() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext
+    if (!AudioCtx) return
+    const ctx = new AudioCtx()
+    const now = ctx.currentTime
+    const notas = [660, 880] // Mi5 -> La5: pequeño arpegio de éxito
+    notas.forEach((frec, i) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = "sine"
+      osc.frequency.value = frec
+      const t = now + i * 0.18
+      gain.gain.setValueAtTime(0.0001, t)
+      gain.gain.exponentialRampToValueAtTime(0.18, t + 0.03)
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.35)
+      osc.connect(gain).connect(ctx.destination)
+      osc.start(t)
+      osc.stop(t + 0.4)
+    })
+    window.setTimeout(() => ctx.close().catch(() => {}), 1200)
+  } catch {
+    /* ignora: el tono es opcional */
+  }
+}
+
 function App() {
   const [paso, setPaso] = useState(tieneTokenInicial ? "cargando" : "landing")
   const [usuario, setUsuario] = useState(null)
@@ -134,8 +162,11 @@ function App() {
   const [historial, setHistorial] = useState([])
   const [progresoAnalisis, setProgresoAnalisis] = useState(null)
   const [errorMsg, setErrorMsg] = useState("")
+  const [enSegundoPlano, setEnSegundoPlano] = useState(false)
+  const [notificacionLista, setNotificacionLista] = useState(null)
   const errorTimerRef = useRef(null)
   const pendienteRef = useRef(null)
+  const segundoPlanoRef = useRef(false)
 
   useEffect(() => {
     obtenerUsuarioActual().then((dto) => {
@@ -154,9 +185,11 @@ function App() {
     errorTimerRef.current = window.setTimeout(() => setErrorMsg(""), 6000)
   }
 
-  const runAnalysis = async (file, meta) => {
+  const runAnalysis = async (file, meta, inBackground = false) => {
     setErrorMsg("")
     setProgresoAnalisis(null)
+    segundoPlanoRef.current = inBackground
+    setEnSegundoPlano(inBackground)
     setIsProcessing(true)
     try {
       const res = await procesarAnalisisCtlStreaming({
@@ -182,21 +215,48 @@ function App() {
       }))
       setHistorial((prev) => [res, ...prev.filter((h) => h.Id !== res.Id)].slice(0, 6))
       setIsProcessing(false)
-      setPaso("dashboard")
+
+      const corriendoEnSegundoPlano = segundoPlanoRef.current
+      segundoPlanoRef.current = false
+      setEnSegundoPlano(false)
+
+      if (corriendoEnSegundoPlano) {
+        setNotificacionLista(res)
+        reproducirTonoCompletado()
+      } else {
+        setPaso("dashboard")
+      }
     } catch (err) {
       setProgresoAnalisis(null)
       setIsProcessing(false)
+      segundoPlanoRef.current = false
+      setEnSegundoPlano(false)
       notificar(err.message || "Error al procesar el análisis jurídico.")
     }
   }
 
-  const handleAnalyze = (file, meta) => {
+  const handleAnalyze = (file, meta, inBackground = false) => {
     if (!usuario) {
-      pendienteRef.current = { file, meta }
+      pendienteRef.current = { file, meta, inBackground }
       setPaso("login")
       return
     }
-    runAnalysis(file, meta)
+    runAnalysis(file, meta, inBackground)
+  }
+
+  const pasarASegundoPlano = () => {
+    segundoPlanoRef.current = true
+    setEnSegundoPlano(true)
+  }
+
+  const volverAMaximizar = () => {
+    segundoPlanoRef.current = false
+    setEnSegundoPlano(false)
+  }
+
+  const verDictamenEnSegundoPlano = () => {
+    setNotificacionLista(null)
+    setPaso("dashboard")
   }
 
   const handleLogin = (data) => {
@@ -204,7 +264,7 @@ function App() {
     const pendiente = pendienteRef.current
     pendienteRef.current = null
     if (pendiente) {
-      runAnalysis(pendiente.file, pendiente.meta)
+      runAnalysis(pendiente.file, pendiente.meta, pendiente.inBackground)
     } else {
       setPaso("app")
     }
@@ -233,6 +293,9 @@ function App() {
     setUsuario(null)
     pendienteRef.current = null
     setPreAnalisisData(null)
+    setEnSegundoPlano(false)
+    segundoPlanoRef.current = false
+    setNotificacionLista(null)
     setPaso("landing")
   }
 
@@ -312,8 +375,33 @@ function App() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {isProcessing && (
-          <ProcessingOverlay onComplete={() => {}} autoCompletar={false} progreso={progresoAnalisis} />
+        {isProcessing && !enSegundoPlano && (
+          <ProcessingOverlay
+            onComplete={() => {}}
+            autoCompletar={false}
+            progreso={progresoAnalisis}
+            onRunInBackground={pasarASegundoPlano}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isProcessing && enSegundoPlano && (
+          <FloatingAnalysisTracker progreso={progresoAnalisis} onMaximize={volverAMaximizar} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {notificacionLista && (
+          <CompletionToast
+            fmi={
+              notificacionLista.MatriculaFMI ||
+              notificacionLista.Resultado?.MatriculaFMI ||
+              preAnalisisData?.matricula
+            }
+            onVerDictamen={verDictamenEnSegundoPlano}
+            onClose={() => setNotificacionLista(null)}
+          />
         )}
       </AnimatePresence>
 

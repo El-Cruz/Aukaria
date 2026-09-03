@@ -123,7 +123,7 @@ function StepRow({ label, state, reduce }) {
   )
 }
 
-export default function ProcessingOverlay({ onComplete, autoCompletar = true, progreso = null }) {
+export default function ProcessingOverlay({ onComplete, autoCompletar = true, progreso = null, onRunInBackground = null }) {
   const reduce = useReducedMotion()
   const [done, setDone] = useState(1)
   const [msgTick, setMsgTick] = useState(0)
@@ -234,6 +234,29 @@ export default function ProcessingOverlay({ onComplete, autoCompletar = true, pr
             return <StepRow key={s.label} label={s.label} state={state} reduce={reduce} />
           })}
         </ul>
+
+        {onRunInBackground && (
+          <motion.button
+            type="button"
+            onClick={onRunInBackground}
+            whileTap={{ scale: 0.98 }}
+            transition={spring}
+            className="group mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-black/10 bg-white/60 px-4 py-2.5 text-[13px] font-semibold text-neutral-600 backdrop-blur-xl transition-colors duration-150 hover:border-black/20 hover:bg-white hover:text-black"
+          >
+            Continuar en segundo plano
+            <svg
+              viewBox="0 0 24 24"
+              className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M7 17 17 7M9 7h8v8" />
+            </svg>
+          </motion.button>
+        )}
       </motion.div>
     </motion.div>
   )

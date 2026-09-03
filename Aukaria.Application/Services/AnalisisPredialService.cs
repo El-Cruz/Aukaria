@@ -194,8 +194,7 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
 
         ReporteWordDto reporte = await DescargarReporteWordAsync(analisisId, cancellationToken);
         string fmi = analisis.MatriculaFMI;
-        await _emailService.EnviarReporteAsync(destinatario, reporte.NombreArchivo, reporte.Archivo, fmi, cancellationToken);
-    }
+        await _emailService.EnviarReporteAsync(destinatario, reporte.NombreArchivo, reporte.Archivo, fmi, cancellationToken);    }
 
     private static string ConstruirNombreArchivo(string matriculaFmi, Guid analisisId)
     {

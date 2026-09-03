@@ -31,8 +31,7 @@ public sealed class AuthService : IAuthService
         string codigo = GenerarCodigoOtp();
 
         _otpStore.Guardar(email, codigo, ExpiracionOtp);
-        await _emailService.EnviarOtpAsync(email, codigo, cancellationToken);
-    }
+        await _emailService.EnviarOtpAsync(email, codigo, cancellationToken);    }
 
     public async Task<UsuarioSesionDto> VerificarOtpAsync(VerificarOtpRequestDto request, CancellationToken cancellationToken = default)
     {
