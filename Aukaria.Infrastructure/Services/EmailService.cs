@@ -68,14 +68,23 @@ public sealed class EmailService : IEmailService
         }
 
         using var cliente = new SmtpClient();
-        var opcionesSsl = _options.Port == 465
-            ? SecureSocketOptions.SslOnConnect
-            : SecureSocketOptions.StartTlsWhenAvailable;
-        await cliente.ConnectAsync(_options.Host, _options.Port, opcionesSsl, cancellationToken);
 
-        await cliente.AuthenticateAsync(_options.Username, _options.Password, cancellationToken);
+        try
+        {
+            var opcionesSsl = _options.Port == 465
+                ? SecureSocketOptions.SslOnConnect
+                : SecureSocketOptions.StartTlsWhenAvailable;
+            await cliente.ConnectAsync(_options.Host, _options.Port, opcionesSsl, cancellationToken);
 
-        await cliente.SendAsync(mensaje, cancellationToken);
-        await cliente.DisconnectAsync(true, cancellationToken);
+            await cliente.AuthenticateAsync(_options.Username, _options.Password, cancellationToken);
+
+            await cliente.SendAsync(mensaje, cancellationToken);
+            await cliente.DisconnectAsync(true, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error enviando correo a {Destinatario}. Host: {Host}:{Port}", mensaje.To, _options.Host, _options.Port);
+            throw;
+        }
     }
 }

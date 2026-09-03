@@ -79,6 +79,8 @@ async function authRequest(path, options = {}) {
       (typeof data === "string" && data) ||
       data?.mensaje ||
       data?.message ||
+      data?.detalle ||
+      data?.error ||
       `[HTTP ${response.status}] Error de autenticación.`
     throw new Error(mensaje)
   }

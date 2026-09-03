@@ -119,8 +119,14 @@ function normalizarUsuario(dto) {
   }
 }
 
+const tieneTokenInicial = (() => {
+  const match = window.location.search?.match(/[?&]token=([^&]+)/)
+  if (match) return true
+  try { return !!localStorage.getItem("aukaria_token") } catch { return false }
+})()
+
 function App() {
-  const [paso, setPaso] = useState("landing")
+  const [paso, setPaso] = useState(tieneTokenInicial ? "cargando" : "landing")
   const [usuario, setUsuario] = useState(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [resultado, setResultado] = useState(null)
@@ -136,6 +142,8 @@ function App() {
       if (dto) {
         setUsuario(normalizarUsuario(dto))
         setPaso("app")
+      } else {
+        setPaso("landing")
       }
     })
   }, [])
@@ -258,7 +266,12 @@ function App() {
     <div className="relative min-h-screen bg-neutral-100/80 text-neutral-900 antialiased selection:bg-[var(--brand-g1)] selection:text-white">
       <TopographyBackground />
       <AnimatePresence mode="wait">
-        {paso === "landing" ? (
+        {paso === "cargando" && (
+          <motion.div key="cargando" initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={fade} className="relative z-10 flex min-h-screen items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-300 border-t-[var(--brand-g1)]" />
+          </motion.div>
+        )}
+        {paso === "landing" && (
           <motion.div
             key="landing"
             initial={{ opacity: 0 }}
@@ -269,7 +282,8 @@ function App() {
           >
             <LandingPage onAnalyze={handleAnalyze} onLogin={() => setPaso("login")} />
           </motion.div>
-        ) : (
+        )}
+        {paso !== "cargando" && paso !== "landing" && (
           <motion.div key="app" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={fade} className="relative z-10">
             <Navbar usuario={usuario} onLogout={handleLogout} />
             <main className="w-full pb-24 pt-6 md:pt-8">
