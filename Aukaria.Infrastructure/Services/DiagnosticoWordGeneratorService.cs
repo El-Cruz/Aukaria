@@ -13,33 +13,39 @@ namespace Aukaria.Infrastructure.Services;
 /// </summary>
 public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorService
 {
-    // --- Tipografía y paleta institucional FROST MONO (cero azul) ---
+    // --- Tipografía y paleta institucional AUKARIA (verde esmeralda / grafito) ---
     private const string FuenteArial = "Arial";
 
-    private const string Carbon = "111827";      // Títulos principales y encabezados
-    private const string Pizarra = "1E293B";     // Tono alterno para encabezados
+    private const string VerdeBosque = "0F3D2E"; // Encabezados de tablas y título principal
+    private const string VerdeBosqueAlt = "14532D";
     private const string Blanco = "FFFFFF";      // Texto sobre encabezados
-    private const string GrisBorde = "D1D5DB";   // Bordes de tablas
-    private const string GrisBordeSuave = "E2E8F0";
-    private const string GrisHielo = "F8FAFC";   // Zebra striping (filas alternas)
-    private const string GrisCuerpo = "333333";  // Texto de cuerpo
+    private const string BordeTabla = "CBD5E1";  // Bordes de tablas (verde grisáceo sutil)
+    private const string MentaFondo = "F0FDF4";  // Zebra striping (filas alternadas)
+    private const string Carbono = "1F2937";     // Texto de cuerpo
     private const string GrisMuted = "6B7280";   // Subtítulo / identificador
 
-    // --- Semáforos de viabilidad ---
+    // --- Semáforos de viabilidad (dictamen categórico) ---
     private const string VerdeEsmeralda = "059669";
+    private const string VerdeFondo = "ECFDF5";
+    private const string VerdeBorde = "10B981";
+
     private const string Ambar = "D97706";
+    private const string AmbarFondo = "FFFBEB";
+    private const string AmbarBorde = "F59E0B";
+
     private const string RojoCarmesi = "DC2626";
+    private const string RojoFondo = "FEF2F2";
+    private const string RojoBorde = "EF4444";
 
     // --- Textos institucionales obligatorios ---
     private const string ObservacionAmbientalRuap =
-        "Verificación Preventiva en RUNAP: Se recomienda validar la georreferenciación del predio en el portal oficial del " +
-        "Registro Único Nacional de Áreas Protegidas (RUNAP), para verificar que no coincida con zonas de exclusión o " +
-        "reservas de conservación estricta.";
+        "Verificación en RUNAP: Se recomienda verificar la ubicación geográfica del predio en el portal oficial del " +
+        "Registro Único Nacional de Áreas Protegidas (RUNAP) para constatar la inexistencia de afectaciones en zonas " +
+        "de reserva o áreas protegidas.";
 
     private const string ClausulaExclusionResponsabilidad =
-        "Alcance del Diagnóstico: El presente informe se fundamenta exclusivamente en la información jurídica y registral " +
-        "aportada. Aukaria y el equipo consultor no realizan auditorías de antecedentes penales, judiciales ni listas " +
-        "restrictivas (OFAC), siendo la debida diligencia responsabilidad exclusiva de las partes intervinientes en la negociación.";
+        "Aviso Legal: El presente diagnóstico se limita a la revisión documental y registral aportada. Aukaria no " +
+        "realiza consultas en listas restrictivas (OFAC) ni antecedentes judiciales.";
 
     public Task<byte[]> GenerarDiagnosticoWordAsync(
         AnalisisResultadoJsonDto resultadoJson,
@@ -83,8 +89,8 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
         string fmi = Valor(r.MatriculaFMI, "SIN FMI").ToUpperInvariant();
 
         body.Append(CrearTituloMayuscula("ANEXO DE TRADICIÓN Y TRACTO SUCESIVO", 14));
-        body.Append(CrearParrafoCentral("AUKARIA - PLATAFORMA DE AUDITORÍA PREDIAL Y ESTUDIO DE TÍTULOS", 9, GrisMuted, negrita: true));
-        body.Append(CrearParrafoCentral($"{predio}  |  FMI {fmi}", 10, Carbon, negrita: true));
+        body.Append(CrearParrafoCentral("AUKARIA - AUDITORÍA PREDIAL Y ESTUDIO DE TÍTULOS", 9, VerdeBosque, negrita: true));
+        body.Append(CrearParrafoCentral($"{predio}  |  FMI {fmi}", 10, VerdeBosque, negrita: true));
         body.Append(CrearParrafoCentral("Anexo del Diagnóstico Jurídico Catastral · Instrumento de soporte", 9, GrisMuted, negrita: false));
         body.Append(CrearSeparadorLinea());
     }
@@ -220,8 +226,8 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
         string fmi = Valor(r.MatriculaFMI, "SIN FMI").ToUpperInvariant();
 
         body.Append(CrearTituloMayuscula("DIAGNÓSTICO JURÍDICO CATASTRAL", 14));
-        body.Append(CrearParrafoCentral("AUKARIA - PLATAFORMA DE AUDITORÍA PREDIAL Y ESTUDIO DE TÍTULOS", 9, GrisMuted, negrita: true));
-        body.Append(CrearParrafoCentral($"{predio}  |  FMI {fmi}", 10, Carbon, negrita: true));
+        body.Append(CrearParrafoCentral("AUKARIA - AUDITORÍA PREDIAL Y ESTUDIO DE TÍTULOS", 9, VerdeBosque, negrita: true));
+        body.Append(CrearParrafoCentral($"{predio}  |  FMI {fmi}", 10, VerdeBosque, negrita: false));
         body.Append(CrearSeparadorLinea());
     }
 
@@ -232,18 +238,50 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
     {
         CrearTituloSeccion(body, "1. IDENTIFICACIÓN DEL PREDIO");
 
-        var filas = new List<string[]>
-        {
-            new[] { "ID Vector / Predio", Valor(r.NombrePredio) },
-            new[] { "No. Folio de Matrícula Inmobiliaria", Valor(r.MatriculaFMI) },
-            new[] { "Cédula Catastral", Valor(r.CedulaCatastral) },
-            new[] { "FMI Matriz", Valor(r.FolioMatriz) },
-            new[] { "FMI Segregada", Valor(r.FoliosDerivados) },
-            new[] { "Nombre Predio (FMI)", Valor(r.NombrePredio) },
-            new[] { "Nombre Predio (Campo / Base)", Valor(string.Empty) }
-        };
+        var tabla = new Table();
+        tabla.Append(new TableProperties(
+            new TableWidth { Width = "5000", Type = TableWidthUnitValues.Pct },
+            new TableJustification { Val = TableRowAlignmentValues.Center },
+            CrearBordesTablas()));
 
-        body.Append(CrearTablaBase(new[] { "CAMPO", "VALOR" }, filas));
+        var grid = new TableGrid();
+        grid.Append(new GridColumn { Width = "2200" }); // etiqueta
+        grid.Append(new GridColumn { Width = "3000" }); // valor 1
+        grid.Append(new GridColumn { Width = "2200" }); // etiqueta 2
+        grid.Append(new GridColumn { Width = "3000" }); // valor 2
+        tabla.Append(grid);
+
+        // Fila 1: [ID Predio / Aukaria] | [No. Folio Matrícula]
+        var fila1 = new TableRow();
+        fila1.Append(CrearCeldaDato("ID Predio / Aukaria", negrita: true, fondoHex: MentaFondo));
+        fila1.Append(CrearCeldaDato(Valor(r.NombrePredio, "No reportado")));
+        fila1.Append(CrearCeldaDato("No. Folio Matrícula", negrita: true, fondoHex: MentaFondo));
+        fila1.Append(CrearCeldaDato(Valor(r.MatriculaFMI, "No reportado")));
+        tabla.Append(fila1);
+
+        // Fila 2: [Cédula Catastral] | [FMI Matriz]
+        var fila2 = new TableRow();
+        fila2.Append(CrearCeldaDato("Cédula Catastral", negrita: true, fondoHex: MentaFondo));
+        fila2.Append(CrearCeldaDato(Valor(r.CedulaCatastral, "No reportado")));
+        fila2.Append(CrearCeldaDato("FMI Matriz", negrita: true, fondoHex: MentaFondo));
+        fila2.Append(CrearCeldaDato(Valor(r.FolioMatriz, "No reportado")));
+        tabla.Append(fila2);
+
+        // Fila 3: [FMI Segregada] (GridSpan 3)
+        var fila3 = new TableRow();
+        fila3.Append(CrearCeldaDato("FMI Segregada", negrita: true, fondoHex: MentaFondo));
+        fila3.Append(CrearCeldaDato(Valor(r.FoliosDerivados, "No reportado"), gridSpan: 3));
+        tabla.Append(fila3);
+
+        // Fila 4: [Nombre Predio (FMI)] | [Nombre Predio (Campo)]
+        var fila4 = new TableRow();
+        fila4.Append(CrearCeldaDato("Nombre Predio (FMI)", negrita: true, fondoHex: MentaFondo));
+        fila4.Append(CrearCeldaDato(Valor(r.NombrePredio, "No reportado")));
+        fila4.Append(CrearCeldaDato("Nombre Predio (Campo)", negrita: true, fondoHex: MentaFondo));
+        fila4.Append(CrearCeldaDato("No reportado"));
+        tabla.Append(fila4);
+
+        body.Append(tabla);
         body.Append(CrearParrafoSeparador());
     }
 
@@ -398,32 +436,58 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
 
     private static void CrearBadgeViabilidad(Body body, string viabilidad)
     {
-        var (etiqueta, color) = ResolverViabilidad(viabilidad);
+        var (etiqueta, color, fondo, borde) = ResolverViabilidad(viabilidad);
+
+        var tabla = new Table();
+        tabla.Append(new TableProperties(
+            new TableWidth { Width = "5000", Type = TableWidthUnitValues.Pct },
+            new TableJustification { Val = TableRowAlignmentValues.Center },
+            new TableBorders(
+                new TopBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 6, Color = borde },
+                new LeftBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 6, Color = borde },
+                new BottomBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 6, Color = borde },
+                new RightBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 6, Color = borde })));
+
+        var grid = new TableGrid();
+        grid.Append(new GridColumn { Width = "5000" });
+        tabla.Append(grid);
+
+        var fila = new TableRow();
+        var celda = new TableCell();
+        var propiedades = new TableCellProperties();
+        propiedades.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = fondo });
+        propiedades.Append(CrearMargenCelda());
+        celda.Append(propiedades);
 
         var parrafo = new Paragraph(
             new ParagraphProperties(
-                new SpacingBetweenLines { Before = "120", After = "120", Line = "276", LineRule = LineSpacingRuleValues.Auto },
-                new Justification { Val = JustificationValues.Both }));
-        parrafo.Append(CrearRun("VIABILIDAD: ", 11, Carbon, negrita: true));
+                new SpacingBetweenLines { Before = "60", After = "60" },
+                new Justification { Val = JustificationValues.Center }));
+        parrafo.Append(CrearRun("DICTAMEN CATASTRAL: ", 11, Carbono, negrita: true));
         parrafo.Append(CrearRun(etiqueta, 11, color, negrita: true));
-        body.Append(parrafo);
+        celda.Append(parrafo);
+        fila.Append(celda);
+        tabla.Append(fila);
+
+        body.Append(tabla);
+        body.Append(CrearParrafoSeparador());
     }
 
-    private static (string Etiqueta, string Color) ResolverViabilidad(string viabilidad)
+    private static (string Etiqueta, string Color, string Fondo, string Borde) ResolverViabilidad(string viabilidad)
     {
         string normalizado = (viabilidad ?? string.Empty).ToLowerInvariant();
 
         if (normalizado.Contains("viable"))
         {
-            return ("Viable", VerdeEsmeralda);
+            return ("Viable", VerdeEsmeralda, VerdeFondo, VerdeBorde);
         }
 
         if (normalizado.Contains("critic") || normalizado.Contains("no viable") || normalizado.Contains("no-viable"))
         {
-            return ("No Viable", RojoCarmesi);
+            return ("No Viable", RojoCarmesi, RojoFondo, RojoBorde);
         }
 
-        return ("Viable Condicionado", Ambar);
+        return ("Viable Condicionado", Ambar, AmbarFondo, AmbarBorde);
     }
 
     // =====================================================================
@@ -511,13 +575,7 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
         tabla.Append(new TableProperties(
             new TableWidth { Width = "5000", Type = TableWidthUnitValues.Pct },
             new TableJustification { Val = TableRowAlignmentValues.Center },
-            new TableBorders(
-                new TopBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = GrisBorde },
-                new LeftBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = GrisBorde },
-                new BottomBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = GrisBorde },
-                new RightBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = GrisBorde },
-                new InsideHorizontalBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = GrisBorde },
-                new InsideVerticalBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = GrisBorde })));
+            CrearBordesTablas()));
 
         var grid = new TableGrid();
         for (int columna = 0; columna < encabezados.Length; columna++)
@@ -534,7 +592,7 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
         var filaEncabezado = new TableRow(new TableRowProperties(new TableHeader()));
         for (int columna = 0; columna < encabezados.Length; columna++)
         {
-            filaEncabezado.Append(CrearCeldaEncabezado(encabezados[columna]));
+            filaEncabezado.Append(CrearEncabezadoVerde(encabezados[columna]));
         }
         tabla.Append(filaEncabezado);
 
@@ -544,7 +602,7 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
             bool zebra = i % 2 == 1;
             foreach (string valor in filas[i])
             {
-                fila.Append(CrearCelda(valor, zebra));
+                fila.Append(CrearCeldaDato(valor, zebra: zebra));
             }
             tabla.Append(fila);
         }
@@ -560,13 +618,7 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
         tabla.Append(new TableProperties(
             new TableWidth { Width = "5000", Type = TableWidthUnitValues.Pct },
             new TableJustification { Val = TableRowAlignmentValues.Center },
-            new TableBorders(
-                new TopBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = GrisBorde },
-                new LeftBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = GrisBorde },
-                new BottomBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = GrisBorde },
-                new RightBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = GrisBorde },
-                new InsideHorizontalBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = GrisBorde },
-                new InsideVerticalBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = GrisBorde })));
+            CrearBordesTablas()));
 
         var grid = new TableGrid();
         for (int columna = 0; columna < 3; columna++)
@@ -578,7 +630,7 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
         var filaEncabezado = new TableRow(new TableRowProperties(new TableHeader()));
         foreach (string encabezado in encabezados)
         {
-            filaEncabezado.Append(CrearCeldaEncabezado(encabezado));
+            filaEncabezado.Append(CrearEncabezadoVerde(encabezado));
         }
         tabla.Append(filaEncabezado);
 
@@ -595,11 +647,24 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
         return tabla;
     }
 
-    private static TableCell CrearCeldaEncabezado(string texto)
+    /// <summary>Crea la colección de bordes verdes grisáceos (single, sz 4) para tablas.</summary>
+    private static TableBorders CrearBordesTablas()
+    {
+        return new TableBorders(
+            new TopBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = BordeTabla },
+            new LeftBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = BordeTabla },
+            new BottomBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = BordeTabla },
+            new RightBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = BordeTabla },
+            new InsideHorizontalBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = BordeTabla },
+            new InsideVerticalBorder { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 4, Color = BordeTabla });
+    }
+
+    /// <summary>Crea una celda de encabezado con fondo verde bosque y texto blanco en negrita.</summary>
+    private static TableCell CrearEncabezadoVerde(string texto)
     {
         var celda = new TableCell();
         var propiedades = new TableCellProperties();
-        propiedades.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = Carbon });
+        propiedades.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = VerdeBosque });
         propiedades.Append(CrearMargenCelda());
 
         celda.Append(propiedades);
@@ -607,19 +672,33 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
         return celda;
     }
 
-    private static TableCell CrearCelda(string texto, bool zebra)
+    /// <summary>
+    /// Crea una celda de dato. Aplica grilla `gridSpan` y fondo `fondoHex` cuando se indican;
+    /// de lo contrario usa el zebra striping menta.
+    /// </summary>
+    private static TableCell CrearCeldaDato(
+        string texto,
+        bool negrita = false,
+        int gridSpan = 1,
+        string? fondoHex = null,
+        bool zebra = false)
     {
         var celda = new TableCell();
         var propiedades = new TableCellProperties();
 
-        if (zebra)
+        string? relleno = fondoHex ?? (zebra ? MentaFondo : null);
+        if (relleno != null)
         {
-            propiedades.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = GrisHielo });
+            propiedades.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = relleno });
+        }
+        if (gridSpan > 1)
+        {
+            propiedades.Append(new GridSpan { Val = gridSpan });
         }
         propiedades.Append(CrearMargenCelda());
 
         celda.Append(propiedades);
-        celda.Append(CrearParrafoCelda(texto, 10, GrisCuerpo, negrita: false));
+        celda.Append(CrearParrafoCelda(texto, 10, Carbono, negrita));
         return celda;
     }
 
@@ -632,7 +711,7 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
 
         foreach (string linea in texto.Split('\n'))
         {
-            celda.Append(CrearParrafoCentrado(linea, 10, GrisCuerpo, negrita: true));
+            celda.Append(CrearParrafoCentrado(linea, 10, Carbono, negrita: true));
         }
         return celda;
     }
@@ -655,7 +734,7 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
             new ParagraphProperties(
                 new SpacingBetweenLines { Before = "0", After = "80" },
                 new Justification { Val = JustificationValues.Center }));
-        parrafo.Append(CrearRun(texto, tamanoPt, Carbon, negrita: true));
+        parrafo.Append(CrearRun(texto, tamanoPt, VerdeBosque, negrita: true));
         return parrafo;
     }
 
@@ -685,7 +764,7 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
             new ParagraphProperties(
                 new KeepNext(),
                 new SpacingBetweenLines { Before = "360", After = "140" }));
-        parrafo.Append(CrearRun(titulo, 12, Carbon, negrita: true));
+        parrafo.Append(CrearRun(titulo, 12, VerdeBosque, negrita: true));
         body.Append(parrafo);
     }
 
@@ -695,7 +774,7 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
             new ParagraphProperties(
                 new KeepNext(),
                 new SpacingBetweenLines { Before = "160", After = "120" }));
-        parrafo.Append(CrearRun(texto, 11, Pizarra, negrita: true));
+        parrafo.Append(CrearRun(texto, 11, VerdeBosque, negrita: true));
         body.Append(parrafo);
     }
 
@@ -703,9 +782,9 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
     {
         var parrafo = new Paragraph(
             new ParagraphProperties(
-                new SpacingBetweenLines { Before = "0", After = "120", Line = "276", LineRule = LineSpacingRuleValues.Auto },
+                new SpacingBetweenLines { Before = "0", After = "80", Line = "276", LineRule = LineSpacingRuleValues.Auto },
                 new Justification { Val = JustificationValues.Both }));
-        parrafo.Append(CrearRun(texto, 10, GrisCuerpo, negrita));
+        parrafo.Append(CrearRun(texto, 10, Carbono, negrita));
         body.Append(parrafo);
     }
 
@@ -713,11 +792,11 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
     {
         var parrafo = new Paragraph(
             new ParagraphProperties(
-                new SpacingBetweenLines { Before = "0", After = "120", Line = "276", LineRule = LineSpacingRuleValues.Auto },
+                new SpacingBetweenLines { Before = "0", After = "80", Line = "276", LineRule = LineSpacingRuleValues.Auto },
                 new Indentation { Left = "360" },
                 new Justification { Val = JustificationValues.Both }));
-        parrafo.Append(CrearRun("• ", 10, GrisCuerpo, negrita: true));
-        parrafo.Append(CrearRun(NormalizarSaltoLinea(texto), 10, GrisCuerpo, negrita: false));
+        parrafo.Append(CrearRun("• ", 10, Carbono, negrita: true));
+        parrafo.Append(CrearRun(NormalizarSaltoLinea(texto), 10, Carbono, negrita: false));
         body.Append(parrafo);
     }
 
@@ -736,7 +815,7 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
                 {
                     Val = new EnumValue<BorderValues>(BorderValues.Single),
                     Size = 6,
-                    Color = GrisBorde
+                    Color = BordeTabla
                 })));
         parrafo.Append(new Run());
         return parrafo;
