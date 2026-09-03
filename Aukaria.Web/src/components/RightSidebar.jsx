@@ -63,6 +63,7 @@ export default function RightSidebar({
   modo = "dashboard",
   analisis,
   onDownload = () => {},
+  onDownloadAnexo = () => {},
   movil = false,
   usuario = null,
   onLogout = () => {},
@@ -213,7 +214,28 @@ export default function RightSidebar({
               >
                 <path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2" />
               </svg>
-              Descargar Reporte Word (.docx)
+              Descargar Diagnóstico Jurídico (.docx)
+            </motion.button>
+
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.98 }}
+              transition={spring}
+              onClick={onDownloadAnexo}
+              className={botonSecundario}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-3.5 w-3.5 text-[var(--icon)]"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M13 2 3 14h7l-1 8 11-13h-7l1-7z" />
+              </svg>
+              Descargar Anexo: Tracto Sucesivo (.docx)
             </motion.button>
 
             <div className="grid grid-cols-1 gap-2">

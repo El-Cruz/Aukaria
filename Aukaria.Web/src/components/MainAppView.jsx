@@ -47,6 +47,7 @@ export default function MainAppView({
   onReabrir = () => {},
   onNuevoEstudio = () => {},
   onDownload = () => {},
+  onDownloadAnexo = () => {},
   onEnviarPorCorreo = () => {},
   onLogout = () => {},
 }) {
@@ -222,7 +223,7 @@ export default function MainAppView({
                   exit={{ opacity: 0, y: -12 }}
                   transition={spring}
                 >
-                  <AnalysisDashboard analisis={analisis} preAnalisisData={preAnalisisData} onDownload={onDownload} onEnviarPorCorreo={onEnviarPorCorreo} />
+                  <AnalysisDashboard analisis={analisis} preAnalisisData={preAnalisisData} onDownload={onDownload} onDownloadAnexo={onDownloadAnexo} onEnviarPorCorreo={onEnviarPorCorreo} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -235,6 +236,7 @@ export default function MainAppView({
               preAnalisisData={preAnalisisData}
               usuario={usuario}
               onDownload={onDownload}
+              onDownloadAnexo={onDownloadAnexo}
               onLogout={onLogout}
             />
           </aside>
@@ -292,6 +294,7 @@ export default function MainAppView({
                 preAnalisisData={preAnalisisData}
                 usuario={usuario}
                 onDownload={onDownload}
+                onDownloadAnexo={onDownloadAnexo}
                 onLogout={onLogout}
                 movil
               />

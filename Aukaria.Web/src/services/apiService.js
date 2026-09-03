@@ -191,6 +191,21 @@ export async function descargarReporteWord(analisisId, matriculaFmi) {
   setTimeout(() => URL.revokeObjectURL(url), 1500)
 }
 
+export async function descargarAnexoTractoWord(analisisId, matriculaFmi) {
+  const blob = await request(`/descargar-anexo-tracto/${analisisId}`, { method: "GET" }, "blob")
+  const nombre = matriculaFmi
+    ? `Anexo_Tracto_Sucesivo_FMI_${matriculaFmi}.docx`
+    : `Anexo_Tracto_Sucesivo_${analisisId}.docx`
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  link.href = url
+  link.download = nombre
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 1500)
+}
+
 export async function procesarAnalisisCtlStreaming({
   archivoPdf,
   matriculaFmi,

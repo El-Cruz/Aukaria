@@ -10,6 +10,7 @@ import CompletionToast from "./components/CompletionToast"
 import TopographyBackground from "./components/TopographyBackground"
 import {
   descargarReporteWord,
+  descargarAnexoTractoWord,
   procesarAnalisisCtlStreaming,
   obtenerUsuarioActual,
   enviarReporteWord,
@@ -313,6 +314,20 @@ function App() {
     }
   }
 
+  const handleDownloadAnexo = async () => {
+    if (!resultado) return
+    try {
+      await descargarAnexoTractoWord(
+        resultado.Id,
+        resultado.MatriculaFMI ||
+          resultado.Resultado?.MatriculaFMI ||
+          preAnalisisData?.matricula,
+      )
+    } catch (err) {
+      notificar(err.message || "No se pudo descargar el anexo de tracto sucesivo.")
+    }
+  }
+
   const handleEnviarPorCorreo = async () => {
     if (!resultado) return
     try {
@@ -360,6 +375,7 @@ function App() {
                 onReabrir={handleReabrir}
                 onNuevoEstudio={handleNuevoEstudio}
                 onDownload={handleDownload}
+                onDownloadAnexo={handleDownloadAnexo}
                 onEnviarPorCorreo={handleEnviarPorCorreo}
                 onLogout={handleLogout}
               />
