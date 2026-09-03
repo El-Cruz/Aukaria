@@ -203,6 +203,23 @@ public sealed class AnalisisPredialController : ControllerBase
         }
     }
 
+    [HttpGet("descargar-anexo-tracto/{id:guid}")]
+    public async Task<IActionResult> DescargarAnexoTracto(Guid id, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            ReporteWordDto reporte = await _analisisService.DescargarAnexoTractoWordAsync(id, cancellationToken);
+            return File(
+                reporte.Archivo,
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                reporte.NombreArchivo);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound("El análisis predial especificado no fue encontrado.");
+        }
+    }
+
     [Authorize]
     [HttpPost("envia-word/{id:guid}")]
     public async Task<IActionResult> EnviarReporteWord(Guid id, CancellationToken cancellationToken = default)

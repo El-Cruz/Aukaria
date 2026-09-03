@@ -28,7 +28,7 @@ public static class DependencyInjection
         {
             client.Timeout = TimeSpan.FromMinutes(5);
         });
-        services.AddScoped<IReportGeneratorService, ReportGeneratorService>();
+        services.AddScoped<IDiagnosticoWordGeneratorService, DiagnosticoWordGeneratorService>();
         services.AddScoped<IAnalisisPredialRepository, AnalisisPredialRepository>();
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
         services.AddSingleton<IOtpStore, InMemoryOtpStore>();

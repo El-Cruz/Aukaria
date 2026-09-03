@@ -15,7 +15,7 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
     private readonly IPdfExtractorService _pdfExtractorService;
     private readonly IClaudeApiService _claudeApiService;
     private readonly IDocumentClassifierService _documentClassifierService;
-    private readonly IReportGeneratorService _reportGeneratorService;
+    private readonly IDiagnosticoWordGeneratorService _diagnosticoWordGeneratorService;
     private readonly IEmailService _emailService;
 
     public AnalisisPredialService(
@@ -23,14 +23,14 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
         IPdfExtractorService pdfExtractorService,
         IClaudeApiService claudeApiService,
         IDocumentClassifierService documentClassifierService,
-        IReportGeneratorService reportGeneratorService,
+        IDiagnosticoWordGeneratorService diagnosticoWordGeneratorService,
         IEmailService emailService)
     {
         _repository = repository;
         _pdfExtractorService = pdfExtractorService;
         _claudeApiService = claudeApiService;
         _documentClassifierService = documentClassifierService;
-        _reportGeneratorService = reportGeneratorService;
+        _diagnosticoWordGeneratorService = diagnosticoWordGeneratorService;
         _emailService = emailService;
     }
 
@@ -165,17 +165,9 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
         Guid analisisId,
         CancellationToken cancellationToken = default)
     {
-        AnalisisPredial? analisis = await _repository.ObtenerPorIdAsync(analisisId, cancellationToken);
+        AnalisisResultadoJsonDto resultadoDto = await ObtenerResultadoDtoAsync(analisisId, cancellationToken);
 
-        if (analisis is null)
-        {
-            throw new KeyNotFoundException("El análisis predial solicitado no existe.");
-        }
-
-        AnalisisResultadoJsonDto resultadoDto = JsonSerializer.Deserialize<AnalisisResultadoJsonDto>(analisis.ResultadoJson)
-            ?? new AnalisisResultadoJsonDto();
-
-        byte[] bytes = await _reportGeneratorService.GenerarReporteWordAsync(resultadoDto, cancellationToken);
+        byte[] bytes = await _diagnosticoWordGeneratorService.GenerarDiagnosticoWordAsync(resultadoDto, cancellationToken);
 
         return new ReporteWordDto
         {
@@ -184,17 +176,43 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
         };
     }
 
+    public async Task<ReporteWordDto> DescargarAnexoTractoWordAsync(
+        Guid analisisId,
+        CancellationToken cancellationToken = default)
+    {
+        AnalisisResultadoJsonDto resultadoDto = await ObtenerResultadoDtoAsync(analisisId, cancellationToken);
+
+        byte[] bytes = await _diagnosticoWordGeneratorService.GenerarAnexoTractoWordAsync(resultadoDto, cancellationToken);
+
+        return new ReporteWordDto
+        {
+            Archivo = bytes,
+            NombreArchivo = ConstruirNombreAnexo(resultadoDto.MatriculaFMI, analisisId)
+        };
+    }
+
     public async Task EnviarReportePorCorreoAsync(Guid analisisId, string destinatario, CancellationToken cancellationToken = default)
     {
+        ReporteWordDto reporte = await DescargarReporteWordAsync(analisisId, cancellationToken);
+
         AnalisisPredial? analisis = await _repository.ObtenerPorIdAsync(analisisId, cancellationToken);
+        string fmi = analisis?.MatriculaFMI ?? string.Empty;
+
+        await _emailService.EnviarReporteAsync(destinatario, reporte.NombreArchivo, reporte.Archivo, fmi, cancellationToken);
+    }
+
+    private async Task<AnalisisResultadoJsonDto> ObtenerResultadoDtoAsync(Guid analisisId, CancellationToken cancellationToken)
+    {
+        AnalisisPredial? analisis = await _repository.ObtenerPorIdAsync(analisisId, cancellationToken);
+
         if (analisis is null)
         {
             throw new KeyNotFoundException("El análisis predial solicitado no existe.");
         }
 
-        ReporteWordDto reporte = await DescargarReporteWordAsync(analisisId, cancellationToken);
-        string fmi = analisis.MatriculaFMI;
-        await _emailService.EnviarReporteAsync(destinatario, reporte.NombreArchivo, reporte.Archivo, fmi, cancellationToken);    }
+        return JsonSerializer.Deserialize<AnalisisResultadoJsonDto>(analisis.ResultadoJson)
+            ?? new AnalisisResultadoJsonDto();
+    }
 
     private static string ConstruirNombreArchivo(string matriculaFmi, Guid analisisId)
     {
@@ -203,6 +221,15 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
         return string.IsNullOrWhiteSpace(fmi)
             ? $"Informe_Juridico_Predial_{analisisId}.docx"
             : $"Informe_Juridico_Predial_FMI_{fmi}.docx";
+    }
+
+    private static string ConstruirNombreAnexo(string matriculaFmi, Guid analisisId)
+    {
+        string fmi = new string((matriculaFmi ?? string.Empty).Where(c => !System.IO.Path.GetInvalidFileNameChars().Contains(c)).ToArray()).Trim();
+
+        return string.IsNullOrWhiteSpace(fmi)
+            ? $"Anexo_Tracto_Sucesivo_{analisisId}.docx"
+            : $"Anexo_Tracto_Sucesivo_FMI_{fmi}.docx";
     }
 
     private static EstadoViabilidad MapearViabilidad(string viabilidad)
