@@ -63,50 +63,47 @@ public static class LegalPromptBuilder
                                """;
 
     private const string CapEstructura = """
-                                          Sigue estrictamente la siguiente estructura de 10 CAPÍTULOS:
+                                          Sigue estrictamente la siguiente estructura de 9 CAPÍTULOS:
 
                                           1. INFORMACIÓN GENERAL DEL PREDIO:
-                                             - Nombre del Predio, Vereda, Municipio, Departamento, Folio de Matrícula Inmobiliaria (FMI), Cédula Catastral / NUPRE, Oficina de Registro (ORIP), Estado del Folio (Activo/Cerrado/Sustituido/Cancelado), Folio Matriz, Folios Derivados, Fecha de Expedición del Certificado.
-                                             - Regla de formato: Capitalizar Al Inicio De Cada Palabra en los valores descriptivos.
+                                             - Tabla de 2 columnas (Campo | Detalle) con: Nombre del Predio, Vereda, Municipio, Departamento, Folio de Matrícula (FMI), Cédula Catastral / NUPRE, Oficina de Registro (ORIP), Estado del Folio (Activo/Cerrado/Sustituido/Cancelado), Folio Matriz, Folios Derivados, Fecha de Expedición del Certificado.
+                                             - Regla de formato: "Mayúscula Al Inicio De Cada Palabra" en los valores descriptivos.
 
                                           2. ÁREAS Y CABIDAS REGISTRALES (MÁXIMO DOS PÁRRAFOS CORTOS):
-                                             - Párrafo 1 (Origen y Cabida Actual): Cabida registrada, acto de origen (Tipo/Fecha/Notaría) y área actual segregada.
-                                             - Párrafo 2 (Conclusión Predial): Confirmar si existen o no segregaciones/ventas parciales y concluir con el 'Área Remanente Real' disponible para la intervención sísmica.
+                                             - Párrafo 1 (Origen y Cabida Actual): Cabida registrada y acto de origen (Tipo/Fecha/Notaría).
+                                             - Párrafo 2 CONDICIONAL (Análisis de Segregaciones): Confirmar si existen o no segregaciones/ventas parciales y concluir con el 'Área Remanente Real' disponible para la intervención. Si no existen segregaciones, OMITIR por completo este segundo párrafo.
                                              - Resumen estructurado: Área Según FMI, Área en Adjudicación Inicial, Desenglobes/Ventas Parciales, Área Remanente Real (formato: [X] Ha + [Y] m²).
 
                                           3. DESCRIPCIÓN FÍSICA Y LINDEROS:
-                                             - Linderos según folio (transcripción técnica) y Soporte documental (Escritura/Resolución, Notaría/Entidad y Fecha).
+                                             - Transcripción técnica de linderos según el folio y el soporte notarial/documental (Escritura/Resolución, Notaría/Entidad y Fecha).
 
                                           4. TITULARIDAD DEL INMUEBLE:
-                                             - Tabla de Titulares: Nombre | Identificación | % Participación / Cuota.
-                                             - Soporte de Adquisición y Análisis Jurídico del régimen de propiedad (falsa tradición, propiedad exclusiva, comunidad, sociedad conyugal, afectación a vivienda familiar, patrimonio de familia, etc.).
+                                             - Tabla: [Nombre del Titular | Identificación | % Participación | Condición del Dominio (Propietario/Usufructuario/Coposeedor/etc.)].
+                                             - Título y modo de adquisición en UNA SOLA oración concisa.
+                                             - Análisis de capacidad legal y disposición en un párrafo, sin repetir fechas ni notarías ya mencionadas.
 
-                                          5. ANÁLISIS DE LA TRADICIÓN (TRACTO SUCESIVO):
-                                             - Tabla Cronológica: Año | Acto Jurídico | Anotación | Análisis Jurídico (solo actos con trascendencia de dominio).
-                                             - Certificación de continuidad o ruptura del tracto ininterrumpido.
+                                          5. ANÁLISIS DE LA TRADICIÓN Y TRACTO SUCESIVO (PARA ANEXO DE SOPORTE):
+                                             - Tabla Cronológica: [Anotación N° | Fecha | Acto Jurídico (Código SNR) | Cadena de Dominio (De: / A:) | Análisis de Impacto].
+                                             - Regla de Anotación 001: Rastrear la complementación para identificar tradente y adjudicatario en divisiones materiales/segregaciones.
+                                             - A continuación, detalle de cada acto registral relevante con su Hecho Registral y Análisis Jurídico.
 
-                                          6. ACTOS REGISTRALES RELEVANTES:
-                                             - Cada anotación debe seguir estrictamente este formato:
-                                               Anotación N° {NUMERO_ANOTACION: 3 dígitos ej. 001} ({FECHA: DD-MM-YYYY}): {ESPECIFICACION: Mayúscula Inicial} (Código {CODIGO_SNR: 4 dígitos})
-                                               Hecho Registral: {Descripción fáctica, instrumento, fecha y notaría/oficina}.
-                                               Análisis Jurídico: {Efecto legal en máximo 2 oraciones breves y directas. Prohibido repetir fechas/notarías ya dichas en el hecho}.
+                                          6. RIESGOS JURÍDICOS (MARCO LEY 1274 DE 2009):
+                                             - Cada riesgo en 3-4 oraciones de la forma: [Riesgo: Bajo / Medio / Alto] - [Tipo de Riesgo (Anotación N°)]: 1. Hallazgo -> 2. Efecto legal -> 3. Impacto en la servidumbre transitoria -> 4. Instrucción de gestión.
+                                             - Evaluar: Hipotecas, Embargos, Medidas penales/SAE, Falsa tradición, Sucesiones, Limitaciones, Condición resolutoria, Naturaleza fiscal, Actuaciones ANT y Determinantes Ambientales/UAF.
+                                             - Regla de Cero Riesgos: Si no hay hallazgos negativos, deja el arreglo AlertasJuridicas vacío ([]) y no generes alertas; el informe jurídico redactará automáticamente la certificación de cero riesgos con el texto estandarizado.
 
-                                          7. RIESGOS JURÍDICOS (MARCO LEY 1274 DE 2009):
-                                             - Estructura: [Riesgo: Bajo / Medio / Alto] - [Tipo de Riesgo]: [Explicación del impacto sobre la servidumbre transitoria].
-                                             - Evaluar: Hipotecas, Medidas cautelares y embargos (según su tipo: ejecutivo/penal/coactivo), Falsa tradición, Sucesiones ilíquidas, Limitaciones al dominio, Condición resolutoria, Naturaleza fiscal/ANT, Incapacidades, Inconsistencia de linderos/UAF.
-                                             - Regla Cero Riesgos: Si no hay hallazgos negativos, deja el arreglo AlertasJuridicas vacío ([]) y no generes alertas; el informe jurídico redactará automáticamente la certificación de cero riesgos.
+                                          7. DIAGNÓSTICO JURÍDICO EJECUTIVO (EN UN SOLO PÁRRAFO PROFESIONAL):
+                                             - Dictamen final de viabilidad: Viable / Viable Condicionado / No Viable, sin repetir cédulas ni nombres del capítulo 4.
+                                             - Mantén el estándar de conclusión: "Por lo tanto, se concluye que el predio cuenta con plena VIABILIDAD JURÍDICA / VIABILIDAD JURÍDICA CONDICIONADA a [requisito] / NO ES VIABLE JURÍDICAMENTE ... para adelantar los trámites de gestión predial y negociación de la servidumbre transitoria para la exploración sísmica conforme a la Ley 1274 de 2009."
 
-                                          8. DIAGNÓSTICO JURÍDICO EJECUTIVO (EN UN SOLO PÁRRAFO ESTANDARIZADO):
-                                             - Sintetizar: 1. Identificación titular actual -> 2. Continuidad de la tradición -> 3. Mención de restricciones/gravámenes -> 4. Título de dominio citado estrictamente como: "Escritura No. [X] del [Día] de [Mes] de [Año] de la Notaría [Número en letras] de [Ciudad], [Departamento]" -> 5. Conclusión final de viabilidad:
-                                               * Plena viabilidad: "Por lo tanto, se concluye que el predio cuenta con plena VIABILIDAD JURÍDICA para adelantar los trámites de gestión predial y negociación de la servidumbre transitoria para la exploración sísmica conforme a la Ley 1274 de 2009."
-                                               * Viable condicionado: "Por lo tanto, se concluye que el predio cuenta con VIABILIDAD JURÍDICA CONDICIONADA a [requisito/condición], para adelantar los trámites de gestión predial y negociación de la servidumbre transitoria para la exploración sísmica conforme a la Ley 1274 de 2009."
-                                               * No viable: "Por lo tanto, se concluye que el predio NO ES VIABLE JURÍDICAMENTE para la gestión predial y negociación directa de la servidumbre transitoria hasta tanto se resuelva [motivo determinante] que impide adelantar los trámites conforme a la Ley 1274 de 2009."
+                                          8. OBSERVACIONES Y RECOMENDACIONES:
+                                             - Recomendaciones prácticas y directas para el equipo de gestión predial y social en campo (listado).
+                                             - INCLUSIÓN OBLIGATORIA (OBSERVACIÓN AMBIENTAL): "Verificación en RUNAP: Se recomienda validar de forma preventiva la ubicación geográfica del predio en el portal oficial del RUNAP (Registro Único Nacional de Áreas Protegidas), a fin de descartar solapamientos con zonas de conservación estricta o parques naturales no susceptibles de intervención."
+                                             - INCLUSIÓN OBLIGATORIA (EXCLUSIÓN DE RESPONSABILIDAD): "Alcance del Estudio y Antecedentes: El presente diagnóstico constituye un análisis estrictamente registral y catastral. La plataforma y el equipo consultor no realizan consultas ni validaciones en bases de datos judiciales, antecedentes penales ni listas restrictivas (OFAC), recayendo la debida diligencia sobre las partes que suscriban eventuales acuerdos o negociaciones directas."
+                                             - Estas dos inclusiones SIEMPRE deben estar presentes, incluso cuando no haya observaciones adicionales.
 
-                                          9. OBSERVACIONES Y RECOMENDACIONES:
-                                             - Recomendaciones prácticas y directas para el equipo de gestión predial y social en campo.
-
-                                          10. DOCUMENTOS ANALIZADOS:
-                                              - Lista viñeteada exclusiva de los documentos aportados y cotejados.
+                                          9. DOCUMENTOS ANALIZADOS:
+                                             - Lista viñeteada EXCLUSIVA según el tipo de documento fuente aportado (VUR, ORIP, Escritura, Resolución, Sentencia, Hijuela o Soporte técnico). Prohibido inventar documentos.
                                           """;
 
     private const string InstruccionesSalida = """
@@ -142,49 +139,56 @@ public static class LegalPromptBuilder
                                          "ConclusionPredial": "string (Párrafo 2 del Capítulo 2)",
                                          "LinderosDescripcion": "string (transcripción técnica del folio)",
                                          "SoporteDocumentalLinderos": "string (Escritura/Resolución, Notaría/Entidad y Fecha)",
-                                         "Titulares": [
-                                           {
-                                             "Nombre": "string",
-                                             "Identificacion": "string",
-                                             "ParticipacionCuota": "string (porcentaje o cuota)"
-                                           }
-                                         ],
-                                         "RegimenPropiedadAnalisis": "string (análisis del régimen de propiedad)",
-                                         "TradicionActos": [
-                                           {
-                                             "Anio": "string (AAAA)",
-                                             "ActoJuridico": "string",
-                                             "Anotacion": "string",
-                                             "AnalisisJuridico": "string"
-                                           }
-                                         ],
-                                         "CertificacionTracto": "string (continuidad o ruptura del tracto)",
-                                         "Viabilidad": "Viable | RequiereRevision | AlertaCritica",
-                                         "ResumenEjecutivo": "Diagnóstico técnico en 2 párrafos",
-                                         "DiagnosticoEjecutivo": "string (Capítulo 8, un solo párrafo estandarizado)",
-                                         "Anotaciones": [
-                                           {
-                                             "NumeroAnotacion": "string (3 dígitos, ej. 001)",
-                                             "Fecha": "string (DD-MM-YYYY)",
-                                             "Especificacion": "string (Mayúscula Inicial)",
-                                             "CodigoSnr": "string (4 dígitos)",
-                                             "NaturalezaJuridica": "string",
-                                             "HechoRegistral": "string (hecho fáctico, instrumento, fecha y notaría/oficina)",
-                                             "AnalisisJuridico": "string (máximo 2 oraciones, sin repetir fechas/notarías del hecho)",
-                                             "EsGravamen": true,
-                                             "EsMedidaCautelar": false
-                                           }
-                                         ],
-                                         "AlertasJuridicas": [
-                                           {
-                                             "Titulo": "string (Tipo de Riesgo)",
-                                             "Descripcion": "string (explicación del impacto sobre la servidumbre transitoria)",
-                                             "NivelRiesgo": "Bajo | Medio | Alto",
-                                             "Recomendacion": "string"
-                                           }
-                                         ],
-                                         "Observaciones": ["recomendaciones para el equipo de gestión predial y social en campo"],
-                                         "DocumentosAnalizados": ["lista viñeteada de documentos aportados y cotejados"],
+                                          "Titulares": [
+                                            {
+                                              "Nombre": "string",
+                                              "Identificacion": "string",
+                                              "ParticipacionCuota": "string (porcentaje o cuota)",
+                                              "CondicionDominio": "string (Propietario/Usufructuario/Coposeedor/etc.)"
+                                            }
+                                          ],
+                                          "RegimenPropiedadAnalisis": "string (análisis del régimen de propiedad)",
+                                          "TradicionActos": [
+                                            {
+                                              "Anio": "string (AAAA)",
+                                              "NumeroAnotacion": "string (3 dígitos, ej. 001)",
+                                              "Fecha": "string (DD-MM-YYYY)",
+                                              "ActoJuridico": "string (Código SNR)",
+                                              "CodigoSnr": "string (4 dígitos)",
+                                              "CadenaDeDominio": "string (De: / A:)",
+                                              "AnalisisJuridico": "string",
+                                              "AnalisisImpacto": "string (análisis de impacto en la cadena de dominio)"
+                                            }
+                                          ],
+                                          "CertificacionTracto": "string (continuidad o ruptura del tracto)",
+                                          "Viabilidad": "Viable | RequiereRevision | AlertaCritica",
+                                          "ResumenEjecutivo": "Diagnóstico técnico en 2 párrafos",
+                                          "DiagnosticoEjecutivo": "string (Capítulo 7, un solo párrafo profesional con dictamen de viabilidad)",
+                                          "Anotaciones": [
+                                            {
+                                              "NumeroAnotacion": "string (3 dígitos, ej. 001)",
+                                              "Fecha": "string (DD-MM-YYYY)",
+                                              "Especificacion": "string (Mayúscula Inicial)",
+                                              "CodigoSnr": "string (4 dígitos)",
+                                              "NaturalezaJuridica": "string",
+                                              "HechoRegistral": "string (hecho fáctico, instrumento, fecha y notaría/oficina)",
+                                              "AnalisisJuridico": "string (máximo 2 oraciones, sin repetir fechas/notarías del hecho)",
+                                              "EsGravamen": true,
+                                              "EsMedidaCautelar": false
+                                            }
+                                          ],
+                                          "AlertasJuridicas": [
+                                            {
+                                              "Titulo": "string (Tipo de Riesgo con Anotación N°)",
+                                              "Descripcion": "string (3-4 oraciones: 1. Hallazgo -> 2. Efecto legal -> 3. Impacto en la servidumbre transitoria -> 4. Instrucción de gestión)",
+                                              "NivelRiesgo": "Bajo | Medio | Alto",
+                                              "Recomendacion": "string"
+                                            }
+                                          ],
+                                          "Observaciones": ["recomendaciones para el equipo de gestión predial y social en campo"],
+                                          "ObservacionAmbiental": "string (Texto estandarizado de Verificación en RUNAP. Siempre obligatoria)",
+                                          "ExclusionResponsabilidad": "string (Texto estandarizado de Alcance del Estudio y Antecedentes. Siempre obligatoria)",
+                                          "DocumentosAnalizados": ["lista viñeteada de documentos aportados y cotejados"],
                                          "NumeroEscritura": "string (solo Escritura Pública)",
                                          "Notaria": "string (solo Escritura Pública)",
                                          "CiudadNotaria": "string (solo Escritura Pública)",

@@ -16,6 +16,8 @@ public class AnalisisResultadoJsonDto
     public List<AnotacionDto> Anotaciones { get; set; } = new();
     public List<AlertaJuridicaDto> AlertasJuridicas { get; set; } = new();
     public List<string> Observaciones { get; set; } = new();
+    public string ObservacionAmbiental { get; set; } = string.Empty;
+    public string ExclusionResponsabilidad { get; set; } = string.Empty;
     public string NumeroEscritura { get; set; } = string.Empty;
     public string Notaria { get; set; } = string.Empty;
     public string CiudadNotaria { get; set; } = string.Empty;

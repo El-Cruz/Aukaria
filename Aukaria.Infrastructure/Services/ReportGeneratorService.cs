@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using Aukaria.Application.DTOs.JsonSchema;
 using Aukaria.Application.Interfaces;
 using DocumentFormat.OpenXml;
@@ -45,7 +44,6 @@ public sealed class ReportGeneratorService : IReportGeneratorService
             CrearCapitulo7(body, resultadoJson);
             CrearCapitulo8(body, resultadoJson);
             CrearCapitulo9(body, resultadoJson);
-            CrearCapitulo10(body, resultadoJson);
 
             mainPart.Document.Save();
         }
@@ -135,15 +133,21 @@ public sealed class ReportGeneratorService : IReportGeneratorService
         var filas = new List<string[]>();
         foreach (TitularDto titular in r.Titulares)
         {
-            filas.Add(new[] { Valor(titular.Nombre), Valor(titular.Identificacion), Valor(titular.ParticipacionCuota) });
+            filas.Add(new[]
+            {
+                Valor(titular.Nombre),
+                Valor(titular.Identificacion),
+                Valor(titular.ParticipacionCuota),
+                Valor(titular.CondicionDominio)
+            });
         }
 
         if (filas.Count == 0)
         {
-            filas.Add(new[] { Valor(r.PropietarioActual), "No reportado", "No reportado" });
+            filas.Add(new[] { Valor(r.PropietarioActual), "No reportado", "No reportado", "No reportado" });
         }
 
-        body.Append(CrearTabla(new[] { "NOMBRE", "IDENTIFICACIÓN", "% PARTICIPACIÓN / CUOTA" }, filas));
+        body.Append(CrearTabla(new[] { "NOMBRE", "IDENTIFICACIÓN", "% PARTICIPACIÓN", "CONDICIÓN DEL DOMINIO" }, filas));
         body.Append(CrearParrafoSeparador());
 
         CrearSubtitulo(body, "Soporte de Adquisición y Análisis del Régimen de Propiedad");
@@ -154,14 +158,27 @@ public sealed class ReportGeneratorService : IReportGeneratorService
 
     private static void CrearCapitulo5(Body body, AnalisisResultadoJsonDto r)
     {
-        CrearTituloCapitulo(body, "5. ANÁLISIS DE LA TRADICIÓN (TRACTO SUCESIVO)");
+        CrearTituloCapitulo(body, "5. ANÁLISIS DE LA TRADICIÓN Y TRACTO SUCESIVO (PARA ANEXO DE SOPORTE)");
 
         CrearSubtitulo(body, "Tabla Cronológica de la Tradición");
 
         var filas = new List<string[]>();
         foreach (TradicionActoDto acto in r.TradicionActos)
         {
-            filas.Add(new[] { Valor(acto.Anio), Valor(acto.ActoJuridico), Valor(acto.Anotacion), Valor(acto.AnalisisJuridico) });
+            string numAnotacion = string.IsNullOrWhiteSpace(acto.NumeroAnotacion)
+                ? Valor(acto.Anotacion, "—")
+                : acto.NumeroAnotacion;
+
+            string fecha = NoVacio(acto.Fecha) ? acto.Fecha : Valor(acto.Anio);
+
+            filas.Add(new[]
+            {
+                numAnotacion,
+                fecha,
+                NoVacio(acto.CodigoSnr) ? $"{Valor(acto.ActoJuridico)} (Código {acto.CodigoSnr})" : Valor(acto.ActoJuridico),
+                Valor(acto.CadenaDeDominio),
+                NoVacio(acto.AnalisisImpacto) ? acto.AnalisisImpacto : Valor(acto.AnalisisJuridico)
+            });
         }
 
         if (filas.Count == 0)
@@ -170,9 +187,10 @@ public sealed class ReportGeneratorService : IReportGeneratorService
             {
                 filas.Add(new[]
                 {
-                    AnioDesdeFecha(anotacion.Fecha),
+                    Valor(anotacion.NumeroAnotacion, "—"),
+                    Valor(anotacion.Fecha),
                     Valor(anotacion.Especificacion),
-                    Valor(anotacion.NumeroAnotacion),
+                    "—",
                     Valor(anotacion.NaturalezaJuridica)
                 });
             }
@@ -184,48 +202,46 @@ public sealed class ReportGeneratorService : IReportGeneratorService
         }
         else
         {
-            body.Append(CrearTabla(new[] { "AÑO", "ACTO JURÍDICO", "ANOTACIÓN", "ANÁLISIS JURÍDICO" }, filas));
+            body.Append(CrearTabla(new[] { "ANOTACIÓN N°", "FECHA", "ACTO JURÍDICO (CÓDIGO SNR)", "CADENA DE DOMINIO", "ANÁLISIS DE IMPACTO" }, filas));
             body.Append(CrearParrafoSeparador());
         }
 
         CrearSubtitulo(body, "Certificación del Tracto");
         CrearCuerpo(body, Valor(r.CertificacionTracto));
+
+        CrearSubtitulo(body, "Detalle de Actos Registrales Relevantes");
+
+        if (r.Anotaciones.Count == 0)
+        {
+            CrearCuerpo(body, "No se registran actos relevantes adicionales en el folio de matrícula inmobiliaria.");
+        }
+        else
+        {
+            foreach (AnotacionDto anotacion in r.Anotaciones)
+            {
+                string numero = string.IsNullOrWhiteSpace(anotacion.NumeroAnotacion)
+                    ? "000"
+                    : anotacion.NumeroAnotacion.PadLeft(3, '0');
+
+                string lineaAnotacion = $"Anotación N° {numero} ({Valor(anotacion.Fecha)}): {Valor(anotacion.Especificacion)}";
+                if (NoVacio(anotacion.CodigoSnr))
+                {
+                    lineaAnotacion += $" (Código {anotacion.CodigoSnr})";
+                }
+
+                body.Append(CrearParrafoDestacado(lineaAnotacion));
+
+                string hecho = NoVacio(anotacion.HechoRegistral) ? anotacion.HechoRegistral : anotacion.NaturalezaJuridica;
+                CrearCuerpo(body, $"Hecho Registral: {Valor(hecho)}");
+                CrearCuerpo(body, $"Análisis Jurídico: {Valor(anotacion.AnalisisJuridico)}");
+                body.Append(CrearParrafoSeparador());
+            }
+        }
     }
 
     private static void CrearCapitulo6(Body body, AnalisisResultadoJsonDto r)
     {
-        CrearTituloCapitulo(body, "6. ACTOS REGISTRALES RELEVANTES");
-
-        if (r.Anotaciones.Count == 0)
-        {
-            CrearCuerpo(body, "No se registran actos relevantes en el folio de matrícula inmobiliaria.");
-            return;
-        }
-
-        foreach (AnotacionDto anotacion in r.Anotaciones)
-        {
-            string numero = string.IsNullOrWhiteSpace(anotacion.NumeroAnotacion)
-                ? "000"
-                : anotacion.NumeroAnotacion.PadLeft(3, '0');
-
-            string lineaAnotacion = $"Anotación N° {numero} ({Valor(anotacion.Fecha)}): {Valor(anotacion.Especificacion)}";
-            if (NoVacio(anotacion.CodigoSnr))
-            {
-                lineaAnotacion += $" (Código {anotacion.CodigoSnr})";
-            }
-
-            body.Append(CrearParrafoDestacado(lineaAnotacion));
-
-            string hecho = NoVacio(anotacion.HechoRegistral) ? anotacion.HechoRegistral : anotacion.NaturalezaJuridica;
-            CrearCuerpo(body, $"Hecho Registral: {Valor(hecho)}");
-            CrearCuerpo(body, $"Análisis Jurídico: {Valor(anotacion.AnalisisJuridico)}");
-            body.Append(CrearParrafoSeparador());
-        }
-    }
-
-    private static void CrearCapitulo7(Body body, AnalisisResultadoJsonDto r)
-    {
-        CrearTituloCapitulo(body, "7. RIESGOS JURÍDICOS (MARCO LEY 1274 DE 2009)");
+        CrearTituloCapitulo(body, "6. RIESGOS JURÍDICOS (MARCO LEY 1274 DE 2009)");
 
         if (r.AlertasJuridicas.Count == 0)
         {
@@ -244,31 +260,40 @@ public sealed class ReportGeneratorService : IReportGeneratorService
         }
     }
 
-    private static void CrearCapitulo8(Body body, AnalisisResultadoJsonDto r)
+    private static void CrearCapitulo7(Body body, AnalisisResultadoJsonDto r)
     {
-        CrearTituloCapitulo(body, "8. DIAGNÓSTICO JURÍDICO EJECUTIVO");
+        CrearTituloCapitulo(body, "7. DIAGNÓSTICO JURÍDICO EJECUTIVO");
         CrearCuerpo(body, NoVacio(r.DiagnosticoEjecutivo) ? r.DiagnosticoEjecutivo : Valor(r.ResumenEjecutivo));
     }
 
-    private static void CrearCapitulo9(Body body, AnalisisResultadoJsonDto r)
+    private static void CrearCapitulo8(Body body, AnalisisResultadoJsonDto r)
     {
-        CrearTituloCapitulo(body, "9. OBSERVACIONES Y RECOMENDACIONES");
+        CrearTituloCapitulo(body, "8. OBSERVACIONES Y RECOMENDACIONES");
 
-        if (r.Observaciones.Count == 0)
+        if (r.Observaciones.Count == 0 && !NoVacio(r.ObservacionAmbiental) && !NoVacio(r.ExclusionResponsabilidad))
         {
             CrearCuerpo(body, "Sin observaciones adicionales.");
-            return;
         }
 
         foreach (string observacion in r.Observaciones)
         {
             CrearVineta(body, observacion);
         }
+
+        if (NoVacio(r.ObservacionAmbiental))
+        {
+            CrearVineta(body, r.ObservacionAmbiental.Trim());
+        }
+
+        if (NoVacio(r.ExclusionResponsabilidad))
+        {
+            CrearVineta(body, r.ExclusionResponsabilidad.Trim());
+        }
     }
 
-    private static void CrearCapitulo10(Body body, AnalisisResultadoJsonDto r)
+    private static void CrearCapitulo9(Body body, AnalisisResultadoJsonDto r)
     {
-        CrearTituloCapitulo(body, "10. DOCUMENTOS ANALIZADOS");
+        CrearTituloCapitulo(body, "9. DOCUMENTOS ANALIZADOS");
 
         if (r.DocumentosAnalizados.Count == 0)
         {
@@ -448,19 +473,5 @@ public sealed class ReportGeneratorService : IReportGeneratorService
     private static string Valor(string valor, string fallback = "No reportado")
     {
         return NoVacio(valor) ? valor.Trim() : fallback;
-    }
-
-    private static string AnioDesdeFecha(string fecha)
-    {
-        if (NoVacio(fecha))
-        {
-            Match coincidencia = Regex.Match(fecha, @"(?<!\d)(19|20)\d{2}(?!\d)");
-            if (coincidencia.Success)
-            {
-                return coincidencia.Value;
-            }
-        }
-
-        return "—";
     }
 }
