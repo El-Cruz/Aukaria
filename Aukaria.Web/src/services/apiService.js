@@ -1,17 +1,29 @@
 /**
  * Deriva la URL base (origen) del backend de forma dinámica
- * a partir de VITE_API_BASE_URL con fallback seguro hacia Render (o localhost en desarrollo).
+ * a partir de VITE_BACKEND_URL o VITE_API_BASE_URL con fallback seguro hacia Render (o localhost en desarrollo).
+ * Erradica activamente cualquier remanente de Railway en caché o configuración de entorno.
  */
 export const getBackendBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_BASE_URL
   const fallback = import.meta.env.DEV
     ? "https://localhost:7078"
-    : "https://aukaria.onrender.com/api/AnalisisPredial"
-  const apiUrl = import.meta.env.VITE_API_BASE_URL || fallback
-  const clean = String(apiUrl).trim().replace(/\/+$/, "")
+    : "https://aukaria.onrender.com"
+
+  let rawUrl = envUrl || fallback
+
+  // Si la variable viene con menciones a railway.app, forzamos Render
+  if (!rawUrl || String(rawUrl).includes("railway")) {
+    rawUrl = "https://aukaria.onrender.com"
+  }
+
+  const clean = String(rawUrl).trim().replace(/\/+$/, "")
   const schemed = /^https?:\/\//i.test(clean) ? clean : `https://${clean}`
 
   try {
     const parsed = new URL(schemed)
+    if (parsed.hostname.includes("railway")) {
+      return "https://aukaria.onrender.com"
+    }
     return parsed.origin // Retorna https://aukaria.onrender.com o https://localhost:7078
   } catch {
     return "https://aukaria.onrender.com"
@@ -286,11 +298,13 @@ function parsearBloqueSse(bloque) {
 // --- Autenticación ---
 
 export function iniciarGoogle(returnUrl) {
-  window.location.href = `${AUTH_BASE}/login-google${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ""}`
+  const backendUrl = getBackendBaseUrl()
+  window.location.href = `${backendUrl}/api/auth/login-google${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ""}`
 }
 
 export function iniciarMicrosoft(returnUrl) {
-  window.location.href = `${AUTH_BASE}/login-microsoft${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ""}`
+  const backendUrl = getBackendBaseUrl()
+  window.location.href = `${backendUrl}/api/auth/login-microsoft${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ""}`
 }
 
 export const solicitarOtp = (email) =>

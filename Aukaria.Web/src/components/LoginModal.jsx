@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { motion, useReducedMotion } from "framer-motion"
-import { iniciarGoogle, iniciarMicrosoft, solicitarOtp, verificarOtp, EMPRESA_ID } from "../services/apiService"
+import { solicitarOtp, verificarOtp, EMPRESA_ID } from "../services/apiService"
 
 const spring = { type: "spring", bounce: 0, duration: 0.45 }
 const springBtn = { type: "spring", stiffness: 500, damping: 30 }
@@ -75,6 +75,26 @@ export default function LoginModal({ onClose, onLogin }) {
     setInfo("")
     setCodigo("")
     setPaso("correo")
+  }
+
+  const handleGoogleLogin = () => {
+    const rawBackend =
+      import.meta.env.VITE_BACKEND_URL ||
+      import.meta.env.VITE_API_BASE_URL ||
+      (import.meta.env.DEV ? "https://localhost:7078" : "https://aukaria.onrender.com")
+    const cleanUrl = String(rawBackend).includes("railway") ? "https://aukaria.onrender.com" : rawBackend
+    const backendUrl = new URL(cleanUrl.startsWith("http") ? cleanUrl : `https://${cleanUrl}`).origin
+    window.location.href = `${backendUrl}/api/auth/login-google`
+  }
+
+  const handleMicrosoftLogin = () => {
+    const rawBackend =
+      import.meta.env.VITE_BACKEND_URL ||
+      import.meta.env.VITE_API_BASE_URL ||
+      (import.meta.env.DEV ? "https://localhost:7078" : "https://aukaria.onrender.com")
+    const cleanUrl = String(rawBackend).includes("railway") ? "https://aukaria.onrender.com" : rawBackend
+    const backendUrl = new URL(cleanUrl.startsWith("http") ? cleanUrl : `https://${cleanUrl}`).origin
+    window.location.href = `${backendUrl}/api/auth/login-microsoft`
   }
 
   const campoBase =
@@ -235,7 +255,7 @@ export default function LoginModal({ onClose, onLogin }) {
               <motion.button
                 type="button"
                 disabled={cargando}
-                onClick={() => iniciarMicrosoft()}
+                onClick={handleMicrosoftLogin}
                 whileTap={{ scale: 0.97 }}
                 transition={springBtn}
                 className="flex items-center justify-center gap-2.5 rounded-full border border-black/10 bg-white/70 px-5 py-3 text-sm font-semibold text-neutral-700 transition-colors duration-150 hover:bg-white hover:text-black disabled:opacity-70"
@@ -246,7 +266,7 @@ export default function LoginModal({ onClose, onLogin }) {
               <motion.button
                 type="button"
                 disabled={cargando}
-                onClick={() => iniciarGoogle()}
+                onClick={handleGoogleLogin}
                 whileTap={{ scale: 0.97 }}
                 transition={springBtn}
                 className="flex items-center justify-center gap-2.5 rounded-full border border-black/10 bg-white/70 px-5 py-3 text-sm font-semibold text-neutral-700 transition-colors duration-150 hover:bg-white hover:text-black disabled:opacity-70"
