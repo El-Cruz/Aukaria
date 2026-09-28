@@ -16,11 +16,56 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AukariaProductionCors", policy =>
     {
-        string[] origenes = (builder.Configuration["Cors:AllowedOrigins"]
-                ?? "http://localhost:5173,http://localhost:3000")
+        var configOrigins = (builder.Configuration["Cors:AllowedOrigins"] ?? "")
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-        policy.WithOrigins(origenes)
+        var explicitOrigins = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "https://aukaria.com",
+            "https://www.aukaria.com",
+            "http://localhost:5173",
+            "http://localhost:3000"
+        };
+
+        foreach (var origin in configOrigins)
+        {
+            explicitOrigins.Add(origin);
+        }
+
+        policy.WithOrigins([.. explicitOrigins, "https://*.vercel.app"])
+              .SetIsOriginAllowedToAllowWildcardSubdomains()
+              .SetIsOriginAllowed(origin =>
+              {
+                  if (string.IsNullOrWhiteSpace(origin)) return false;
+
+                  if (explicitOrigins.Contains(origin)) return true;
+
+                  if (Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+                  {
+                      // Permite dominios aukaria.com y cualquier subdominio
+                      if (uri.Host.Equals("aukaria.com", StringComparison.OrdinalIgnoreCase) ||
+                          uri.Host.EndsWith(".aukaria.com", StringComparison.OrdinalIgnoreCase))
+                      {
+                          return true;
+                      }
+
+                      // Permite cualquier despliegue o preview en vercel.app con HTTPS
+                      if (uri.Host.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase) &&
+                          uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
+                      {
+                          return true;
+                      }
+
+                      // Permite localhost en desarrollo
+                      if (uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) ||
+                          uri.Host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase))
+                      {
+                          return true;
+                      }
+                  }
+
+                  return false;
+              })
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
