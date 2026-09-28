@@ -27,7 +27,7 @@ public static class AukariaAuthExtensions
             .AddCookie(OAuthCookieScheme, cookie =>
             {
                 cookie.Cookie.Name = "Aukaria.OAuth";
-                cookie.Cookie.SameSite = SameSiteMode.None;
+                cookie.Cookie.SameSite = SameSiteMode.Lax;
                 cookie.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 cookie.Cookie.HttpOnly = true;
                 cookie.SlidingExpiration = true;
@@ -59,6 +59,11 @@ public static class AukariaAuthExtensions
                 google.ClientSecret = googleClientSecret;
                 google.CallbackPath = "/api/auth/signin-google";
                 google.SignInScheme = OAuthCookieScheme;
+
+                // CRÍTICO PARA RENDER / DOCKER:
+                google.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+                google.CorrelationCookie.SameSite = SameSiteMode.None;
+
                 google.Events.OnCreatingTicket = ctx => CrearSesionDesdeProviderAsync(ctx, "google", configuration);
             });
         }
@@ -71,6 +76,11 @@ public static class AukariaAuthExtensions
                 microsoft.ClientSecret = microsoftClientSecret;
                 microsoft.CallbackPath = "/api/auth/signin-microsoft";
                 microsoft.SignInScheme = OAuthCookieScheme;
+
+                // CRÍTICO PARA RENDER / DOCKER:
+                microsoft.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+                microsoft.CorrelationCookie.SameSite = SameSiteMode.None;
+
                 microsoft.Events.OnCreatingTicket = ctx => CrearSesionDesdeProviderAsync(ctx, "microsoft", configuration);
             });
         }

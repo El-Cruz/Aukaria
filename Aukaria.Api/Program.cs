@@ -81,8 +81,8 @@ if (builder.Environment.IsDevelopment())
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
-    options.ForwardedHeaders =
-        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+    options.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor | 
+                               Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto;
     options.KnownNetworks.Clear();
     options.KnownProxies.Clear();
 });
@@ -122,6 +122,8 @@ builder.Services.AddAukariaAuth(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseForwardedHeaders();
+
 bool hayConexionBd = !string.IsNullOrWhiteSpace(
     Aukaria.Infrastructure.DependencyInjection.ObtenerCadenaPostgresValida(app.Configuration));
 using (var scope = app.Services.CreateScope())
@@ -152,8 +154,6 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
-
-app.UseForwardedHeaders();
 
 app.UseExceptionHandler(errorApp =>
 {
