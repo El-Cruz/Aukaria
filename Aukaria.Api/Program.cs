@@ -164,4 +164,6 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/health");
 
+app.MapGet("/", () => Results.Ok(new { status = "Healthy", service = "Aukaria API .NET 9", timestamp = DateTime.UtcNow }));
+
 app.Run();

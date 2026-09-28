@@ -1,27 +1,34 @@
-// Limpia barras finales y define la raíz
-const RAW_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.PROD
-    ? "https://aukaria-production.up.railway.app"
-    : "https://localhost:7078")
+/**
+ * Deriva la URL base (origen) del backend de forma dinámica
+ * a partir de VITE_API_BASE_URL con fallback seguro hacia Render (o localhost en desarrollo).
+ */
+export const getBackendBaseUrl = () => {
+  const fallback = import.meta.env.DEV
+    ? "https://localhost:7078"
+    : "https://aukaria.onrender.com/api/AnalisisPredial"
+  const apiUrl = import.meta.env.VITE_API_BASE_URL || fallback
+  const clean = String(apiUrl).trim().replace(/\/+$/, "")
+  const schemed = /^https?:\/\//i.test(clean) ? clean : `https://${clean}`
 
-const CLEAN_URL = RAW_URL.replace(/\/+$/, "")
+  try {
+    const parsed = new URL(schemed)
+    return parsed.origin // Retorna https://aukaria.onrender.com o https://localhost:7078
+  } catch {
+    return "https://aukaria.onrender.com"
+  }
+}
 
-// Garantiza el esquema https si la variable viene sin protocolo
-const SCHEMED_URL = /^https?:\/\//.test(CLEAN_URL) ? CLEAN_URL : `https://${CLEAN_URL}`
+export const ROOT_URL = getBackendBaseUrl()
 
-// Elimina rutas legadas (/api/analisis) para evitar duplicados
-const ROOT_URL = SCHEMED_URL.replace(/\/api\/analisis$/i, "")
-
-// Garantiza que termine en /api/AnalisisPredial
-const API_BASE = ROOT_URL.includes("/api/AnalisisPredial")
-  ? ROOT_URL
-  : `${ROOT_URL}/api/AnalisisPredial`
+// Base para los endpoints de análisis predial (/api/AnalisisPredial)
+export const API_BASE = `${ROOT_URL}/api/AnalisisPredial`
 
 // Base para los endpoints de autenticación (/api/auth)
-const AUTH_BASE = `${ROOT_URL}/api/auth`
+export const AUTH_BASE = `${ROOT_URL}/api/auth`
 
-console.log("[Aukaria API Service] URL Base configurada:", API_BASE)
+console.log("[Aukaria API Service] Servidor backend configurado:", ROOT_URL)
+console.log("[Aukaria API Service] API Predial Base:", API_BASE)
+console.log("[Aukaria API Service] Auth Base:", AUTH_BASE)
 
 export const EMPRESA_ID = "11111111-1111-1111-1111-111111111111"
 export const USUARIO_ID = "22222222-2222-2222-2222-222222222222"
