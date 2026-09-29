@@ -51,8 +51,15 @@ const ANALISIS_TIMEOUT_MS = 240000
 const TOKEN_KEY = "aukaria_token"
 
 export function guardarToken(token) {
-  if (token) localStorage.setItem(TOKEN_KEY, token)
-  else localStorage.removeItem(TOKEN_KEY)
+  if (token) {
+    localStorage.setItem(TOKEN_KEY, token)
+    localStorage.setItem("token", token)
+    localStorage.setItem("authToken", token)
+  } else {
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem("token")
+    localStorage.removeItem("authToken")
+  }
 }
 
 export function obtenerToken() {

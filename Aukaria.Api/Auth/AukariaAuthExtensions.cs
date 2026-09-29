@@ -120,7 +120,14 @@ public static class AukariaAuthExtensions
         string token = jwt.Generar(
             new IniciarSesionUsuario(usuario.Id, usuario.Nombre, usuario.Email, usuario.EmpresaId));
 
-        string frontend = configuration["Authentication:RedirectToFrontend"] ?? "/";
+        string? frontend = configuration["Authentication:RedirectToFrontend"];
+        if (string.IsNullOrWhiteSpace(frontend)) frontend = configuration["FrontendUrl"];
+        if (string.IsNullOrWhiteSpace(frontend)) frontend = Environment.GetEnvironmentVariable("FRONTEND_URL");
+        if (string.IsNullOrWhiteSpace(frontend)) frontend = "https://aukaria.com";
+        frontend = frontend.TrimEnd('/');
+        // Nunca permitir un redirect relativo: caería sobre /api/auth/signin-google y el middleware de Google fallaría con "oauth state was missing or invalid".
+        if (!frontend.StartsWith("http", StringComparison.OrdinalIgnoreCase)) frontend = "https://aukaria.com";
+
         string separador = frontend.Contains('?') ? "&" : "?";
         context.Properties.RedirectUri = $"{frontend}{separador}token={Uri.EscapeDataString(token)}";
     }
