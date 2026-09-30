@@ -4,8 +4,10 @@ using Aukaria.Application.DTOs.JsonSchema;
 using Aukaria.Application.DTOs.Requests;
 using Aukaria.Application.DTOs.Responses;
 using Aukaria.Application.Interfaces;
+using Aukaria.Application.Mappers;
 using Aukaria.Domain.Entities;
 using Aukaria.Domain.Enums;
+using Aukaria.Domain.Models;
 
 namespace Aukaria.Application.Services;
 
@@ -123,18 +125,20 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
         int consumoTokens,
         CancellationToken cancellationToken)
     {
+        var model = resultado.ToDomainModel();
+
         var analisis = new AnalisisPredial
         {
             Id = Guid.NewGuid(),
             EmpresaId = solicitud.EmpresaId,
             UsuarioId = solicitud.UsuarioId,
-            MatriculaFMI = resultado.MatriculaFMI,
-            ORIP = resultado.ORIP,
-            NombrePredio = resultado.NombrePredio,
+            MatriculaFMI = model.MatriculaFMI,
+            ORIP = model.ORIP,
+            NombrePredio = model.NombrePredio,
             Proposito = solicitud.Proposito,
             TipoDocumento = solicitud.TipoDocumento,
-            Viabilidad = MapearViabilidad(resultado.Viabilidad),
-            ResumenEjecutivo = resultado.ResumenEjecutivo,
+            Viabilidad = model.Viabilidad,
+            ResumenEjecutivo = model.ResumenEjecutivo,
             ResultadoJson = JsonSerializer.Serialize(resultado),
             FechaAnalisis = DateTime.UtcNow,
             ConsumoTokens = consumoTokens
@@ -147,10 +151,10 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
             Id = analisis.Id,
             MatriculaFMI = analisis.MatriculaFMI,
             NombrePredio = analisis.NombrePredio,
-            ORIP = resultado.ORIP,
-            Departamento = resultado.Departamento,
-            Municipio = resultado.Municipio,
-            CedulaCatastral = resultado.CedulaCatastral,
+            ORIP = model.ORIP,
+            Departamento = model.Departamento,
+            Municipio = model.Municipio,
+            CedulaCatastral = model.CedulaCatastral,
             Proposito = analisis.Proposito,
             TipoDocumento = analisis.TipoDocumento,
             NombreTipoDocumento = analisis.TipoDocumento.ObtenerNombre(),
@@ -165,14 +169,14 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
         Guid analisisId,
         CancellationToken cancellationToken = default)
     {
-        AnalisisResultadoJsonDto resultadoDto = await ObtenerResultadoDtoAsync(analisisId, cancellationToken);
+        DiagnosticoPredialModel model = await ObtenerModeloDominioAsync(analisisId, cancellationToken);
 
-        byte[] bytes = await _diagnosticoWordGeneratorService.GenerarDiagnosticoWordAsync(resultadoDto, cancellationToken);
+        byte[] bytes = await _diagnosticoWordGeneratorService.GenerarDiagnosticoWordAsync(model, cancellationToken);
 
         return new ReporteWordDto
         {
             Archivo = bytes,
-            NombreArchivo = ConstruirNombreArchivo(resultadoDto.MatriculaFMI, analisisId)
+            NombreArchivo = ConstruirNombreArchivo(model.MatriculaFMI, analisisId)
         };
     }
 
@@ -180,14 +184,14 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
         Guid analisisId,
         CancellationToken cancellationToken = default)
     {
-        AnalisisResultadoJsonDto resultadoDto = await ObtenerResultadoDtoAsync(analisisId, cancellationToken);
+        DiagnosticoPredialModel model = await ObtenerModeloDominioAsync(analisisId, cancellationToken);
 
-        byte[] bytes = await _diagnosticoWordGeneratorService.GenerarAnexoTractoWordAsync(resultadoDto, cancellationToken);
+        byte[] bytes = await _diagnosticoWordGeneratorService.GenerarAnexoTractoWordAsync(model, cancellationToken);
 
         return new ReporteWordDto
         {
             Archivo = bytes,
-            NombreArchivo = ConstruirNombreAnexo(resultadoDto.MatriculaFMI, analisisId)
+            NombreArchivo = ConstruirNombreAnexo(model.MatriculaFMI, analisisId)
         };
     }
 
@@ -201,7 +205,7 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
         await _emailService.EnviarReporteAsync(destinatario, reporte.NombreArchivo, reporte.Archivo, fmi, cancellationToken);
     }
 
-    private async Task<AnalisisResultadoJsonDto> ObtenerResultadoDtoAsync(Guid analisisId, CancellationToken cancellationToken)
+    private async Task<DiagnosticoPredialModel> ObtenerModeloDominioAsync(Guid analisisId, CancellationToken cancellationToken)
     {
         AnalisisPredial? analisis = await _repository.ObtenerPorIdAsync(analisisId, cancellationToken);
 
@@ -210,8 +214,10 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
             throw new KeyNotFoundException("El análisis predial solicitado no existe.");
         }
 
-        return JsonSerializer.Deserialize<AnalisisResultadoJsonDto>(analisis.ResultadoJson)
+        var dto = JsonSerializer.Deserialize<AnalisisResultadoJsonDto>(analisis.ResultadoJson)
             ?? new AnalisisResultadoJsonDto();
+
+        return dto.ToDomainModel();
     }
 
     private static string ConstruirNombreArchivo(string matriculaFmi, Guid analisisId)

@@ -170,6 +170,46 @@ function App() {
   const segundoPlanoRef = useRef(false)
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const token = params.get("token")
+
+    if (token) {
+      try {
+        localStorage.setItem("token", token)
+        localStorage.setItem("authToken", token)
+
+        const base64Url = token.split(".")[1]
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/")
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split("")
+            .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+            .join("")
+        )
+        const payload = JSON.parse(jsonPayload)
+
+        const user = {
+          id: payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || payload.sub,
+          name: payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || payload.name || "Usuario",
+          email: payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"] || payload.email,
+          empresaId: payload.EmpresaId,
+        }
+
+        localStorage.setItem("user", JSON.stringify(user))
+        setUsuario(normalizarUsuario({
+          Id: user.id,
+          Nombre: user.name,
+          Email: user.email,
+          EmpresaId: user.empresaId,
+        }))
+        setPaso("app")
+        window.history.replaceState({}, document.title, window.location.pathname)
+        return
+      } catch (err) {
+        console.error("Error al procesar el token de autenticación:", err)
+      }
+    }
+
     obtenerUsuarioActual().then((dto) => {
       if (dto) {
         setUsuario(normalizarUsuario(dto))
