@@ -5,6 +5,7 @@ using Aukaria.Application.DTOs.Responses;
 using Aukaria.Application.Exceptions;
 using Aukaria.Application.Interfaces;
 using Aukaria.Domain.Enums;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
@@ -187,13 +188,15 @@ public sealed class AnalisisPredialController : ControllerBase
     }
 
     [HttpGet("historial")]
-    [Authorize]
-    public async Task<IActionResult> GetHistorial(CancellationToken cancellationToken = default)
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> ObtenerHistorial(CancellationToken cancellationToken = default)
     {
-        string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out Guid usuarioId))
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                      ?? User.FindFirstValue("sub");
+
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var usuarioId))
         {
-            return Unauthorized();
+            return Unauthorized("Identificador de usuario no válido en el token.");
         }
 
         var historial = await _analisisService.ObtenerHistorialAsync(usuarioId, cancellationToken);
