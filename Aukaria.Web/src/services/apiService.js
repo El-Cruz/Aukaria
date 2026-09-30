@@ -356,5 +356,24 @@ export async function enviarReporteWord(analisisId) {
 }
 
 export async function obtenerHistorial() {
-  return request("/historial", { method: "GET" })
+  const token = localStorage.getItem("token") || localStorage.getItem("authToken")
+
+  if (!token) {
+    console.warn("[Aukaria API] No hay token en localStorage para consultar historial.")
+    return []
+  }
+
+  const response = await fetch(`${API_BASE}/historial`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  if (!response.ok) {
+    throw new Error(`Error ${response.status} al obtener historial`)
+  }
+
+  return await response.json()
 }
