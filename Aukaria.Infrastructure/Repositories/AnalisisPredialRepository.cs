@@ -30,6 +30,16 @@ public sealed class AnalisisPredialRepository : IAnalisisPredialRepository
             .FirstOrDefaultAsync(cancellationToken);
     }
 
+    public async Task<List<AnalisisPredial>> ObtenerHistorialPorUsuarioAsync(Guid usuarioId, CancellationToken cancellationToken = default)
+    {
+        return await _context.AnalisisPrediales
+            .AsNoTracking()
+            .Where(a => a.UsuarioId == usuarioId)
+            .OrderByDescending(a => a.FechaAnalisis)
+            .Take(50)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task AgregarAsync(AnalisisPredial analisis, CancellationToken cancellationToken = default)
     {
         await _context.AnalisisPrediales.AddAsync(analisis, cancellationToken);

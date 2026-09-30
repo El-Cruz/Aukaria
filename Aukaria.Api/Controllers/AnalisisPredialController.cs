@@ -186,6 +186,20 @@ public sealed class AnalisisPredialController : ControllerBase
         await EnviarEventoAsync("error", new { detalle });
     }
 
+    [HttpGet("historial")]
+    [Authorize]
+    public async Task<IActionResult> GetHistorial(CancellationToken cancellationToken = default)
+    {
+        string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out Guid usuarioId))
+        {
+            return Unauthorized();
+        }
+
+        var historial = await _analisisService.ObtenerHistorialAsync(usuarioId, cancellationToken);
+        return Ok(historial);
+    }
+
     [HttpGet("descargar-word/{id:guid}")]
     public async Task<IActionResult> DescargarReporteWord(Guid id, CancellationToken cancellationToken = default)
     {

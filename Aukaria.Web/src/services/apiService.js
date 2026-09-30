@@ -354,3 +354,7 @@ export const cerrarSesion = async () => {
 export async function enviarReporteWord(analisisId) {
   return request(`/envia-word/${analisisId}`, { method: "POST" }, "json", 0)
 }
+
+export async function obtenerHistorial() {
+  return request("/historial", { method: "GET" })
+}

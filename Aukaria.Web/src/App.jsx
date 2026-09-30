@@ -15,6 +15,7 @@ import {
   obtenerUsuarioActual,
   enviarReporteWord,
   cerrarSesion,
+  obtenerHistorial,
 } from "./services/apiService"
 
 const fade = { duration: 0.3 }
@@ -204,6 +205,7 @@ function App() {
         }))
         setPaso("app")
         window.history.replaceState({}, document.title, window.location.pathname)
+        cargarHistorial()
         return
       } catch (err) {
         console.error("Error al procesar el token de autenticación:", err)
@@ -214,11 +216,23 @@ function App() {
       if (dto) {
         setUsuario(normalizarUsuario(dto))
         setPaso("app")
+        cargarHistorial()
       } else {
         setPaso("landing")
       }
     })
   }, [])
+
+  const cargarHistorial = async () => {
+    try {
+      const data = await obtenerHistorial()
+      if (Array.isArray(data)) {
+        setHistorial(data)
+      }
+    } catch (err) {
+      console.error("Error al cargar historial:", err)
+    }
+  }
 
   const notificar = (message) => {
     setErrorMsg(message)
@@ -331,7 +345,11 @@ function App() {
     } catch {
       /* ignora errores al cerrar sesión */
     }
+    localStorage.removeItem("token")
+    localStorage.removeItem("authToken")
+    localStorage.removeItem("user")
     setUsuario(null)
+    setHistorial([])
     pendienteRef.current = null
     setPreAnalisisData(null)
     setEnSegundoPlano(false)

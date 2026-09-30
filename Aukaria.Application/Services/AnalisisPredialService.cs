@@ -195,6 +195,11 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
         };
     }
 
+    public async Task<List<AnalisisPredial>> ObtenerHistorialAsync(Guid usuarioId, CancellationToken cancellationToken = default)
+    {
+        return await _repository.ObtenerHistorialPorUsuarioAsync(usuarioId, cancellationToken);
+    }
+
     public async Task EnviarReportePorCorreoAsync(Guid analisisId, string destinatario, CancellationToken cancellationToken = default)
     {
         ReporteWordDto reporte = await DescargarReporteWordAsync(analisisId, cancellationToken);
