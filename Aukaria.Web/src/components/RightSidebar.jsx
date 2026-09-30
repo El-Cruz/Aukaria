@@ -10,8 +10,16 @@ const VIABILITY = {
   critica: { label: "ALERTA CRÍTICA", dot: "bg-rose-500", badge: "border-rose-500/30 bg-rose-500/10 text-rose-600" },
 }
 
+function normalize(valor) {
+  return String(valor ?? "").toLowerCase()
+}
+
 function viabilidadKey(valor) {
-  const v = (valor || "").toLowerCase().replace(/[\s-]+/g, "")
+  if (typeof valor === "number") {
+    const map = { 0: "viable", 1: "revision", 2: "critica" }
+    return map[valor] ?? "viable"
+  }
+  const v = normalize(valor).replace(/[\s-]+/g, "")
   if (v.includes("requiere") || v === "requiererevision") return "revision"
   if (v.includes("critic") || v === "alertacritica") return "critica"
   return "viable"
@@ -20,7 +28,7 @@ function viabilidadKey(valor) {
 const PREGUNTAS_WORKSPACE = ["¿Qué normativa aplica a este documento?", "¿Cómo funciona la bolsa de créditos?"]
 
 function respuestaIA(pregunta, tipoKey = "CTL") {
-  const q = pregunta.toLowerCase()
+  const q = String(pregunta ?? "").toLowerCase()
   if (q.includes("crédito") || q.includes("credito") || q.includes("bolsa") || q.includes("plan"))
     return "Tu cuenta está en el Plan Empresarial con 50 créditos mensuales. Cada documento procesado consume 1 crédito y la bolsa se reabastece el primer día de cada mes. Puedes ampliar créditos desde el panel de administración."
   if (q.includes("normativa") || q.includes("ley") || q.includes("decreto") || q.includes("circular"))

@@ -104,7 +104,7 @@ function ErrorBanner({ message, onClose }) {
 
 function normalizarUsuario(dto) {
   const rol =
-    String(dto?.Rol || dto?.rol || "").toLowerCase() === "adminempresa"
+    String(dto?.Rol ?? dto?.rol ?? "").toLowerCase() === "adminempresa"
       ? "Admin Legal"
       : "Analista Jurídico"
   return {

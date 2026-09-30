@@ -39,15 +39,23 @@ const TEXTO_CERO_RIESGOS =
 const OBSERVACION_RUNAP =
   "Verificación Preventiva en RUNAP: Se recomienda validar la georreferenciación del predio en el portal oficial del Registro Único Nacional de Áreas Protegidas (RUNAP), para verificar que no coincida con zonas de exclusión o reservas de conservación estricta."
 
+function normalize(valor) {
+  return String(valor ?? "").toLowerCase()
+}
+
 function viabilidadKey(valor) {
-  const v = (valor || "").toLowerCase().replace(/[\s-]+/g, "")
+  if (typeof valor === "number") {
+    const map = { 0: "viable", 1: "revision", 2: "critica" }
+    return map[valor] ?? "viable"
+  }
+  const v = normalize(valor).replace(/[\s-]+/g, "")
   if (v.includes("requiere") || v === "requiererevision") return "revision"
   if (v.includes("critic") || v === "alertacritica" || v.includes("noviable")) return "critica"
   return "viable"
 }
 
 function nivelRiesgo(valor) {
-  const v = (valor || "").toLowerCase().replace(/riesgo/g, "").trim()
+  const v = normalize(valor).replace(/riesgo/g, "").trim()
   if (v.includes("alto")) return "alto"
   if (v.includes("bajo")) return "bajo"
   return "medio"
@@ -81,7 +89,7 @@ function mapAnotacion(item, i) {
 }
 
 function capitalizar(valor) {
-  const v = (valor || "").trim()
+  const v = String(valor ?? "").trim()
   if (!v) return v
   return v
     .toLowerCase()

@@ -24,8 +24,16 @@ const VIABILITY = {
   },
 }
 
+function normalize(valor) {
+  return String(valor ?? "").toLowerCase()
+}
+
 function viabilidadKey(valor) {
-  const v = (valor || "").toLowerCase().replace(/[\s-]+/g, "")
+  if (typeof valor === "number") {
+    const map = { 0: "viable", 1: "revision", 2: "critica" }
+    return map[valor] ?? "viable"
+  }
+  const v = normalize(valor).replace(/[\s-]+/g, "")
   if (v.includes("requiere") || v === "requiererevision") return "revision"
   if (v.includes("critic") || v === "alertacritica") return "critica"
   return "viable"
