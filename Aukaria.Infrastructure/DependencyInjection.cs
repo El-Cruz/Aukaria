@@ -1,4 +1,4 @@
-using Aukaria.Application.Interfaces;
+﻿using Aukaria.Application.Interfaces;
 using Aukaria.Application.Options;
 using Aukaria.Infrastructure.Persistence;
 using Aukaria.Infrastructure.Repositories;
@@ -51,6 +51,10 @@ public static class DependencyInjection
         }
 
         rawUrl = rawUrl.Trim();
+        if (rawUrl.Contains("localdb", StringComparison.OrdinalIgnoreCase) || rawUrl.Contains("Trusted_Connection", StringComparison.OrdinalIgnoreCase))
+        {
+            return string.Empty;
+        }
 
         if (rawUrl.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
             rawUrl.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))

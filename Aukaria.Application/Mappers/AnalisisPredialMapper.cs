@@ -1,4 +1,4 @@
-using Aukaria.Application.DTOs.JsonSchema;
+﻿using Aukaria.Application.DTOs.JsonSchema;
 using Aukaria.Domain.Enums;
 using Aukaria.Domain.Models;
 
@@ -163,12 +163,15 @@ public static class AnalisisPredialMapper
         if (string.IsNullOrWhiteSpace(viabilidad))
             return EstadoViabilidad.RequiereRevision;
 
+        if (Enum.TryParse<EstadoViabilidad>(viabilidad.Trim(), ignoreCase: true, out var estadoDirecto))
+            return estadoDirecto;
+
         var normalized = viabilidad.Trim().ToLowerInvariant();
 
         return normalized switch
         {
             "viable" => EstadoViabilidad.Viable,
-            "no viable" or "alerta critica" or "alertacrítica" => EstadoViabilidad.AlertaCritica,
+            "no viable" or "alerta critica" or "alertacritica" or "alertacrítica" or "critica" or "crítica" => EstadoViabilidad.AlertaCritica,
             _ => EstadoViabilidad.RequiereRevision
         };
     }

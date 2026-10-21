@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Aukaria.Application.Interfaces;
 using Aukaria.Domain.Entities;
 using Microsoft.AspNetCore.Authentication.Cookies;

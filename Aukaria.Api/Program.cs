@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Text.Json.Serialization;
 using Aukaria.Api.Auth;
 using Aukaria.Application.Interfaces;
@@ -212,3 +212,5 @@ app.MapHealthChecks("/health");
 app.MapGet("/", () => Results.Ok(new { status = "Healthy", service = "Aukaria API .NET 9", timestamp = DateTime.UtcNow }));
 
 app.Run();
+
+public partial class Program { }

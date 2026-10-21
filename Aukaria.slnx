@@ -3,4 +3,5 @@
   <Project Path="Aukaria.Application/Aukaria.Application.csproj" />
   <Project Path="Aukaria.Domain/Aukaria.Domain.csproj" />
   <Project Path="Aukaria.Infrastructure/Aukaria.Infrastructure.csproj" />
+  <Project Path="Aukaria.Tests/Aukaria.Tests.csproj" />
 </Solution>

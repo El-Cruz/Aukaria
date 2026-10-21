@@ -103,12 +103,12 @@ public static class GravamenesSectionBuilder
         return tabla;
     }
 
-    private static TableCell CrearCeldaDato(string texto, bool negrita = false, string fondoHex = null, int gridSpan = 1)
+    private static TableCell CrearCeldaDato(string? texto, bool negrita = false, string? fondoHex = null, int gridSpan = 1)
     {
         var cell = new TableCell();
         var para = new Paragraph();
         var run = new Run();
-        run.Append(new Text(texto) { Space = SpaceProcessingModeValues.Preserve });
+        run.Append(new Text(texto ?? string.Empty) { Space = SpaceProcessingModeValues.Preserve });
 
         var props = new RunProperties();
         if (negrita) props.Append(new Bold());
@@ -157,7 +157,7 @@ public static class GravamenesSectionBuilder
     {
         var para = new Paragraph();
         var run = new Run();
-        run.Append(new Text(texto) { Space = SpaceProcessingModeValues.Preserve });
+        run.Append(new Text(texto ?? string.Empty) { Space = SpaceProcessingModeValues.Preserve });
         run.RunProperties = new RunProperties
         {
             Color = new Color { Val = "1F2937" },
