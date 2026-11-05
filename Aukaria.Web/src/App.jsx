@@ -8,6 +8,7 @@ import ProcessingOverlay from "./components/ProcessingOverlay"
 import FloatingAnalysisTracker from "./components/FloatingAnalysisTracker"
 import CompletionToast from "./components/CompletionToast"
 import TopographyBackground from "./components/TopographyBackground"
+import { Component as Loader3 } from "./components/ui/loader-3"
 import {
   descargarReporteWord,
   descargarAnexoTractoWord,
@@ -59,7 +60,8 @@ function extraerInfoPredio(res) {
   }
 }
 
-function ErrorBanner({ message, onClose }) {
+function ErrorBanner({ message, onClose, tipo = "error" }) {
+  const exito = tipo === "exito"
   return (
     <motion.div
       role="alert"
@@ -69,26 +71,40 @@ function ErrorBanner({ message, onClose }) {
       transition={spring}
       className="fixed bottom-5 left-1/2 z-[60] w-[calc(100%-2rem)] max-w-md -translate-x-1/2"
     >
-      <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50/80 p-4 shadow-2xl backdrop-blur-2xl">
+      <div
+        className={`flex items-start gap-3 rounded-2xl border p-4 shadow-2xl backdrop-blur-2xl ${
+          exito ? "border-emerald-200 bg-emerald-50/80" : "border-red-200 bg-red-50/80"
+        }`}
+      >
         <svg
           viewBox="0 0 24 24"
-          className="mt-0.5 h-4 w-4 shrink-0 text-red-600"
+          className={`mt-0.5 h-4 w-4 shrink-0 ${exito ? "text-emerald-600" : "text-red-600"}`}
           fill="none"
           stroke="currentColor"
           strokeWidth={2}
         >
           <circle cx="12" cy="12" r="9" />
-          <path d="M12 8v4M12 16h.01" strokeLinecap="round" />
+          {exito ? (
+            <path d="m8 12 3 3 5-6" strokeLinecap="round" strokeLinejoin="round" />
+          ) : (
+            <path d="M12 8v4M12 16h.01" strokeLinecap="round" />
+          )}
         </svg>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-bold text-red-600">Algo salió mal</p>
-          <p className="mt-0.5 text-xs leading-relaxed text-red-700/80">{message}</p>
+          <p className={`text-xs font-bold ${exito ? "text-emerald-700" : "text-red-600"}`}>
+            {exito ? "¡Listo!" : "Algo salió mal"}
+          </p>
+          <p className={`mt-0.5 text-xs leading-relaxed ${exito ? "text-emerald-800/80" : "text-red-700/80"}`}>{message}</p>
         </div>
         <button
           type="button"
           onClick={onClose}
           aria-label="Cerrar notificación"
-          className="shrink-0 rounded-full p-1 text-red-400 transition-colors duration-150 hover:bg-red-100 hover:text-red-600"
+          className={`shrink-0 rounded-full p-1 transition-colors duration-150 ${
+            exito
+              ? "text-emerald-500 hover:bg-emerald-100 hover:text-emerald-700"
+              : "text-red-400 hover:bg-red-100 hover:text-red-600"
+          }`}
         >
           <svg
             viewBox="0 0 24 24"
@@ -174,6 +190,8 @@ function App() {
   const [historial, setHistorial] = useState([])
   const [progresoAnalisis, setProgresoAnalisis] = useState(null)
   const [errorMsg, setErrorMsg] = useState("")
+  const [notifTipo, setNotifTipo] = useState("error")
+  const [enviandoCorreo, setEnviandoCorreo] = useState(false)
   const [enSegundoPlano, setEnSegundoPlano] = useState(false)
   const [notificacionLista, setNotificacionLista] = useState(null)
   const errorTimerRef = useRef(null)
@@ -243,7 +261,8 @@ function App() {
     }
   }
 
-  const notificar = (message) => {
+  const notificar = (message, tipo = "error") => {
+    setNotifTipo(tipo)
     setErrorMsg(message)
     window.clearTimeout(errorTimerRef.current)
     errorTimerRef.current = window.setTimeout(() => setErrorMsg(""), 6000)
@@ -402,10 +421,18 @@ function App() {
       setPaso("login")
       return
     }
+    setEnviandoCorreo(true)
     try {
       await enviarReporteWord(resultado.Id, correoUsuario)
-      notificar(correoUsuario ? `Reporte enviado a ${correoUsuario}.` : "Reporte enviado a tu correo.")
+      setEnviandoCorreo(false)
+      notificar(
+        correoUsuario
+          ? `El documento fue enviado con éxito a ${correoUsuario}.`
+          : "El documento fue enviado con éxito a tu correo.",
+        "exito",
+      )
     } catch (err) {
+      setEnviandoCorreo(false)
       notificar(err.message || "No se pudo enviar el reporte por correo.")
     }
   }
@@ -494,7 +521,27 @@ function App() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {errorMsg && <ErrorBanner message={errorMsg} onClose={() => setErrorMsg("")} />}
+        {errorMsg && <ErrorBanner message={errorMsg} tipo={notifTipo} onClose={() => setErrorMsg("")} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {enviandoCorreo && (
+          <motion.div
+            key="enviando-correo"
+            role="status"
+            aria-live="polite"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={fade}
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-white/70 backdrop-blur-md"
+          >
+            <div className="flex flex-col items-center gap-6 rounded-3xl border border-neutral-200 bg-white/90 px-12 pb-8 pt-10 shadow-2xl">
+              <Loader3 />
+              <p className="text-sm font-semibold text-neutral-700">Enviando informe a tu correo…</p>
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   )
