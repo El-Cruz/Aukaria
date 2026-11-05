@@ -1,8 +1,9 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Aukaria.Application.Interfaces;
 using Aukaria.Domain.Entities;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.AspNetCore.Authentication.OAuth;
 
@@ -23,7 +24,29 @@ public static class AukariaAuthExtensions
         var microsoftClientId = configuration["Authentication:Microsoft:ClientId"] ?? string.Empty;
         var microsoftClientSecret = configuration["Authentication:Microsoft:ClientSecret"] ?? string.Empty;
 
-        var authenticationBuilder = services.AddAuthentication(SessionScheme)
+        Action<JwtBearerOptions> configurarJwt = jwt =>
+        {
+            jwt.RequireHttpsMetadata = false;
+            jwt.SaveToken = true;
+            jwt.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = configuration["Authentication:Jwt:Issuer"] ?? "Aukaria.Api",
+                ValidateAudience = true,
+                ValidAudience = configuration["Authentication:Jwt:Audience"] ?? "Aukaria.Web",
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = ObtenerClaveFirma(configuration),
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromSeconds(30)
+            };
+        };
+
+        var authenticationBuilder = services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = SessionScheme;
+                options.DefaultChallengeScheme = SessionScheme;
+                options.DefaultScheme = SessionScheme;
+            })
             .AddCookie(OAuthCookieScheme, cookie =>
             {
                 cookie.Cookie.Name = "Aukaria.OAuth";
@@ -34,22 +57,8 @@ public static class AukariaAuthExtensions
                 cookie.ExpireTimeSpan = TimeSpan.FromDays(7);
                 cookie.LoginPath = "/api/auth/login";
             })
-            .AddJwtBearer(SessionScheme, jwt =>
-            {
-                jwt.RequireHttpsMetadata = false;
-                jwt.SaveToken = true;
-                jwt.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = configuration["Authentication:Jwt:Issuer"] ?? "Aukaria.Api",
-                    ValidateAudience = true,
-                    ValidAudience = configuration["Authentication:Jwt:Audience"] ?? "Aukaria.Web",
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = ObtenerClaveFirma(configuration),
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.FromSeconds(30)
-                };
-            });
+            .AddJwtBearer(SessionScheme, configurarJwt)
+            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, configurarJwt);
 
         if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
         {

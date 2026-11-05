@@ -188,7 +188,7 @@ public sealed class AnalisisPredialController : ControllerBase
     }
 
     [HttpGet("historial")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = $"{AukariaAuthExtensions.SessionScheme},{JwtBearerDefaults.AuthenticationScheme}")]
     public async Task<IActionResult> ObtenerHistorial(CancellationToken cancellationToken = default)
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
@@ -237,15 +237,20 @@ public sealed class AnalisisPredialController : ControllerBase
         }
     }
 
-    [Authorize]
     [HttpPost("envia-word/{id:guid}")]
-    public async Task<IActionResult> EnviarReporteWord(Guid id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> EnviarReporteWord(
+        Guid id,
+        [FromQuery] string? correo = null,
+        CancellationToken cancellationToken = default)
     {
-        string? email = User.FindFirstValue(ClaimTypes.Email);
+        string? email = !string.IsNullOrWhiteSpace(correo)
+            ? correo.Trim()
+            : (User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue("email"));
+
         _logger.LogInformation("Recibida solicitud de envío de reporte por correo. AnalisisId={AnalisisId}, Email={Email}", id, email);
         if (string.IsNullOrWhiteSpace(email))
         {
-            return Unauthorized("No hay un correo asociado a la sesión.");
+            return BadRequest(new { mensaje = "Debes ingresar tu correo o iniciar sesión para recibir el informe." });
         }
 
         try
@@ -255,11 +260,11 @@ public sealed class AnalisisPredialController : ControllerBase
         }
         catch (KeyNotFoundException)
         {
-            return NotFound("El análisis predial especificado no fue encontrado.");
+            return NotFound(new { mensaje = "El análisis predial especificado no fue encontrado." });
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(new { mensaje = ex.Message });
         }
     }
 

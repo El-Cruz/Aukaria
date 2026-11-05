@@ -16,6 +16,8 @@ import {
   enviarReporteWord,
   cerrarSesion,
   obtenerHistorial,
+  guardarToken,
+  obtenerToken,
 } from "./services/apiService"
 
 const fade = { duration: 0.3 }
@@ -126,7 +128,15 @@ function normalizarUsuario(dto) {
 const tieneTokenInicial = (() => {
   const match = window.location.search?.match(/[?&]token=([^&]+)/)
   if (match) return true
-  try { return !!localStorage.getItem("aukaria_token") } catch { return false }
+  try {
+    return !!(
+      localStorage.getItem("aukaria_token") ||
+      localStorage.getItem("token") ||
+      localStorage.getItem("authToken")
+    )
+  } catch {
+    return false
+  }
 })()
 
 function reproducirTonoCompletado() {
@@ -176,8 +186,7 @@ function App() {
 
     if (token) {
       try {
-        localStorage.setItem("token", token)
-        localStorage.setItem("authToken", token)
+        guardarToken(token)
 
         const base64Url = token.split(".")[1]
         const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/")
@@ -345,8 +354,7 @@ function App() {
     } catch {
       /* ignora errores al cerrar sesión */
     }
-    localStorage.removeItem("token")
-    localStorage.removeItem("authToken")
+    guardarToken(null)
     localStorage.removeItem("user")
     setUsuario(null)
     setHistorial([])
@@ -388,9 +396,15 @@ function App() {
 
   const handleEnviarPorCorreo = async () => {
     if (!resultado) return
+    const correoUsuario = usuario?.email || usuario?.Email
+    if (!correoUsuario && !obtenerToken()) {
+      notificar("Debes iniciar sesión para recibir el informe por correo.")
+      setPaso("login")
+      return
+    }
     try {
-      await enviarReporteWord(resultado.Id)
-      notificar("Reporte enviado a tu correo.")
+      await enviarReporteWord(resultado.Id, correoUsuario)
+      notificar(correoUsuario ? `Reporte enviado a ${correoUsuario}.` : "Reporte enviado a tu correo.")
     } catch (err) {
       notificar(err.message || "No se pudo enviar el reporte por correo.")
     }

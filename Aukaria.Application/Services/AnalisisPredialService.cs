@@ -207,7 +207,11 @@ public sealed class AnalisisPredialService : IAnalisisPredialService
         AnalisisPredial? analisis = await _repository.ObtenerPorIdAsync(analisisId, cancellationToken);
         string fmi = analisis?.MatriculaFMI ?? string.Empty;
 
-        await _emailService.EnviarReporteAsync(destinatario, reporte.NombreArchivo, reporte.Archivo, fmi, cancellationToken);
+        bool enviado = await _emailService.EnviarReporteAsync(destinatario, reporte.NombreArchivo, reporte.Archivo, fmi, cancellationToken);
+        if (!enviado)
+        {
+            throw new InvalidOperationException("No se pudo enviar el correo. Por favor verifica las credenciales de correo en el servidor o intenta más tarde.");
+        }
     }
 
     private async Task<DiagnosticoPredialModel> ObtenerModeloDominioAsync(Guid analisisId, CancellationToken cancellationToken)

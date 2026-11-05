@@ -51,6 +51,7 @@ const ANALISIS_TIMEOUT_MS = 240000
 const TOKEN_KEY = "aukaria_token"
 
 export function guardarToken(token) {
+  if (typeof window === "undefined") return
   if (token) {
     localStorage.setItem(TOKEN_KEY, token)
     localStorage.setItem("token", token)
@@ -63,7 +64,13 @@ export function guardarToken(token) {
 }
 
 export function obtenerToken() {
-  return typeof window !== "undefined" ? localStorage.getItem(TOKEN_KEY) || null : null
+  if (typeof window === "undefined") return null
+  return (
+    localStorage.getItem(TOKEN_KEY) ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("authToken") ||
+    null
+  )
 }
 
 export function capturarTokenDeUrl() {
@@ -137,7 +144,10 @@ async function request(path, options = {}, tipoRespuesta = "json", timeoutMs = T
   }
 
   if (!response.ok) {
-    let message = `[HTTP ${response.status}] Error desconocido en el servidor.`
+    let message =
+      response.status === 401
+        ? "Tu sesión ha expirado o debes iniciar sesión para realizar esta acción."
+        : `[HTTP ${response.status}] Error desconocido en el servidor.`
     try {
       const texto = await response.text()
       if (texto) {
@@ -145,6 +155,8 @@ async function request(path, options = {}, tipoRespuesta = "json", timeoutMs = T
           const data = JSON.parse(texto)
           if (typeof data === "string" && data) {
             message = `[HTTP ${response.status}] ${data}`
+          } else if (data?.mensaje) {
+            message = data.mensaje
           } else if (data?.detalle) {
             message = `[HTTP ${response.status}] ${data.detalle}`
           } else if (data?.detail) {
@@ -351,8 +363,9 @@ export const cerrarSesion = async () => {
   }
 }
 
-export async function enviarReporteWord(analisisId) {
-  return request(`/envia-word/${analisisId}`, { method: "POST" }, "json", 0)
+export async function enviarReporteWord(analisisId, correo = null) {
+  const query = correo ? `?correo=${encodeURIComponent(correo)}` : ""
+  return request(`/envia-word/${analisisId}${query}`, { method: "POST" }, "json", 0)
 }
 
 export async function obtenerHistorial() {
