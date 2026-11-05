@@ -8,7 +8,6 @@ import ProcessingOverlay from "./components/ProcessingOverlay"
 import FloatingAnalysisTracker from "./components/FloatingAnalysisTracker"
 import CompletionToast from "./components/CompletionToast"
 import TopographyBackground from "./components/TopographyBackground"
-import { Component as Loader3 } from "./components/ui/loader-3"
 import {
   descargarReporteWord,
   descargarAnexoTractoWord,
@@ -191,7 +190,6 @@ function App() {
   const [progresoAnalisis, setProgresoAnalisis] = useState(null)
   const [errorMsg, setErrorMsg] = useState("")
   const [notifTipo, setNotifTipo] = useState("error")
-  const [enviandoCorreo, setEnviandoCorreo] = useState(false)
   const [enSegundoPlano, setEnSegundoPlano] = useState(false)
   const [notificacionLista, setNotificacionLista] = useState(null)
   const errorTimerRef = useRef(null)
@@ -421,10 +419,8 @@ function App() {
       setPaso("login")
       return
     }
-    setEnviandoCorreo(true)
     try {
       await enviarReporteWord(resultado.Id, correoUsuario)
-      setEnviandoCorreo(false)
       notificar(
         correoUsuario
           ? `El documento fue enviado con éxito a ${correoUsuario}.`
@@ -432,7 +428,6 @@ function App() {
         "exito",
       )
     } catch (err) {
-      setEnviandoCorreo(false)
       notificar(err.message || "No se pudo enviar el reporte por correo.")
     }
   }
@@ -524,25 +519,6 @@ function App() {
         {errorMsg && <ErrorBanner message={errorMsg} tipo={notifTipo} onClose={() => setErrorMsg("")} />}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {enviandoCorreo && (
-          <motion.div
-            key="enviando-correo"
-            role="status"
-            aria-live="polite"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={fade}
-            className="fixed inset-0 z-[70] flex items-center justify-center bg-white/70 backdrop-blur-md"
-          >
-            <div className="flex flex-col items-center gap-6 rounded-3xl border border-neutral-200 bg-white/90 px-12 pb-8 pt-10 shadow-2xl">
-              <Loader3 />
-              <p className="text-sm font-semibold text-neutral-700">Enviando informe a tu correo…</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }
