@@ -363,3 +363,7 @@ MigrationBackup/
 FodyWeavers.xsd
 .neon
 .env.local
+
+.env
+.env.*
+!.env.example
