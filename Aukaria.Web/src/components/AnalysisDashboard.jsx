@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion"
 import AnnotationsTimeline from "./AnnotationsTimeline"
 import LegalNoticeModal from "./LegalNoticeModal"
 import { resolvedorTipo } from "../utils/tiposDocumento"
+import { useLanguage } from "../i18n/LanguageContext"
 
 const spring = { type: "spring", stiffness: 260, damping: 26 }
 
@@ -108,13 +109,14 @@ function CampoValor({ campo, valor }) {
 }
 
 function SeccionCard({ num, titulo, children }) {
+  const { langShort } = useLanguage()
   return (
     <motion.section
       variants={item}
       className="rounded-3xl border border-neutral-200 bg-white/80 p-6 shadow-sm backdrop-blur-md md:p-7"
     >
       <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-400">
-        Sección {num}
+        {langShort === "en" ? `Section ${num}` : `Sección ${num}`}
       </p>
       <h2 className="mt-1.5 text-xl font-black tracking-tight text-neutral-900">{titulo}</h2>
       <div className="mt-5">{children}</div>
@@ -268,6 +270,25 @@ export default function AnalysisDashboard({
       className="mx-auto flex w-full max-w-5xl flex-col gap-5"
       aria-label="Diagnóstico Jurídico Catastral"
     >
+      {analisis?.ResumenDeduplicacion && (
+        <motion.div
+          variants={item}
+          className={`rounded-2xl border p-4 text-xs leading-relaxed backdrop-blur-md ${
+            analisis.CoherenciaVerificada === false
+              ? "border-amber-300 bg-amber-50/90 text-amber-900"
+              : "border-emerald-200 bg-emerald-50/90 text-emerald-900"
+          }`}
+        >
+          <p className="font-bold">{analisis.ResumenDeduplicacion}</p>
+          {Array.isArray(analisis.DiscrepanciasCoherencia) && analisis.DiscrepanciasCoherencia.length > 0 && (
+            <ul className="mt-2 list-disc space-y-1 pl-4">
+              {analisis.DiscrepanciasCoherencia.map((d, idx) => (
+                <li key={idx}>{d}</li>
+              ))}
+            </ul>
+          )}
+        </motion.div>
+      )}
       {/* 1. Encabezado institucional */}
       <motion.section
         variants={item}
@@ -284,7 +305,7 @@ export default function AnalysisDashboard({
               </p>
             </div>
             <h1 className="mt-3 text-2xl font-black tracking-tight text-neutral-900 md:text-4xl">
-              Diagnóstico Jurídico Catastral
+              {analisis?.Idioma === "en" || false ? "Cadastral Legal Diagnosis" : "Diagnóstico Jurídico Catastral"}
             </h1>
             <p className="mt-2 font-mono text-xs text-neutral-500">{fmiLinea}</p>
             <p className="mt-1 text-sm font-bold text-neutral-800">{capitalizar(nombrePredio)}</p>

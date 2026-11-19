@@ -12,4 +12,8 @@ public class PreAnalisisFmiResponseDto
     public string Orip { get; set; } = string.Empty;
     public string NombrePredio { get; set; } = string.Empty;
     public string Municipio { get; set; } = string.Empty;
+    public DateOnly? FechaExpedicionCertificado { get; set; }
+    public DateOnly? FechaExpedicionPrevio { get; set; }
+    public string AccionSugerida { get; set; } = "Nuevo";
+    public int CantidadVigentes { get; set; }
 }

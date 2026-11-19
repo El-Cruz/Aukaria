@@ -8,7 +8,6 @@ using Aukaria.Domain.Entities;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,11 +19,29 @@ public sealed class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly IUsuarioRepository _usuarioRepository;
+    private readonly IConfiguration _configuration;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IAuthService authService, IUsuarioRepository usuarioRepository)
+    public AuthController(
+        IAuthService authService,
+        IUsuarioRepository usuarioRepository,
+        IConfiguration configuration,
+        ILogger<AuthController> logger)
     {
         _authService = authService;
         _usuarioRepository = usuarioRepository;
+        _configuration = configuration;
+        _logger = logger;
+    }
+
+    [HttpGet("providers")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ObtenerProveedoresConfigurados()
+    {
+        return Ok(new
+        {
+            google = await EsquemaRegistradoAsync(GoogleDefaults.AuthenticationScheme)
+        });
     }
 
     [HttpGet("login-google")]
@@ -32,29 +49,32 @@ public sealed class AuthController : ControllerBase
     {
         if (!await EsquemaRegistradoAsync(GoogleDefaults.AuthenticationScheme))
         {
-            return BadRequest("El inicio de sesión con Google no está configurado.");
+            _logger.LogWarning("Intento de login con Google sin credenciales configuradas.");
+            return RedirigirErrorAlFrontend("El inicio de sesión con Google no está configurado.");
         }
 
-        string redirect = string.IsNullOrWhiteSpace(returnUrl)
-            ? "/"
-            : returnUrl;
+        string redirect = ValidarReturnUrl(returnUrl);
         var props = new AuthenticationProperties { RedirectUri = redirect };
         return Challenge(props, GoogleDefaults.AuthenticationScheme);
     }
 
-    [HttpGet("login-microsoft")]
-    public async Task<IActionResult> LoginMicrosoft([FromQuery] string? returnUrl = null)
+    private IActionResult RedirigirErrorAlFrontend(string mensaje)
     {
-        if (!await EsquemaRegistradoAsync(MicrosoftAccountDefaults.AuthenticationScheme))
+        string frontend = AukariaAuthExtensions.ObtenerFrontendUrl(_configuration);
+        string separador = frontend.Contains('?') ? "&" : "?";
+        return Redirect($"{frontend}{separador}authError={Uri.EscapeDataString(mensaje)}");
+    }
+
+    private static string ValidarReturnUrl(string? returnUrl)
+    {
+        if (string.IsNullOrWhiteSpace(returnUrl))
         {
-            return BadRequest("El inicio de sesión con Microsoft no está configurado.");
+            return "/";
         }
 
-        string redirect = string.IsNullOrWhiteSpace(returnUrl)
-            ? "/"
-            : returnUrl;
-        var props = new AuthenticationProperties { RedirectUri = redirect };
-        return Challenge(props, MicrosoftAccountDefaults.AuthenticationScheme);
+        return Uri.IsWellFormedUriString(returnUrl, UriKind.Relative) && returnUrl.StartsWith('/') && !returnUrl.StartsWith("//")
+            ? returnUrl
+            : "/";
     }
 
     private async Task<bool> EsquemaRegistradoAsync(string scheme)

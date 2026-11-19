@@ -1,10 +1,10 @@
 using System.Security.Claims;
 using Aukaria.Application.Interfaces;
 using Aukaria.Domain.Entities;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.AspNetCore.Authentication.OAuth;
 
 namespace Aukaria.Api.Auth;
@@ -21,8 +21,6 @@ public static class AukariaAuthExtensions
 
         var googleClientId = configuration["Authentication:Google:ClientId"] ?? string.Empty;
         var googleClientSecret = configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
-        var microsoftClientId = configuration["Authentication:Microsoft:ClientId"] ?? string.Empty;
-        var microsoftClientSecret = configuration["Authentication:Microsoft:ClientSecret"] ?? string.Empty;
 
         Action<JwtBearerOptions> configurarJwt = jwt =>
         {
@@ -74,23 +72,7 @@ public static class AukariaAuthExtensions
                 google.CorrelationCookie.SameSite = SameSiteMode.None;
 
                 google.Events.OnCreatingTicket = ctx => CrearSesionDesdeProviderAsync(ctx, "google", configuration);
-            });
-        }
-
-        if (!string.IsNullOrWhiteSpace(microsoftClientId) && !string.IsNullOrWhiteSpace(microsoftClientSecret))
-        {
-            authenticationBuilder.AddMicrosoftAccount(MicrosoftAccountDefaults.AuthenticationScheme, microsoft =>
-            {
-                microsoft.ClientId = microsoftClientId;
-                microsoft.ClientSecret = microsoftClientSecret;
-                microsoft.CallbackPath = "/api/auth/signin-microsoft";
-                microsoft.SignInScheme = OAuthCookieScheme;
-
-                // CRÍTICO PARA RENDER / DOCKER:
-                microsoft.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
-                microsoft.CorrelationCookie.SameSite = SameSiteMode.None;
-
-                microsoft.Events.OnCreatingTicket = ctx => CrearSesionDesdeProviderAsync(ctx, "microsoft", configuration);
+                google.Events.OnRemoteFailure = ctx => ManejarErrorOAuthAsync(ctx, configuration);
             });
         }
 
@@ -103,7 +85,11 @@ public static class AukariaAuthExtensions
         IConfiguration configuration)
     {
         string sub = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-        string email = context.Principal?.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
+        string email = context.Principal?.FindFirstValue(ClaimTypes.Email)
+                       ?? context.Principal?.FindFirstValue("email")
+                       ?? context.Principal?.FindFirstValue("preferred_username")
+                       ?? context.Principal?.FindFirstValue(ClaimTypes.Upn)
+                       ?? string.Empty;
         string nombre = context.Principal?.FindFirstValue(ClaimTypes.Name)
                         ?? context.Principal?.FindFirstValue("name")
                         ?? email.Split('@')[0];
@@ -129,16 +115,30 @@ public static class AukariaAuthExtensions
         string token = jwt.Generar(
             new IniciarSesionUsuario(usuario.Id, usuario.Nombre, usuario.Email, usuario.EmpresaId));
 
+        string frontend = ObtenerFrontendUrl(configuration);
+        string separador = frontend.Contains('?') ? "&" : "?";
+        context.Properties.RedirectUri = $"{frontend}{separador}token={Uri.EscapeDataString(token)}";
+    }
+
+    private static Task ManejarErrorOAuthAsync(RemoteFailureContext context, IConfiguration configuration)
+    {
+        string frontend = ObtenerFrontendUrl(configuration);
+        string separador = frontend.Contains('?') ? "&" : "?";
+        string error = context.Failure?.Message ?? "Error de autenticación con el proveedor externo.";
+        context.Response.Redirect($"{frontend}{separador}authError={Uri.EscapeDataString(error)}");
+        context.HandleResponse();
+        return Task.CompletedTask;
+    }
+
+    public static string ObtenerFrontendUrl(IConfiguration configuration)
+    {
         string? frontend = configuration["Authentication:RedirectToFrontend"];
         if (string.IsNullOrWhiteSpace(frontend)) frontend = configuration["FrontendUrl"];
         if (string.IsNullOrWhiteSpace(frontend)) frontend = Environment.GetEnvironmentVariable("FRONTEND_URL");
         if (string.IsNullOrWhiteSpace(frontend)) frontend = "https://aukaria.com";
         frontend = frontend.TrimEnd('/');
-        // Nunca permitir un redirect relativo: caería sobre /api/auth/signin-google y el middleware de Google fallaría con "oauth state was missing or invalid".
         if (!frontend.StartsWith("http", StringComparison.OrdinalIgnoreCase)) frontend = "https://aukaria.com";
-
-        string separador = frontend.Contains('?') ? "&" : "?";
-        context.Properties.RedirectUri = $"{frontend}{separador}token={Uri.EscapeDataString(token)}";
+        return frontend;
     }
 
     public static Guid ObtenerEmpresaIdPorDefecto(IConfiguration configuration)

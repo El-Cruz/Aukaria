@@ -1,16 +1,13 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion, useReducedMotion } from "framer-motion"
-import { solicitarOtp, verificarOtp, EMPRESA_ID } from "../services/apiService"
+import { solicitarOtp, verificarOtp, obtenerProveedoresAuth, EMPRESA_ID } from "../services/apiService"
+import { useT } from "../i18n/LanguageContext"
 
 const spring = { type: "spring", bounce: 0, duration: 0.45 }
 const springBtn = { type: "spring", stiffness: 500, damping: 30 }
 
-const MODOS = {
-  login: { titulo: "Iniciar sesión", botonCodigo: "Enviar código", requiereNombre: false },
-  registro: { titulo: "Crear cuenta", botonCodigo: "Crear cuenta y enviar código", requiereNombre: true },
-}
-
-export default function LoginModal({ onClose, onLogin }) {
+export default function LoginModal({ onClose, onLogin, initialError = "" }) {
+  const t = useT()
   const reduce = useReducedMotion()
   const [modo, setModo] = useState("login")
   const [correo, setCorreo] = useState("")
@@ -18,8 +15,20 @@ export default function LoginModal({ onClose, onLogin }) {
   const [codigo, setCodigo] = useState("")
   const [paso, setPaso] = useState("correo") // correo | otp
   const [cargando, setCargando] = useState(false)
-  const [error, setError] = useState("")
+  const [error, setError] = useState(initialError)
   const [info, setInfo] = useState("")
+  const [providers, setProviders] = useState({ google: true })
+
+  useEffect(() => {
+    obtenerProveedoresAuth().then((p) => {
+      if (p) setProviders(p)
+    })
+  }, [])
+
+  const MODOS = {
+    login: { titulo: t("login.modeLogin"), botonCodigo: t("login.btnCodeLogin"), requiereNombre: false },
+    registro: { titulo: t("login.modeRegister"), botonCodigo: t("login.btnCodeRegister"), requiereNombre: true },
+  }
 
   const conf = MODOS[modo]
 
@@ -27,21 +36,21 @@ export default function LoginModal({ onClose, onLogin }) {
     evento?.preventDefault()
     setError("")
     if (!correo.trim() || !correo.includes("@")) {
-      setError("Ingresa un correo válido.")
+      setError(t("login.errInvalidEmail"))
       return
     }
     if (conf.requiereNombre && !nombre.trim()) {
-      setError("Ingresa tu nombre para crear la cuenta.")
+      setError(t("login.errNameRequired"))
       return
     }
     setCargando(true)
     try {
       await solicitarOtp(correo.trim())
-      setInfo(`Te enviamos un código a ${correo.trim()}. Revísalo e ingrésalo abajo.`)
+      setInfo(t("login.otpSent", { email: correo.trim() }))
       setPaso("otp")
       setCargando(false)
     } catch (err) {
-      setError(err.message || "No se pudo enviar el código.")
+      setError(err.message || t("login.errSendCode"))
       setCargando(false)
     }
   }
@@ -51,7 +60,7 @@ export default function LoginModal({ onClose, onLogin }) {
     setError("")
     setInfo("")
     if (!codigo.trim()) {
-      setError("Ingresa el código de verificación.")
+      setError(t("login.errOtpRequired"))
       return
     }
     setCargando(true)
@@ -65,7 +74,7 @@ export default function LoginModal({ onClose, onLogin }) {
       })
       onLogin(res?.usuario ?? res)
     } catch (err) {
-      setError(err.message || "Código incorrecto o expirado.")
+      setError(err.message || t("login.errOtpInvalid"))
       setCargando(false)
     }
   }
@@ -87,16 +96,6 @@ export default function LoginModal({ onClose, onLogin }) {
     window.location.href = `${backendUrl}/api/auth/login-google`
   }
 
-  const handleMicrosoftLogin = () => {
-    const rawBackend =
-      import.meta.env.VITE_BACKEND_URL ||
-      import.meta.env.VITE_API_BASE_URL ||
-      (import.meta.env.DEV ? "https://localhost:7078" : "https://aukaria.onrender.com")
-    const cleanUrl = String(rawBackend).includes("railway") ? "https://aukaria.onrender.com" : rawBackend
-    const backendUrl = new URL(cleanUrl.startsWith("http") ? cleanUrl : `https://${cleanUrl}`).origin
-    window.location.href = `${backendUrl}/api/auth/login-microsoft`
-  }
-
   const campoBase =
     "w-full rounded-2xl border border-black/10 bg-black/5 px-4 py-3 text-sm text-black placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring)]"
 
@@ -104,7 +103,7 @@ export default function LoginModal({ onClose, onLogin }) {
     <motion.div
       role="dialog"
       aria-modal="true"
-      aria-label="Acceso Corporativo B2B"
+      aria-label={t("login.aria")}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -121,7 +120,7 @@ export default function LoginModal({ onClose, onLogin }) {
         <button
           type="button"
           onClick={onClose}
-          aria-label="Cerrar ventana de acceso"
+          aria-label={t("login.close")}
           className="absolute right-5 top-5 rounded-full border border-black/10 bg-white/60 p-2 text-neutral-500 transition-colors duration-150 hover:bg-black hover:text-white"
         >
           <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -132,11 +131,11 @@ export default function LoginModal({ onClose, onLogin }) {
         <header className="flex flex-col items-center text-center">
           <span className="text-2xl font-black tracking-tighter text-black">AUKARIA</span>
           <span className="mt-1 rounded border border-black/20 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-neutral-500">
-            Multitenant B2B · SNR
+            {t("login.badge")}
           </span>
           <h2 className="mt-5 text-xl font-bold tracking-tight text-black">{conf.titulo}</h2>
           <p className="mt-1.5 text-xs text-neutral-500">
-            Accede con tu cuenta corporativa o con tu correo verificando un código.
+            {t("login.subtitle")}
           </p>
         </header>
 
@@ -163,13 +162,13 @@ export default function LoginModal({ onClose, onLogin }) {
             {conf.requiereNombre && (
               <label className="flex flex-col gap-1.5">
                 <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500">
-                  Nombre completo
+                  {t("login.fullName")}
                 </span>
                 <input
                   type="text"
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
-                  placeholder="Nombre del analista"
+                  placeholder={t("login.fullNamePlaceholder")}
                   autoComplete="name"
                   className={campoBase}
                 />
@@ -178,14 +177,14 @@ export default function LoginModal({ onClose, onLogin }) {
 
             <label className="flex flex-col gap-1.5">
               <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500">
-                Correo Corporativo
+                {t("login.email")}
               </span>
               <input
                 type="email"
                 required
                 value={correo}
                 onChange={(e) => setCorreo(e.target.value)}
-                placeholder="nombre@empresa.com.co"
+                placeholder={t("login.emailPlaceholder")}
                 autoComplete="email"
                 className={campoBase}
               />
@@ -200,7 +199,7 @@ export default function LoginModal({ onClose, onLogin }) {
               transition={springBtn}
               className="mt-1 flex items-center justify-center gap-1.5 rounded-full bg-[var(--cta)] px-7 py-3 text-sm font-semibold text-white shadow-[0_4px_16px_color-mix(in_srgb,var(--cta)_35%,transparent)] transition-colors duration-150 hover:bg-[var(--cta-hover)] disabled:opacity-70"
             >
-              {cargando ? "Enviando…" : conf.botonCodigo}
+              {cargando ? t("login.sending") : conf.botonCodigo}
             </motion.button>
           </form>
         ) : (
@@ -208,7 +207,7 @@ export default function LoginModal({ onClose, onLogin }) {
             {info && <p className="text-xs font-medium text-emerald-700">{info}</p>}
             <label className="flex flex-col gap-1.5">
               <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-500">
-                Código de verificación
+                {t("login.otpCode")}
               </span>
               <input
                 type="text"
@@ -230,7 +229,7 @@ export default function LoginModal({ onClose, onLogin }) {
               transition={springBtn}
               className="mt-1 flex items-center justify-center gap-1.5 rounded-full bg-[var(--cta)] px-7 py-3 text-sm font-semibold text-white shadow-[0_4px_16px_color-mix(in_srgb,var(--cta)_35%,transparent)] transition-colors duration-150 hover:bg-[var(--cta-hover)] disabled:opacity-70"
             >
-              {cargando ? "Verificando…" : "Verificar e ingresar"}
+              {cargando ? t("login.verifying") : t("login.verifyBtn")}
             </motion.button>
 
             <button
@@ -238,7 +237,7 @@ export default function LoginModal({ onClose, onLogin }) {
               onClick={volver}
               className="text-center text-xs font-semibold text-neutral-500 transition-colors duration-150 hover:text-black"
             >
-              ← Volver y cambiar correo
+              {t("login.backChangeEmail")}
             </button>
           </form>
         )}
@@ -247,32 +246,22 @@ export default function LoginModal({ onClose, onLogin }) {
           <>
             <div className="my-6 flex items-center gap-3">
               <span className="h-px flex-1 bg-black/10" />
-              <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-neutral-400">o SSO</span>
+              <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-neutral-400">{t("login.orSso")}</span>
               <span className="h-px flex-1 bg-black/10" />
             </div>
 
             <div className="flex flex-col gap-2.5">
               <motion.button
                 type="button"
-                disabled={cargando}
-                onClick={handleMicrosoftLogin}
-                whileTap={{ scale: 0.97 }}
-                transition={springBtn}
-                className="flex items-center justify-center gap-2.5 rounded-full border border-black/10 bg-white/70 px-5 py-3 text-sm font-semibold text-neutral-700 transition-colors duration-150 hover:bg-white hover:text-black disabled:opacity-70"
-              >
-                <AzureIcon />
-                Continuar con Microsoft
-              </motion.button>
-              <motion.button
-                type="button"
-                disabled={cargando}
+                disabled={cargando || !providers.google}
+                title={!providers.google ? t("login.notConfigured") : undefined}
                 onClick={handleGoogleLogin}
                 whileTap={{ scale: 0.97 }}
                 transition={springBtn}
-                className="flex items-center justify-center gap-2.5 rounded-full border border-black/10 bg-white/70 px-5 py-3 text-sm font-semibold text-neutral-700 transition-colors duration-150 hover:bg-white hover:text-black disabled:opacity-70"
+                className="flex items-center justify-center gap-2.5 rounded-full border border-black/10 bg-white/70 px-5 py-3 text-sm font-semibold text-neutral-700 transition-colors duration-150 hover:bg-white hover:text-black disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <GoogleIcon />
-                Continuar con Google
+                {t("login.google")}
               </motion.button>
             </div>
           </>
@@ -283,17 +272,6 @@ export default function LoginModal({ onClose, onLogin }) {
         </p>
       </motion.div>
     </motion.div>
-  )
-}
-
-function AzureIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden="true">
-      <rect x="2" y="2" width="9.5" height="9.5" rx="1.5" fill="currentColor" opacity="0.9" />
-      <rect x="12.5" y="2" width="9.5" height="9.5" rx="1.5" fill="currentColor" opacity="0.5" />
-      <rect x="2" y="12.5" width="9.5" height="9.5" rx="1.5" fill="currentColor" opacity="0.5" />
-      <rect x="12.5" y="12.5" width="9.5" height="9.5" rx="1.5" fill="currentColor" opacity="0.3" />
-    </svg>
   )
 }
 

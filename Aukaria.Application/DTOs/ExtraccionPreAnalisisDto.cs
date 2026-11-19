@@ -8,5 +8,6 @@ public class ExtraccionPreAnalisisDto
     public string Orip { get; set; } = string.Empty;
     public string NombrePredio { get; set; } = string.Empty;
     public string Municipio { get; set; } = string.Empty;
+    public DateOnly? FechaExpedicionCertificado { get; set; }
     public string TextoExtraido { get; set; } = string.Empty;
 }

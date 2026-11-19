@@ -10,6 +10,7 @@ public interface IClaudeApiService
         string textoDocumento,
         PropositoAnalisis proposito,
         TipoDocumentoJuridico tipoDocumento,
+        string idioma = "es",
         CancellationToken cancellationToken = default);
 
     Task<ClaudeAnalisisResultadoDto> AnalizarDocumentoStreamingAsync(
@@ -17,5 +18,6 @@ public interface IClaudeApiService
         PropositoAnalisis proposito,
         TipoDocumentoJuridico tipoDocumento,
         Func<ProgresoAnalisisDto, Task> onProgreso,
+        string idioma = "es",
         CancellationToken cancellationToken = default);
 }

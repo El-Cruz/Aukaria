@@ -37,6 +37,16 @@ namespace Aukaria.Infrastructure.Migrations
                     b.Property<DateTime>("FechaAnalisis")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateOnly?>("FechaExpedicionCertificado")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Idioma")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasDefaultValue("es");
+
                     b.Property<string>("MatriculaFMI")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -54,6 +64,14 @@ namespace Aukaria.Infrastructure.Migrations
 
                     b.Property<int>("Proposito")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("Reemplazado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid?>("ReemplazadoPorId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ResultadoJson")
                         .IsRequired()
@@ -79,6 +97,8 @@ namespace Aukaria.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("MatriculaFMI", "EmpresaId");
+
+                    b.HasIndex("EmpresaId", "MatriculaFMI", "FechaExpedicionCertificado");
 
                     b.ToTable("AnalisisPrediales", (string)null);
                 });

@@ -9,6 +9,7 @@ import {
 } from "framer-motion"
 import { preAnalizarCtl } from "../services/apiService"
 import { identificadorPreAnalisis, resolvedorTipo } from "../utils/tiposDocumento"
+import { useT } from "../i18n/LanguageContext"
 
 const spring = { type: "spring", stiffness: 300, damping: 20 }
 const fade = { duration: 0.2 }
@@ -33,6 +34,7 @@ function PdfIcon({ className = "" }) {
 }
 
 export default function PdfUploadZone({ onAnalyze = () => {} }) {
+  const t = useT()
   const inputRef = useRef(null)
   const reduce = useReducedMotion()
   const errorRef = useRef(null)
@@ -75,6 +77,10 @@ export default function PdfUploadZone({ onAnalyze = () => {} }) {
           nombrePredio: res.NombrePredio || "",
           municipio: res.Municipio || "",
           cedulaCatastral: res.CedulaCatastral || "",
+          accionSugerida: res.AccionSugerida || "Nuevo",
+          fechaExpedicion: res.FechaExpedicionCertificado || "",
+          fechaExpedicionPrevio: res.FechaExpedicionPrevio || "",
+          cantidadVigentes: res.CantidadVigentes || 0,
         })
       })
       .catch((err) => {
@@ -303,9 +309,34 @@ export default function PdfUploadZone({ onAnalyze = () => {} }) {
                       </span>
                     )}
                     {pre?.analisisIdPrevio && (
-                      <span className="inline-flex w-fit items-center gap-2 rounded-full border border-black/10 bg-black/5 px-3.5 py-1.5 font-mono text-[11px] text-neutral-500">
-                        Análisis previo registrado · {pre.analisisIdPrevio}
-                      </span>
+                      <div className="rounded-2xl border border-amber-500/25 bg-amber-400/10 px-4 py-3 text-left text-xs leading-relaxed text-amber-900">
+                        <p className="font-mono text-[11px] font-bold uppercase tracking-wider text-amber-700">
+                          {pre.accionSugerida === "MismaFecha"
+                            ? t("upload.analyzeCoherenceBtn")
+                            : pre.accionSugerida === "VersionAntigua"
+                              ? `FMI ${pre.fmi}`
+                              : t("upload.analyzeUpdateBtn")}
+                        </p>
+                        <p className="mt-1">
+                          {pre.accionSugerida === "MismaFecha"
+                            ? t("upload.dupSameDate", {
+                                fmi: pre.fmi,
+                                date: pre.fechaExpedicion || pre.fechaExpedicionPrevio || "—",
+                                count: (pre.cantidadVigentes || 1) + 1,
+                              })
+                            : pre.accionSugerida === "VersionAntigua"
+                              ? t("upload.dupOlder", {
+                                  fmi: pre.fmi,
+                                  prevDate: pre.fechaExpedicionPrevio || "—",
+                                  newDate: pre.fechaExpedicion || "—",
+                                })
+                              : t("upload.dupUpdate", {
+                                  fmi: pre.fmi,
+                                  prevDate: pre.fechaExpedicionPrevio || "—",
+                                  newDate: pre.fechaExpedicion || "—",
+                                })}
+                        </p>
+                      </div>
                     )}
                     {!fmiOk && (
                       <p className="text-left text-xs leading-relaxed text-neutral-500">
@@ -339,7 +370,11 @@ export default function PdfUploadZone({ onAnalyze = () => {} }) {
                         }
                         className="rounded-full bg-[var(--cta)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_4px_16px_color-mix(in_srgb,var(--cta)_30%,transparent)] hover:bg-[var(--cta-hover)]"
                       >
-                        Iniciar Diagnóstico Jurídico →
+                        {pre?.accionSugerida === "MismaFecha"
+                          ? `${t("upload.analyzeCoherenceBtn")} →`
+                          : pre?.accionSugerida === "Actualizacion"
+                            ? `${t("upload.analyzeUpdateBtn")} →`
+                            : `${t("upload.analyzeBtn")} →`}
                       </motion.button>
                     </div>
                     <p className="mt-4 font-mono text-[11px] text-neutral-500">

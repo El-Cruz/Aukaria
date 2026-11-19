@@ -8,6 +8,7 @@ import ProcessingOverlay from "./components/ProcessingOverlay"
 import FloatingAnalysisTracker from "./components/FloatingAnalysisTracker"
 import CompletionToast from "./components/CompletionToast"
 import TopographyBackground from "./components/TopographyBackground"
+import { useLanguage } from "./i18n/LanguageContext"
 import {
   descargarReporteWord,
   descargarAnexoTractoWord,
@@ -60,6 +61,7 @@ function extraerInfoPredio(res) {
 }
 
 function ErrorBanner({ message, onClose, tipo = "error" }) {
+  const t = useT()
   const exito = tipo === "exito"
   return (
     <motion.div
@@ -91,7 +93,7 @@ function ErrorBanner({ message, onClose, tipo = "error" }) {
         </svg>
         <div className="min-w-0 flex-1">
           <p className={`text-xs font-bold ${exito ? "text-emerald-700" : "text-red-600"}`}>
-            {exito ? "¡Listo!" : "Algo salió mal"}
+            {exito ? t("common.done") : t("common.errorTitle")}
           </p>
           <p className={`mt-0.5 text-xs leading-relaxed ${exito ? "text-emerald-800/80" : "text-red-700/80"}`}>{message}</p>
         </div>
@@ -181,7 +183,9 @@ function reproducirTonoCompletado() {
 }
 
 function App() {
+  const { langShort } = useLanguage()
   const [paso, setPaso] = useState(tieneTokenInicial ? "cargando" : "landing")
+  const [authError, setAuthError] = useState("")
   const [usuario, setUsuario] = useState(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [resultado, setResultado] = useState(null)
@@ -199,6 +203,13 @@ function App() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const token = params.get("token")
+    const errParam = params.get("authError")
+
+    if (errParam) {
+      setAuthError(errParam)
+      notificar(errParam, "error")
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
 
     if (token) {
       try {
@@ -280,10 +291,14 @@ function App() {
         tipoDocumento: meta?.tipoDocumento || "CTL",
         empresaId: usuario?.empresaId,
         usuarioId: usuario?.usuarioId,
+        idioma: langShort,
         onProgreso: (progreso) => setProgresoAnalisis(progreso),
       })
       setProgresoAnalisis(null)
       setResultado(res)
+      if (res?.ResumenDeduplicacion) {
+        notificar(res.ResumenDeduplicacion, res.CoherenciaVerificada === false ? "error" : "exito")
+      }
       const info = extraerInfoPredio(res)
       setPreAnalisisData((prev) => ({
         ...(prev || {}),
@@ -480,7 +495,14 @@ function App() {
 
       <AnimatePresence>
         {paso === "login" && (
-          <LoginModal onClose={() => setPaso("landing")} onLogin={handleLogin} />
+          <LoginModal
+            initialError={authError}
+            onClose={() => {
+              setAuthError("")
+              setPaso("landing")
+            }}
+            onLogin={handleLogin}
+          />
         )}
       </AnimatePresence>
 

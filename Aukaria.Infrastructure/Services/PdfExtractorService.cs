@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Aukaria.Application.DTOs;
 using Aukaria.Application.Exceptions;
 using Aukaria.Application.Interfaces;
+using Aukaria.Application.Services;
 using UglyToad.PdfPig;
 
 namespace Aukaria.Infrastructure.Services;
@@ -45,6 +46,10 @@ public sealed class PdfExtractorService : IPdfExtractorService
 
     private static readonly Regex PatronMunicipio = new(
         @"MUNICIPIO(?:\s+O\s+VEREDA)?[\s:]*[N°º#]?[\s:]*(?:DE\s+)?([A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ\.\-][A-ZÁÉÍÓÚÑ0-9\s\.\-]{2,40})",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+    private static readonly Regex PatronFechaExpedicion = new(
+        @"(?:FECHA\s+DE\s+EXPEDICI[ÓO]N|IMPRESO\s+EL|EXPEDIDO\s+EL|FECHA\s+CERTIFICADO)[\s:]*([^\n]{6,45})",
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     private static readonly Regex PatronEtiquetaSiguiente = new(
@@ -112,6 +117,7 @@ public sealed class PdfExtractorService : IPdfExtractorService
             Orip = NormalizarMetadato(ExtraerPrimera(texto, PatronOrip)),
             NombrePredio = NormalizarMetadato(ExtraerPrimera(texto, PatronNombrePredio)),
             Municipio = NormalizarMetadato(ExtraerPrimera(texto, PatronMunicipio)),
+            FechaExpedicionCertificado = ComparadorAnalisisService.ParsearFechaTexto(ExtraerPrimera(texto, PatronFechaExpedicion)),
             TextoExtraido = texto
         };
     }

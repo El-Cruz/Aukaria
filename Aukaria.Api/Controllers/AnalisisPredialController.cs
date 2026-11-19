@@ -69,6 +69,7 @@ public sealed class AnalisisPredialController : ControllerBase
         [FromForm] TipoDocumentoJuridico tipoDocumento,
         [FromForm] Guid empresaId,
         [FromForm] Guid usuarioId,
+        [FromForm] string? idioma = "es",
         CancellationToken cancellationToken = default)
     {
         if (archivoPdf is null || archivoPdf.Length == 0)
@@ -89,7 +90,8 @@ public sealed class AnalisisPredialController : ControllerBase
             Proposito = proposito,
             TipoDocumento = tipoDocumento,
             EmpresaId = empresaReal,
-            UsuarioId = usuarioReal
+            UsuarioId = usuarioReal,
+            Idioma = idioma ?? "es"
         };
 
         using var stream = archivoPdf.OpenReadStream();
@@ -113,6 +115,7 @@ public sealed class AnalisisPredialController : ControllerBase
         [FromForm] TipoDocumentoJuridico tipoDocumento,
         [FromForm] Guid empresaId,
         [FromForm] Guid usuarioId,
+        [FromForm] string? idioma = "es",
         CancellationToken cancellationToken = default)
     {
         Response.StatusCode = 200;
@@ -140,7 +143,8 @@ public sealed class AnalisisPredialController : ControllerBase
             Proposito = proposito,
             TipoDocumento = tipoDocumento,
             EmpresaId = empresaReal,
-            UsuarioId = usuarioReal
+            UsuarioId = usuarioReal,
+            Idioma = idioma ?? "es"
         };
 
         using var stream = archivoPdf.OpenReadStream();

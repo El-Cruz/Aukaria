@@ -10,4 +10,5 @@ public class SolicitudAnalisisRequestDto
     public Guid EmpresaId { get; set; }
     public Guid UsuarioId { get; set; }
     public string ContenidoTextoCtl { get; set; } = string.Empty;
+    public string Idioma { get; set; } = "es";
 }

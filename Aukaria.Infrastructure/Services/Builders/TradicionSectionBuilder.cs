@@ -8,7 +8,8 @@ public static class TradicionSectionBuilder
 {
     public static void Build(Body body, DiagnosticoPredialModel model)
     {
-        CrearTituloSeccion(body, "A. TITULARIDAD REGISTRADA");
+        bool en = string.Equals(model.Idioma, "en", StringComparison.OrdinalIgnoreCase);
+        CrearTituloSeccion(body, en ? "A. REGISTERED OWNERSHIP" : "A. TITULARIDAD REGISTRADA");
 
         var filas = new List<string[]>();
         foreach (var titular in model.Titulares)
@@ -23,13 +24,16 @@ public static class TradicionSectionBuilder
         }
         if (filas.Count == 0)
         {
-            filas.Add(new[] { CapitalizarPalabras(Valor(model.PropietarioActual)), "No reportado", "No reportado", "No reportado" });
+            string nr = en ? "Not reported" : "No reportado";
+            filas.Add(new[] { CapitalizarPalabras(Valor(model.PropietarioActual)), nr, nr, nr });
         }
 
-        body.Append(CrearTablaBase(new[] { "NOMBRE", "IDENTIFICACIÓN", "CONDICIÓN DEL DOMINIO", "% PROPIEDAD" }, filas));
+        body.Append(CrearTablaBase(en
+            ? new[] { "NAME", "ID NUMBER", "OWNERSHIP CONDITION", "% OWNERSHIP" }
+            : new[] { "NOMBRE", "IDENTIFICACIÓN", "CONDICIÓN DEL DOMINIO", "% PROPIEDAD" }, filas));
         body.Append(CrearParrafoSeparador());
 
-        CrearTituloSeccion(body, "B. RÉGIMEN HISTÓRICO DE LA TRADICIÓN");
+        CrearTituloSeccion(body, en ? "B. HISTORICAL CHAIN OF TITLE" : "B. RÉGIMEN HISTÓRICO DE LA TRADICIÓN");
 
         var filasTradicion = new List<string[]>();
         foreach (var acto in model.TradicionActos)

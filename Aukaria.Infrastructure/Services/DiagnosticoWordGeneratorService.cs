@@ -83,25 +83,32 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
         return ms.ToArray();
     }
 
+    private static bool En(DiagnosticoPredialModel model) =>
+        string.Equals(model.Idioma, "en", StringComparison.OrdinalIgnoreCase);
+
+    private static string T(DiagnosticoPredialModel model, string es, string en) => En(model) ? en : es;
+
     private static void CrearBannerAnexo(Body body, DiagnosticoPredialModel model)
     {
-        string predio = Valor(model.NombrePredio, "PREDIO SIN IDENTIFICAR").ToUpperInvariant();
-        string fmi = Valor(model.MatriculaFMI, "SIN FMI").ToUpperInvariant();
+        string predio = Valor(model.NombrePredio, T(model, "PREDIO SIN IDENTIFICAR", "UNIDENTIFIED PROPERTY")).ToUpperInvariant();
+        string fmi = Valor(model.MatriculaFMI, T(model, "SIN FMI", "NO FMI")).ToUpperInvariant();
 
-        body.Append(CrearTituloMayuscula("ANEXO DE TRADICIÓN Y TRACTO SUCESIVO", 14));
-        body.Append(CrearParrafoCentral("AUKARIA - AUDITORÍA PREDIAL Y ESTUDIO DE TÍTULOS", 9, VerdeBosque, negrita: true));
+        body.Append(CrearTituloMayuscula(T(model, "ANEXO DE TRADICIÓN Y TRACTO SUCESIVO", "CHAIN OF TITLE & TRADITION ANNEX"), 14));
+        body.Append(CrearParrafoCentral(T(model, "AUKARIA - AUDITORÍA PREDIAL Y ESTUDIO DE TÍTULOS", "AUKARIA - PROPERTY AUDIT & TITLE EXAMINATION"), 9, VerdeBosque, negrita: true));
         body.Append(CrearParrafoCentral($"{predio}  |  FMI {fmi}", 10, VerdeBosque, negrita: true));
-        body.Append(CrearParrafoCentral("Anexo del Diagnóstico Jurídico Catastral · Instrumento de soporte", 9, GrisMuted, negrita: false));
+        body.Append(CrearParrafoCentral(T(model, "Anexo del Diagnóstico Jurídico Catastral · Instrumento de soporte", "Cadastral Legal Diagnosis Annex · Supporting Instrument"), 9, GrisMuted, negrita: false));
         body.Append(CrearSeparadorLinea());
     }
 
     private static void CrearAnexoCertificacionTracto(Body body, DiagnosticoPredialModel model)
     {
-        CrearTituloSeccion(body, "C. CERTIFICACIÓN DEL TRACTO");
+        CrearTituloSeccion(body, T(model, "C. CERTIFICACIÓN DEL TRACTO", "C. CHAIN OF TITLE CERTIFICATION"));
 
         string certificacion = NoVacio(model.CertificacionTracto)
             ? model.CertificacionTracto
-            : "El tracto sucesivo se reconstruyó a partir de las anotaciones del folio de matrícula inmobiliaria.";
+            : T(model,
+                "El tracto sucesivo se reconstruyó a partir de las anotaciones del folio de matrícula inmobiliaria.",
+                "The chain of title was reconstructed from the annotations in the real estate registration folio.");
 
         CrearCuerpoJustificado(body, certificacion);
         body.Append(CrearParrafoSeparador());
@@ -127,7 +134,7 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
             CrearSeccionConceptoJuridico(body, model);
             CrearSeccionObservaciones(body, model);
             CrearSeccionDocumentosConsultados(body, model);
-            CrearCuadroControlFirmas(body);
+            CrearCuadroControlFirmas(body, model);
 
             mainPart.Document.Save();
         }
@@ -147,18 +154,19 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
 
     private static void CrearBannerBranding(Body body, DiagnosticoPredialModel model)
     {
-        string predio = Valor(model.NombrePredio, "PREDIO SIN IDENTIFICAR").ToUpperInvariant();
-        string fmi = Valor(model.MatriculaFMI, "SIN FMI").ToUpperInvariant();
+        string predio = Valor(model.NombrePredio, T(model, "PREDIO SIN IDENTIFICAR", "UNIDENTIFIED PROPERTY")).ToUpperInvariant();
+        string fmi = Valor(model.MatriculaFMI, T(model, "SIN FMI", "NO FMI")).ToUpperInvariant();
 
-        body.Append(CrearTituloMayuscula("DIAGNÓSTICO JURÍDICO CATASTRAL", 14));
-        body.Append(CrearParrafoCentral("AUKARIA - AUDITORÍA PREDIAL Y ESTUDIO DE TÍTULOS", 9, VerdeBosque, negrita: true));
+        body.Append(CrearTituloMayuscula(T(model, "DIAGNÓSTICO JURÍDICO CATASTRAL", "CADASTRAL LEGAL DIAGNOSIS"), 14));
+        body.Append(CrearParrafoCentral(T(model, "AUKARIA - AUDITORÍA PREDIAL Y ESTUDIO DE TÍTULOS", "AUKARIA - PROPERTY AUDIT & TITLE EXAMINATION"), 9, VerdeBosque, negrita: true));
         body.Append(CrearParrafoCentral($"{predio}  |  FMI {fmi}", 10, VerdeBosque, negrita: false));
         body.Append(CrearSeparadorLinea());
     }
 
     private static void CrearSeccionIdentificacionPredio(Body body, DiagnosticoPredialModel model)
     {
-        CrearTituloSeccion(body, "1. IDENTIFICACIÓN DEL PREDIO");
+        CrearTituloSeccion(body, T(model, "1. IDENTIFICACIÓN DEL PREDIO", "1. PROPERTY IDENTIFICATION"));
+        string nr = T(model, "No reportado", "Not reported");
 
         var tabla = new Table();
         tabla.Append(new TableProperties(
@@ -174,29 +182,29 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
         tabla.Append(grid);
 
         var fila1 = new TableRow();
-        fila1.Append(CrearCeldaDato("ID Predio / Aukaria", negrita: true, fondoHex: MentaFondo));
-        fila1.Append(CrearCeldaDato(Valor(model.NombrePredio, "No reportado")));
-        fila1.Append(CrearCeldaDato("No. Folio Matrícula", negrita: true, fondoHex: MentaFondo));
-        fila1.Append(CrearCeldaDato(Valor(model.MatriculaFMI, "No reportado")));
+        fila1.Append(CrearCeldaDato(T(model, "ID Predio / Aukaria", "Property ID / Aukaria"), negrita: true, fondoHex: MentaFondo));
+        fila1.Append(CrearCeldaDato(Valor(model.NombrePredio, nr)));
+        fila1.Append(CrearCeldaDato(T(model, "No. Folio Matrícula", "Registration Folio No."), negrita: true, fondoHex: MentaFondo));
+        fila1.Append(CrearCeldaDato(Valor(model.MatriculaFMI, nr)));
         tabla.Append(fila1);
 
         var fila2 = new TableRow();
-        fila2.Append(CrearCeldaDato("Cédula Catastral", negrita: true, fondoHex: MentaFondo));
-        fila2.Append(CrearCeldaDato(Valor(model.CedulaCatastral, "No reportado")));
-        fila2.Append(CrearCeldaDato("FMI Matriz", negrita: true, fondoHex: MentaFondo));
-        fila2.Append(CrearCeldaDato(Valor(model.FolioMatriz, "No reportado")));
+        fila2.Append(CrearCeldaDato(T(model, "Cédula Catastral", "Cadastral ID"), negrita: true, fondoHex: MentaFondo));
+        fila2.Append(CrearCeldaDato(Valor(model.CedulaCatastral, nr)));
+        fila2.Append(CrearCeldaDato(T(model, "FMI Matriz", "Parent FMI"), negrita: true, fondoHex: MentaFondo));
+        fila2.Append(CrearCeldaDato(Valor(model.FolioMatriz, nr)));
         tabla.Append(fila2);
 
         var fila3 = new TableRow();
-        fila3.Append(CrearCeldaDato("FMI Segregada", negrita: true, fondoHex: MentaFondo));
-        fila3.Append(CrearCeldaDato(Valor(model.FoliosDerivados, "No reportado"), gridSpan: 3));
+        fila3.Append(CrearCeldaDato(T(model, "FMI Segregada", "Derived FMIs"), negrita: true, fondoHex: MentaFondo));
+        fila3.Append(CrearCeldaDato(Valor(model.FoliosDerivados, nr), gridSpan: 3));
         tabla.Append(fila3);
 
         var fila4 = new TableRow();
-        fila4.Append(CrearCeldaDato("Nombre Predio (FMI)", negrita: true, fondoHex: MentaFondo));
-        fila4.Append(CrearCeldaDato(Valor(model.NombrePredio, "No reportado")));
-        fila4.Append(CrearCeldaDato("Nombre Predio (Campo)", negrita: true, fondoHex: MentaFondo));
-        fila4.Append(CrearCeldaDato("No reportado"));
+        fila4.Append(CrearCeldaDato(T(model, "Nombre Predio (FMI)", "Property Name (FMI)"), negrita: true, fondoHex: MentaFondo));
+        fila4.Append(CrearCeldaDato(Valor(model.NombrePredio, nr)));
+        fila4.Append(CrearCeldaDato(T(model, "Nombre Predio (Campo)", "Property Name (Field)"), negrita: true, fondoHex: MentaFondo));
+        fila4.Append(CrearCeldaDato(nr));
         tabla.Append(fila4);
 
         body.Append(tabla);
@@ -205,45 +213,52 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
 
     private static void CrearSeccionLocalizacion(Body body, DiagnosticoPredialModel model)
     {
-        CrearTituloSeccion(body, "2. LOCALIZACIÓN DEL INMUEBLE");
+        CrearTituloSeccion(body, T(model, "2. LOCALIZACIÓN DEL INMUEBLE", "2. PROPERTY LOCATION"));
+        string nr = T(model, "No reportado", "Not reported");
 
         var filas = new List<string[]>
         {
-            new[] { "Vereda", Valor(model.Vereda), "No reportado" },
-            new[] { "Municipio", Valor(model.Municipio), "No reportado" },
-            new[] { "Departamento", Valor(model.Departamento), "No reportado" },
-            new[] { "ORIP", Valor(model.ORIP), "No reportado" }
+            new[] { T(model, "Vereda", "Rural District"), Valor(model.Vereda, nr), nr },
+            new[] { T(model, "Municipio", "Municipality"), Valor(model.Municipio, nr), nr },
+            new[] { T(model, "Departamento", "Department"), Valor(model.Departamento, nr), nr },
+            new[] { "ORIP", Valor(model.ORIP, nr), nr }
         };
 
-        body.Append(CrearTablaBase(new[] { "JURISDICCIÓN / NIVEL", "SEGÚN FMI", "INSPECCIÓN EN CAMPO" }, filas));
+        body.Append(CrearTablaBase(new[]
+        {
+            T(model, "JURISDICCIÓN / NIVEL", "JURISDICTION / LEVEL"),
+            T(model, "SEGÚN FMI", "PER FMI"),
+            T(model, "INSPECCIÓN EN CAMPO", "FIELD INSPECTION")
+        }, filas));
         body.Append(CrearParrafoSeparador());
     }
 
     private static void CrearSeccionInformacionComplementaria(Body body, DiagnosticoPredialModel model)
     {
-        CrearTituloSeccion(body, "3. INFORMACIÓN COMPLEMENTARIA DEL PREDIO");
+        CrearTituloSeccion(body, T(model, "3. INFORMACIÓN COMPLEMENTARIA DEL PREDIO", "3. COMPLEMENTARY PROPERTY INFORMATION"));
 
         var filas = new List<string[]>
         {
-            new[] { "Área según Registro (FMI)", Valor(model.AreaSegunFmi) },
-            new[] { "Área según Inspección de Campo", "No reportado" }
+            new[] { T(model, "Área según Registro (FMI)", "Area per Registry (FMI)"), Valor(model.AreaSegunFmi) },
+            new[] { T(model, "Área según Inspección de Campo", "Area per Field Inspection"), T(model, "No reportado", "Not reported") }
         };
-        body.Append(CrearTablaBase(new[] { "ÁREA", "VALOR" }, filas));
+        body.Append(CrearTablaBase(new[] { T(model, "ÁREA", "AREA"), T(model, "VALOR", "VALUE") }, filas));
         body.Append(CrearParrafoSeparador());
 
-        CrearSubtitulo(body, "LINDEROS DEL PREDIO");
+        CrearSubtitulo(body, T(model, "LINDEROS DEL PREDIO", "PROPERTY BOUNDARIES"));
         string linderos = NoVacio(model.LinderosDescripcion) ? model.LinderosDescripcion : Valor(model.Linderos);
-        CrearCuerpoJustificado(body, $"Según FMI: {linderos}");
+        CrearCuerpoJustificado(body, $"{T(model, "Según FMI", "Per FMI")}: {linderos}");
         if (NoVacio(model.SoporteDocumentalLinderos))
         {
-            CrearCuerpoJustificado(body, $"Acto de soporte: {model.SoporteDocumentalLinderos}");
+            CrearCuerpoJustificado(body, $"{T(model, "Acto de soporte", "Supporting instrument")}: {model.SoporteDocumentalLinderos}");
         }
         body.Append(CrearParrafoSeparador());
     }
 
     private static void CrearSeccionTitularidad(Body body, DiagnosticoPredialModel model)
     {
-        CrearTituloSeccion(body, "4. TITULARIDAD DEL PREDIO");
+        CrearTituloSeccion(body, T(model, "4. TITULARIDAD DEL PREDIO", "4. PROPERTY OWNERSHIP"));
+        string nr = T(model, "No reportado", "Not reported");
 
         var filas = new List<string[]>();
         foreach (var titular in model.Titulares)
@@ -251,9 +266,9 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
             filas.Add(new[]
             {
                 CapitalizarPalabras(Valor(titular.Nombre)),
-                "Cédula de ciudadanía",
-                Valor(titular.NumeroDocumento),
-                Valor(titular.Porcentaje)
+                T(model, "Cédula de ciudadanía", "National ID"),
+                Valor(titular.NumeroDocumento, nr),
+                Valor(titular.Porcentaje, nr)
             });
         }
 
@@ -262,19 +277,25 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
             filas.Add(new[]
             {
                 CapitalizarPalabras(Valor(model.PropietarioActual)),
-                "No reportado",
-                "No reportado",
-                "No reportado"
+                nr,
+                nr,
+                nr
             });
         }
 
-        body.Append(CrearTablaBase(new[] { "NOMBRE PROPIETARIO LEGAL", "TIPO DOC.", "IDENTIFICACIÓN", "% PROPIEDAD" }, filas));
+        body.Append(CrearTablaBase(new[]
+        {
+            T(model, "NOMBRE PROPIETARIO LEGAL", "LEGAL OWNER NAME"),
+            T(model, "TIPO DOC.", "ID TYPE"),
+            T(model, "IDENTIFICACIÓN", "ID NUMBER"),
+            T(model, "% PROPIEDAD", "% OWNERSHIP")
+        }, filas));
         body.Append(CrearParrafoSeparador());
     }
 
     private static void CrearSeccionModoAdquisicion(Body body, DiagnosticoPredialModel model)
     {
-        CrearTituloSeccion(body, "5. MODO DE ADQUISICIÓN");
+        CrearTituloSeccion(body, T(model, "5. MODO DE ADQUISICIÓN", "5. MODE OF ACQUISITION"));
 
         string texto = ModoAdquisicionTexto(model);
         CrearCuerpoJustificado(body, texto);
@@ -283,6 +304,19 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
 
     private static string ModoAdquisicionTexto(DiagnosticoPredialModel model)
     {
+        if (En(model))
+        {
+            string titularEn = Valor(model.PropietarioActual, "The registered owner");
+            string soporteEn = $"{Valor(model.NumeroEscritura, "Not reported")} dated {Valor(model.FechaEscritura, "Not reported")}";
+            if (NoVacio(model.Notaria) || NoVacio(model.CiudadNotaria))
+            {
+                soporteEn += $" executed at {Valor(model.Notaria)} in {Valor(model.CiudadNotaria)}";
+            }
+
+            return $"Title to the property was acquired by {titularEn} through {soporteEn}. " +
+                   $"The chain-of-title source corresponds to {Valor(model.OrigenCabidaActual, "the registry information recorded in the real estate folio")}.";
+        }
+
         string titular = Valor(model.PropietarioActual, "El titular registral");
         string soporte = $"{Valor(model.NumeroEscritura, "Información no reportada")} de fecha {Valor(model.FechaEscritura)}";
         if (NoVacio(model.Notaria) || NoVacio(model.CiudadNotaria))
@@ -296,32 +330,34 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
 
     private static void CrearSeccionConceptoCatastral(Body body, DiagnosticoPredialModel model)
     {
-        CrearTituloSeccion(body, "6. CONCEPTO CATASTRAL");
+        CrearTituloSeccion(body, T(model, "6. CONCEPTO CATASTRAL", "6. CADASTRAL ASSESSMENT"));
 
         string certificado = NoVacio(model.CedulaCatastral)
-            ? $"Se constata la cédula catastral {model.CedulaCatastral}."
-            : "No se reporta cédula catastral en el folio analizado.";
+            ? T(model, $"Se constata la cédula catastral {model.CedulaCatastral}.", $"Cadastral ID verified: {model.CedulaCatastral}.")
+            : T(model, "No se reporta cédula catastral en el folio analizado.", "No cadastral ID is reported in the analyzed folio.");
         string nupre = NoVacio(model.Nupre)
-            ? $"El Número Predial Nacional (NUPRE) reportado es {model.Nupre}."
-            : "No se reporta NUPRE en el folio analizado.";
+            ? T(model, $"El Número Predial Nacional (NUPRE) reportado es {model.Nupre}.", $"Reported National Property Number (NUPRE): {model.Nupre}.")
+            : T(model, "No se reporta NUPRE en el folio analizado.", "No NUPRE is reported in the analyzed folio.");
 
         CrearCuerpoJustificado(body, string.Join(" ", certificado, nupre));
 
-        string cabida = NoVacio(model.ConclusionPredial) ? model.ConclusionPredial : $"Área registrada: {Valor(model.AreaRegistrada)}.";
-        CrearCuerpoJustificado(body, $"Consistencia de cabidas: {cabida}");
+        string cabida = NoVacio(model.ConclusionPredial)
+            ? model.ConclusionPredial
+            : T(model, $"Área registrada: {Valor(model.AreaRegistrada)}.", $"Registered area: {Valor(model.AreaRegistrada)}.");
+        CrearCuerpoJustificado(body, $"{T(model, "Consistencia de cabidas", "Area consistency")}: {cabida}");
         body.Append(CrearParrafoSeparador());
     }
 
     private static void CrearSeccionConceptoJuridico(Body body, DiagnosticoPredialModel model)
     {
-        CrearTituloSeccion(body, "7. CONCEPTO JURÍDICO DEL PREDIO");
+        CrearTituloSeccion(body, T(model, "7. CONCEPTO JURÍDICO DEL PREDIO", "7. LEGAL OPINION ON THE PROPERTY"));
 
         string dictamen = NoVacio(model.DiagnosticoEjecutivo)
             ? model.DiagnosticoEjecutivo
-            : Valor(model.ResumenEjecutivo, "Sin dictamen ejecutivo disponible.");
+            : Valor(model.ResumenEjecutivo, T(model, "Sin dictamen ejecutivo disponible.", "No executive opinion available."));
 
         CrearCuerpoJustificado(body, dictamen);
-        CrearBadgeViabilidad(body, model.Viabilidad);
+        CrearBadgeViabilidad(body, model.Viabilidad, En(model));
 
         foreach (var alerta in model.AlertasJuridicas)
         {
@@ -333,9 +369,9 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
         body.Append(CrearParrafoSeparador());
     }
 
-    private static void CrearBadgeViabilidad(Body body, EstadoViabilidad viabilidad)
+    private static void CrearBadgeViabilidad(Body body, EstadoViabilidad viabilidad, bool en = false)
     {
-        var (etiqueta, color, fondo, borde) = ResolverViabilidad(viabilidad);
+        var (etiqueta, color, fondo, borde) = ResolverViabilidad(viabilidad, en);
 
         var tabla = new Table();
         tabla.Append(new TableProperties(
@@ -362,7 +398,7 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
             new ParagraphProperties(
                 new SpacingBetweenLines { Before = "60", After = "60" },
                 new Justification { Val = JustificationValues.Center }));
-        parrafo.Append(CrearRun("DICTAMEN CATASTRAL: ", 11, Carbono, negrita: true));
+        parrafo.Append(CrearRun(en ? "CADASTRAL RULING: " : "DICTAMEN CATASTRAL: ", 11, Carbono, negrita: true));
         parrafo.Append(CrearRun(etiqueta, 11, color, negrita: true));
         celda.Append(parrafo);
         fila.Append(celda);
@@ -372,23 +408,23 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
         body.Append(CrearParrafoSeparador());
     }
 
-    private static (string Etiqueta, string Color, string Fondo, string Borde) ResolverViabilidad(EstadoViabilidad viabilidad)
+    private static (string Etiqueta, string Color, string Fondo, string Borde) ResolverViabilidad(EstadoViabilidad viabilidad, bool en = false)
     {
         return viabilidad switch
         {
-            EstadoViabilidad.Viable => ("Viable", VerdeEsmeralda, VerdeFondo, VerdeBorde),
-            EstadoViabilidad.AlertaCritica => ("No Viable", RojoCarmesi, RojoFondo, RojoBorde),
-            _ => ("Requiere Revisión", GrisMuted, "F3F4F6", "9CA3AF")
+            EstadoViabilidad.Viable => (en ? "Viable" : "Viable", VerdeEsmeralda, VerdeFondo, VerdeBorde),
+            EstadoViabilidad.AlertaCritica => (en ? "Not Viable" : "No Viable", RojoCarmesi, RojoFondo, RojoBorde),
+            _ => (en ? "Requires Review" : "Requiere Revisión", GrisMuted, "F3F4F6", "9CA3AF")
         };
     }
 
     private static void CrearSeccionObservaciones(Body body, DiagnosticoPredialModel model)
     {
-        CrearTituloSeccion(body, "8. OBSERVACIONES Y/O RECOMENDACIONES DE SANEAMIENTO");
+        CrearTituloSeccion(body, T(model, "8. OBSERVACIONES Y/O RECOMENDACIONES DE SANEAMIENTO", "8. OBSERVATIONS AND/OR REMEDIATION RECOMMENDATIONS"));
 
         if (model.Observaciones.Count == 0 && !NoVacio(model.ObservacionAmbiental) && !NoVacio(model.ExclusionResponsabilidad))
         {
-            CrearCuerpoJustificado(body, "Sin observaciones adicionales.");
+            CrearCuerpoJustificado(body, T(model, "Sin observaciones adicionales.", "No additional observations."));
         }
 
         foreach (string observacion in model.Observaciones)
@@ -399,10 +435,18 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
             }
         }
 
-        string obsAmbiental = NoVacio(model.ObservacionAmbiental) ? model.ObservacionAmbiental.Trim() : ObservacionAmbientalRuap;
+        string obsAmbiental = NoVacio(model.ObservacionAmbiental)
+            ? model.ObservacionAmbiental.Trim()
+            : T(model,
+                ObservacionAmbientalRuap,
+                "RUNAP Verification: It is recommended to verify the property's geographic location on the official RUNAP portal (National Registry of Protected Areas) to rule out overlaps with conservation zones or natural parks.");
         CrearVineta(body, obsAmbiental);
 
-        string exclusion = NoVacio(model.ExclusionResponsabilidad) ? model.ExclusionResponsabilidad.Trim() : ClausulaExclusionResponsabilidad;
+        string exclusion = NoVacio(model.ExclusionResponsabilidad)
+            ? model.ExclusionResponsabilidad.Trim()
+            : T(model,
+                ClausulaExclusionResponsabilidad,
+                "Legal Notice: This diagnosis is limited to the documentary review provided. Aukaria does not perform checks against restrictive lists (OFAC) or judicial background databases.");
         CrearVineta(body, exclusion);
 
         body.Append(CrearParrafoSeparador());
@@ -410,12 +454,14 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
 
     private static void CrearSeccionDocumentosConsultados(Body body, DiagnosticoPredialModel model)
     {
-        CrearTituloSeccion(body, "9. DOCUMENTOS CONSULTADOS");
+        CrearTituloSeccion(body, T(model, "9. DOCUMENTOS CONSULTADOS", "9. REVIEWED DOCUMENTS"));
 
         if (model.DocumentosAnalizados.Count == 0)
         {
-            string fmi = Valor(model.MatriculaFMI, "SIN FMI");
-            CrearVineta(body, $"Certificado de Tradición y Libertad (CTL) del FMI {fmi}, expedido por la ORIP de {Valor(model.ORIP)}.");
+            string fmi = Valor(model.MatriculaFMI, T(model, "SIN FMI", "NO FMI"));
+            CrearVineta(body, T(model,
+                $"Certificado de Tradición y Libertad (CTL) del FMI {fmi}, expedido por la ORIP de {Valor(model.ORIP)}.",
+                $"Certificate of Title & Encumbrances (CTL) for FMI {fmi}, issued by the ORIP of {Valor(model.ORIP)}."));
             return;
         }
 
@@ -429,17 +475,23 @@ public sealed class DiagnosticoWordGeneratorService : IDiagnosticoWordGeneratorS
         body.Append(CrearParrafoSeparador());
     }
 
-    private static void CrearCuadroControlFirmas(Body body)
+    private static void CrearCuadroControlFirmas(Body body, DiagnosticoPredialModel model)
     {
-        CrearTituloSeccion(body, "10. CUADRO DE CONTROL Y FIRMAS");
+        CrearTituloSeccion(body, T(model, "10. CUADRO DE CONTROL Y FIRMAS", "10. CONTROL AND SIGNATURE BLOCK"));
 
         var filas = new[]
         {
             new[]
             {
-                "Profesional Jurídico\n(Elaboró)\n\n\n______________________\nNombre / Firma",
-                "Profesional SIG / Campo\n(Elaboró)\n\n\n______________________\nNombre / Firma",
-                "Coordinación de Gestión Inmobiliaria\n(Aprobó)\n\n\n______________________\nNombre / Firma"
+                T(model,
+                    "Profesional Jurídico\n(Elaboró)\n\n\n______________________\nNombre / Firma",
+                    "Legal Counsel\n(Prepared by)\n\n\n______________________\nName / Signature"),
+                T(model,
+                    "Profesional SIG / Campo\n(Elaboró)\n\n\n______________________\nNombre / Firma",
+                    "GIS / Field Specialist\n(Prepared by)\n\n\n______________________\nName / Signature"),
+                T(model,
+                    "Coordinación de Gestión Inmobiliaria\n(Aprobó)\n\n\n______________________\nNombre / Firma",
+                    "Real Estate Coordination\n(Approved by)\n\n\n______________________\nName / Signature")
             }
         };
 

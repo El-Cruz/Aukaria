@@ -46,6 +46,7 @@ public class DiagnosticoPredialModel
     public string CertificacionTracto { get; set; } = string.Empty;
     public string DiagnosticoEjecutivo { get; set; } = string.Empty;
     public List<string> DocumentosAnalizados { get; set; } = new();
+    public string Idioma { get; set; } = "es";
 }
 
 public class AnotacionModel

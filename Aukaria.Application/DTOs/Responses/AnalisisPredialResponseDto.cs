@@ -19,4 +19,10 @@ public class AnalisisPredialResponseDto
     public string ResumenEjecutivo { get; set; } = string.Empty;
     public AnalisisResultadoJsonDto Resultado { get; set; } = new();
     public DateTime FechaAnalisis { get; set; }
+    public string Idioma { get; set; } = "es";
+    public DateOnly? FechaExpedicionCertificado { get; set; }
+    public bool Reemplazado { get; set; }
+    public string? ResumenDeduplicacion { get; set; }
+    public bool? CoherenciaVerificada { get; set; }
+    public List<string> DiscrepanciasCoherencia { get; set; } = new();
 }

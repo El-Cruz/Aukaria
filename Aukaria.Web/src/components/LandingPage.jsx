@@ -3,6 +3,7 @@ import { motion } from "framer-motion"
 import LanguageSelector from "./LanguageSelector"
 import PdfUploadZone from "./PdfUploadZone"
 import ColombiaFlag from "./ColombiaFlag"
+import { useLanguage } from "../i18n/LanguageContext"
 
 const spring = { type: "spring", bounce: 0, duration: 0.4 }
 const fadeUp = { duration: 0.5, ease: [0.22, 0.61, 0.36, 1] }
@@ -123,7 +124,63 @@ function FeatureIcon({ index }) {
 }
 
 export default function LandingPage({ onAnalyze = () => {}, onLogin = () => {} }) {
+  const { langShort, t } = useLanguage()
+  const en = langShort === "en"
   const reduce = useReducedMotion()
+
+  const navLinks = en
+    ? [
+        { id: "inicio", label: "Home" },
+        { id: "caracteristicas", label: "Features" },
+        { id: "como-funciona", label: "How It Works" },
+        { id: "planes", label: "Plans" },
+      ]
+    : NAV_LINKS
+
+  const metricas = en
+    ? [
+        { valor: "< 500 ms", etiqueta: "FMI Registration Extraction" },
+        { valor: "100%", etiqueta: "Liens & Precautionary Measures Detection" },
+        { valor: ".docx", etiqueta: "Official Editable Export" },
+      ]
+    : METRICAS
+
+  const pasos = en
+    ? [
+        {
+          nro: "01",
+          titulo: "Upload Registry Documents (CTL, VUR, or Deeds)",
+          descripcion: "No unprotected file storage. The folio is processed in memory with end-to-end encryption.",
+        },
+        {
+          nro: "02",
+          titulo: "Automated Legal Diagnosis",
+          descripcion: "Chain of title, encumbrances, and liens evaluated with risk traffic lights and Colombian legal standards.",
+        },
+        {
+          nro: "03",
+          titulo: "Word / PDF Legal Report",
+          descripcion: "Editable structure ready for professional review and counsel signature.",
+        },
+      ]
+    : PASOS
+
+  const features = en
+    ? [
+        {
+          titulo: "Annotations Matrix",
+          descripcion: "Smart filters by nature, date, and validity. Precautionary measures and liens detected instantly.",
+        },
+        {
+          titulo: "Viability Traffic Light",
+          descripcion: "Viable, Requires Review, or Critical Alert. Real-time executive reading of the folio's legal status.",
+        },
+        {
+          titulo: "Law 1274 of 2009 & Banking",
+          descripcion: "Easement verification, 20-year chain of title, and bank-grade title examinations.",
+        },
+      ]
+    : FEATURES
 
   const scrollToSection = (id) => (event) => {
     event.preventDefault()
@@ -161,7 +218,7 @@ export default function LandingPage({ onAnalyze = () => {}, onLogin = () => {} }
           </a>
 
           <div className="ml-auto hidden items-center gap-7 md:flex">
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <a
                 key={link.id}
                 href={`#${link.id}`}
@@ -180,7 +237,7 @@ export default function LandingPage({ onAnalyze = () => {}, onLogin = () => {} }
               onClick={onLogin}
               className="hidden rounded-full border border-black/10 bg-white/60 px-4 py-2 text-sm font-semibold text-neutral-700 backdrop-blur-xl transition-colors duration-150 hover:bg-white hover:text-black sm:block"
             >
-              Iniciar Sesión
+              {t("nav.login")}
             </button>
             </div>
         </nav>
@@ -199,16 +256,23 @@ export default function LandingPage({ onAnalyze = () => {}, onLogin = () => {} }
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
-              Potenciado por Metodología y Parámetros Avalados por Profesionales en Derecho Inmobiliario
+              {en
+                ? "Powered by Methodology & Parameters Endorsed by Real Estate Law Professionals"
+                : "Potenciado por Metodología y Parámetros Avalados por Profesionales en Derecho Inmobiliario"}
             </span>
 
             <h1 className="mx-auto mt-6 max-w-4xl text-5xl font-black leading-none tracking-tight text-black md:text-7xl">
-              Estudios Prediales y Diagnóstico Jurídico en <span className="text-neutral-400">Segundos.</span>
+              {en ? (
+                <>Title Audits & Legal Diagnosis in <span className="text-neutral-400">Seconds.</span></>
+              ) : (
+                <>Estudios Prediales y Diagnóstico Jurídico en <span className="text-neutral-400">Segundos.</span></>
+              )}
             </h1>
 
             <p className="mx-auto mt-5 max-w-2xl text-lg text-neutral-600">
-              Automatiza la lectura y validación de Certificados de Tradición (CTL), Escrituras y VUR.
-              Identifica gravámenes, afectaciones y alertas patrimoniales con precisión técnica.
+              {en
+                ? "Automate reading and validation of Certificates of Title (CTL), Deeds, and VUR reports. Identify liens, encumbrances, and property alerts with technical precision."
+                : "Automatiza la lectura y validación de Certificados de Tradición (CTL), Escrituras y VUR. Identifica gravámenes, afectaciones y alertas patrimoniales con precisión técnica."}
             </p>
           </motion.div>
 
@@ -223,7 +287,7 @@ export default function LandingPage({ onAnalyze = () => {}, onLogin = () => {} }
                 CTL
               </span>
               <p className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-neutral-500">
-                Prueba el pre-análisis — sin registro
+                {en ? "Try pre-analysis — no sign-up required" : "Prueba el pre-análisis — sin registro"}
               </p>
             </div>
             <PdfUploadZone onAnalyze={onAnalyze} />
@@ -231,7 +295,7 @@ export default function LandingPage({ onAnalyze = () => {}, onLogin = () => {} }
 
           <Reveal delay={0.2} className="mx-auto mt-14 max-w-3xl">
             <div className="grid grid-cols-1 gap-px overflow-hidden rounded-3xl border border-black/10 bg-black/10 backdrop-blur-2xl sm:grid-cols-3">
-              {METRICAS.map((metrica) => (
+              {metricas.map((metrica) => (
                 <div
                   key={metrica.etiqueta}
                   className="flex flex-col items-center gap-1.5 bg-white/80 px-6 py-6 text-center backdrop-blur-3xl"
@@ -251,14 +315,14 @@ export default function LandingPage({ onAnalyze = () => {}, onLogin = () => {} }
         <section id="como-funciona" className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-16 md:px-8">
           <Reveal>
             <SectionHeader
-              label="Cómo Funciona"
-              title="Del folio al dictamen en tres pasos"
-              subtitle="Un flujo cerrado pensado para notarías, bancos, y equipos jurídicos. Sin citas ni colas en el registro."
+              label={en ? "How It Works" : "Cómo Funciona"}
+              title={en ? "From folio to legal opinion in three steps" : "Del folio al dictamen en tres pasos"}
+              subtitle={en ? "A streamlined workflow built for notaries, banks, and legal teams." : "Un flujo cerrado pensado para notarías, bancos, y equipos jurídicos. Sin citas ni colas en el registro."}
             />
           </Reveal>
 
           <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
-            {PASOS.map((paso, i) => (
+            {pasos.map((paso, i) => (
               <Reveal key={paso.nro} delay={i * 0.08}>
                 <motion.article
                   whileHover={reduce ? undefined : { y: -6 }}
@@ -295,14 +359,14 @@ export default function LandingPage({ onAnalyze = () => {}, onLogin = () => {} }
         <section id="caracteristicas" className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-16 md:px-8">
           <Reveal>
             <SectionHeader
-              label="Características"
-              title="Herramientas de precisión para el estudio de títulos"
-              subtitle="Diseñado para acelerar revisiones jurídicas sin sacrificar el detalle que exige la ley."
+              label={en ? "Features" : "Características"}
+              title={en ? "Precision tools for title examinations" : "Herramientas de precisión para el estudio de títulos"}
+              subtitle={en ? "Built to accelerate legal reviews without sacrificing statutory detail." : "Diseñado para acelerar revisiones jurídicas sin sacrificar el detalle que exige la ley."}
             />
           </Reveal>
 
           <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
-            {FEATURES.map((feature, i) => (
+            {features.map((feature, i) => (
               <Reveal key={feature.titulo} delay={i * 0.08}>
                 <motion.article
                   whileHover={reduce ? undefined : { y: -6 }}

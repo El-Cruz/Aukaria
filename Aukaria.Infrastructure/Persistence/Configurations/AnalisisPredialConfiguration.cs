@@ -22,7 +22,10 @@ public class AnalisisPredialConfiguration : IEntityTypeConfiguration<AnalisisPre
             .HasSentinel(TipoDocumentoJuridico.CTL);
         builder.Property(a => a.ResumenEjecutivo).HasColumnType("text");
         builder.Property(a => a.ResultadoJson).HasColumnType("text");
+        builder.Property(a => a.Reemplazado).HasDefaultValue(false);
+        builder.Property(a => a.Idioma).HasMaxLength(10).HasDefaultValue("es");
 
         builder.HasIndex(a => new { a.MatriculaFMI, a.EmpresaId });
+        builder.HasIndex(a => new { a.EmpresaId, a.MatriculaFMI, a.FechaExpedicionCertificado });
     }
 }

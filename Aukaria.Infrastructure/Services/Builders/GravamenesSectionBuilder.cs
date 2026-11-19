@@ -8,7 +8,8 @@ public static class GravamenesSectionBuilder
 {
     public static void Build(Body body, DiagnosticoPredialModel model)
     {
-        CrearTituloSeccion(body, "C. GRAVÁMENES Y MEDIDAS CAUTELARES");
+        bool en = string.Equals(model.Idioma, "en", StringComparison.OrdinalIgnoreCase);
+        CrearTituloSeccion(body, en ? "C. ENCUMBRANCES AND PRECAUTIONARY MEASURES" : "C. GRAVÁMENES Y MEDIDAS CAUTELARES");
 
         var filas = new List<string[]>();
 
@@ -29,12 +30,16 @@ public static class GravamenesSectionBuilder
 
         if (filas.Count == 0)
         {
-            CrearCuerpoJustificado(body, "No se registraron gravámenes ni medidas cautelares sobre el folio analizado.");
+            CrearCuerpoJustificado(body, en
+                ? "No encumbrances or precautionary measures were recorded on the analyzed folio."
+                : "No se registraron gravámenes ni medidas cautelares sobre el folio analizado.");
             body.Append(CrearParrafoSeparador());
             return;
         }
 
-        body.Append(CrearTablaBase(new[] { "ANOTACIÓN N°", "FECHA", "TIPO", "DESCRIPCIÓN" }, filas));
+        body.Append(CrearTablaBase(en
+            ? new[] { "ANNOTATION NO.", "DATE", "TYPE", "DESCRIPTION" }
+            : new[] { "ANOTACIÓN N°", "FECHA", "TIPO", "DESCRIPCIÓN" }, filas));
         body.Append(CrearParrafoSeparador());
     }
 

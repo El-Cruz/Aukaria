@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from "framer-motion"
+import { useLanguage } from "../i18n/LanguageContext"
 
 const spring = { type: "spring", stiffness: 380, damping: 30 }
 
@@ -7,6 +8,8 @@ const spring = { type: "spring", stiffness: 380, damping: 30 }
  * el análisis predial que corría en segundo plano se completa exitosamente.
  */
 export default function CompletionToast({ fmi, onVerDictamen = () => {}, onClose = () => {} }) {
+  const { langShort, t } = useLanguage()
+  const en = langShort === "en"
   const reduce = useReducedMotion()
 
   const handleVerDictamen = () => {
@@ -34,12 +37,12 @@ export default function CompletionToast({ fmi, onVerDictamen = () => {}, onClose
 
           <div className="min-w-0 flex-1">
             <p className="text-sm font-black tracking-tight text-black">
-              ¡Dictamen Jurídico Completado!
+              {t("proc.toastTitle")}
             </p>
             <p className="mt-1 text-xs leading-relaxed text-neutral-600">
-              El análisis predial del FMI{" "}
-              <span className="font-mono font-bold text-neutral-800">{fmi || "—"}</span> ha
-              finalizado con éxito.
+              {en ? "Property analysis for FMI " : "El análisis predial del FMI "}
+              <span className="font-mono font-bold text-neutral-800">{fmi || "—"}</span>
+              {en ? " completed successfully." : " ha finalizado con éxito."}
             </p>
 
             <button
@@ -47,7 +50,7 @@ export default function CompletionToast({ fmi, onVerDictamen = () => {}, onClose
               onClick={handleVerDictamen}
               className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-black px-3.5 py-2 text-xs font-bold text-white transition-colors duration-150 hover:bg-neutral-800"
             >
-              Ver Dictamen
+              {t("proc.toastView")}
               <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14m-6-6 6 6-6 6" />
               </svg>

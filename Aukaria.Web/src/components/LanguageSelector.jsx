@@ -1,20 +1,13 @@
 import { useEffect, useState } from "react"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
+import { LANGUAGES, useLanguage } from "../i18n/LanguageContext"
 
 const spring = { type: "spring", bounce: 0, duration: 0.4 }
-
-const LANGUAGES = [
-  { code: "es-CO", label: "Español (Colombia)", flag: "🇨🇴" },
-  { code: "en-US", label: "English (US)", flag: "🇺🇸" },
-  { code: "fr-FR", label: "Français", flag: "🇫🇷", pronto: true },
-  { code: "de-DE", label: "Deutsch", flag: "🇩🇪", pronto: true },
-  { code: "pt-BR", label: "Português", flag: "🇵🇹", pronto: true },
-]
 
 export default function LanguageSelector({ className = "" }) {
   const reduce = useReducedMotion()
   const [abierto, setAbierto] = useState(false)
-  const [activo, setActivo] = useState(LANGUAGES[0])
+  const { language: activo, setLanguage, t } = useLanguage()
 
   useEffect(() => {
     if (!abierto) return undefined
@@ -29,7 +22,7 @@ export default function LanguageSelector({ className = "" }) {
         type="button"
         aria-haspopup="listbox"
         aria-expanded={abierto}
-        aria-label="Seleccionar idioma"
+        aria-label={t("lang.select")}
         whileHover={reduce ? undefined : { scale: 1.03 }}
         whileTap={{ scale: 0.97 }}
         transition={spring}
@@ -59,7 +52,7 @@ export default function LanguageSelector({ className = "" }) {
         {abierto && (
           <motion.ul
             role="listbox"
-            aria-label="Idiomas disponibles"
+            aria-label={t("lang.available")}
             initial={reduce ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.97 }}
             animate={reduce ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.97 }}
@@ -80,7 +73,7 @@ export default function LanguageSelector({ className = "" }) {
                     transition={spring}
                     onClick={() => {
                       if (lang.pronto) return
-                      setActivo(lang)
+                      setLanguage(lang.code)
                       setAbierto(false)
                     }}
                     className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm transition-colors duration-150 ${
@@ -108,7 +101,7 @@ export default function LanguageSelector({ className = "" }) {
                       </svg>
                     ) : lang.pronto ? (
                       <span className="shrink-0 font-mono text-[9px] font-bold uppercase tracking-widest text-neutral-400">
-                        Pronto
+                        {t("common.soon")}
                       </span>
                     ) : null}
                   </motion.button>

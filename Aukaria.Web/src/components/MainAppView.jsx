@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import AnalysisDashboard from "./AnalysisDashboard"
 import PdfUploadZone from "./PdfUploadZone"
 import RightSidebar from "./RightSidebar"
+import { useLanguage } from "../i18n/LanguageContext"
 
 const spring = { type: "spring", bounce: 0, duration: 0.35 }
 
@@ -59,6 +60,8 @@ export default function MainAppView({
   onEnviarPorCorreo = () => {},
   onLogout = () => {},
 }) {
+  const { langShort } = useLanguage()
+  const en = langShort === "en"
   const reduce = useReducedMotion()
   const [panelAbierto, setPanelAbierto] = useState(false)
 
@@ -92,11 +95,11 @@ export default function MainAppView({
                 <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                   <path d="M19 12H5m6-6-6 6 6 6" />
                 </svg>
-                Cargar otro documento / Volver al Workspace
+                {en ? "Upload another document / Back to Workspace" : "Cargar otro documento / Volver al Workspace"}
               </motion.button>
               {fmiActual && (
                 <span className="rounded-full border border-black/10 bg-white/50 px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-neutral-500 backdrop-blur-xl">
-                  Estudio abierto · FMI {fmiActual}
+                  {en ? `Open study · FMI ${fmiActual}` : `Estudio abierto · FMI ${fmiActual}`}
                 </span>
               )}
             </motion.div>

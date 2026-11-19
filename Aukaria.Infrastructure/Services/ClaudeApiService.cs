@@ -44,9 +44,10 @@ public sealed class ClaudeApiService : IClaudeApiService
         string textoDocumento,
         PropositoAnalisis proposito,
         TipoDocumentoJuridico tipoDocumento,
+        string idioma = "es",
         CancellationToken cancellationToken = default)
     {
-        (string apiKey, string requestJson) = ConstruirSolicitud(textoDocumento, proposito, tipoDocumento);
+        (string apiKey, string requestJson) = ConstruirSolicitud(textoDocumento, proposito, tipoDocumento, idioma);
 
         var stopwatch = Stopwatch.StartNew();
 
@@ -64,9 +65,10 @@ public sealed class ClaudeApiService : IClaudeApiService
         PropositoAnalisis proposito,
         TipoDocumentoJuridico tipoDocumento,
         Func<ProgresoAnalisisDto, Task> onProgreso,
+        string idioma = "es",
         CancellationToken cancellationToken = default)
     {
-        (string apiKey, string requestJsonBase) = ConstruirSolicitud(textoDocumento, proposito, tipoDocumento);
+        (string apiKey, string requestJsonBase) = ConstruirSolicitud(textoDocumento, proposito, tipoDocumento, idioma);
 
         string requestJson = InsertarStreamTrue(requestJsonBase);
 
@@ -89,11 +91,13 @@ public sealed class ClaudeApiService : IClaudeApiService
             HttpCompletionOption.ResponseHeadersRead,
             cancellationToken);
 
+        bool en = !string.IsNullOrWhiteSpace(idioma) && idioma.Trim().StartsWith("en", StringComparison.OrdinalIgnoreCase);
+
         await onProgreso(new ProgresoAnalisisDto
         {
             Etapa = "analyzing",
             Porcentaje = 2,
-            Mensaje = "Razonando sobre el documento..."
+            Mensaje = en ? "Reasoning about the document..." : "Razonando sobre el documento..."
         });
 
         if (!response.IsSuccessStatusCode)
@@ -166,7 +170,7 @@ public sealed class ClaudeApiService : IClaudeApiService
                 {
                     Etapa = "analyzing",
                     Porcentaje = progreso,
-                    Mensaje = "Generando el informe jurídico..."
+                    Mensaje = en ? "Generating legal report..." : "Generando el informe jurídico..."
                 });
             }
         }
@@ -204,7 +208,8 @@ public sealed class ClaudeApiService : IClaudeApiService
     private (string apiKey, string requestJson) ConstruirSolicitud(
         string textoDocumento,
         PropositoAnalisis proposito,
-        TipoDocumentoJuridico tipoDocumento)
+        TipoDocumentoJuridico tipoDocumento,
+        string idioma = "es")
     {
         string apiKey = _configuration["Anthropic:ApiKey"] ?? string.Empty;
         if (string.IsNullOrWhiteSpace(apiKey))
@@ -220,7 +225,7 @@ public sealed class ClaudeApiService : IClaudeApiService
         {
             Model = modelo,
             MaxTokens = maxTokens,
-            System = LegalPromptBuilder.ConstruirSystemPrompt(proposito, tipoDocumento),
+            System = LegalPromptBuilder.ConstruirSystemPrompt(proposito, tipoDocumento, idioma),
             Messages =
             [
                 new AnthropicMessage { Role = "user", Content = LegalPromptBuilder.ConstruirUserPrompt(textoDocumento) }

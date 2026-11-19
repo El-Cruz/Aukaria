@@ -1,10 +1,12 @@
 import { motion } from "framer-motion"
 import LanguageSelector from "./LanguageSelector"
 import ColombiaFlag from "./ColombiaFlag"
+import { useT } from "../i18n/LanguageContext"
 
 const spring = { type: "spring", stiffness: 400, damping: 25 }
 
 export default function Navbar({ usuario = null, onLogout = () => {} }) {
+  const t = useT()
   const iniciales = usuario?.nombre
     ? usuario.nombre
         .split(" ")
@@ -56,7 +58,7 @@ export default function Navbar({ usuario = null, onLogout = () => {} }) {
             <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2}>
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            Cerrar Sesión
+            {t("nav.logout")}
           </motion.button>
         </div>
       </nav>

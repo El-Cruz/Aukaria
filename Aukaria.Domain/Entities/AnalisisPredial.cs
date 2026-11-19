@@ -16,5 +16,9 @@ public class AnalisisPredial
     public string ResumenEjecutivo { get; set; } = string.Empty;
     public string ResultadoJson { get; set; } = string.Empty;
     public DateTime FechaAnalisis { get; set; }
+    public DateOnly? FechaExpedicionCertificado { get; set; }
+    public bool Reemplazado { get; set; }
+    public Guid? ReemplazadoPorId { get; set; }
+    public string Idioma { get; set; } = "es";
     public int ConsumoTokens { get; set; }
 }

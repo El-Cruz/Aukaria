@@ -244,6 +244,14 @@ export async function descargarAnexoTractoWord(analisisId, matriculaFmi) {
   setTimeout(() => URL.revokeObjectURL(url), 1500)
 }
 
+export async function obtenerProveedoresAuth() {
+  try {
+    return await authRequest("/providers", { method: "GET" })
+  } catch {
+    return { google: true }
+  }
+}
+
 export async function procesarAnalisisCtlStreaming({
   archivoPdf,
   matriculaFmi,
@@ -251,6 +259,7 @@ export async function procesarAnalisisCtlStreaming({
   tipoDocumento = "CTL",
   empresaId = EMPRESA_ID,
   usuarioId = USUARIO_ID,
+  idioma = "es",
   onProgreso,
 }) {
   const formData = new FormData()
@@ -260,6 +269,7 @@ export async function procesarAnalisisCtlStreaming({
   formData.append("tipoDocumento", tipoDocumento)
   formData.append("empresaId", empresaId)
   formData.append("usuarioId", usuarioId)
+  formData.append("idioma", idioma)
 
   const response = await fetch(`${API_BASE}/procesar-sse`, conToken({
     method: "POST",
@@ -319,11 +329,6 @@ function parsearBloqueSse(bloque) {
 export function iniciarGoogle(returnUrl) {
   const backendUrl = getBackendBaseUrl()
   window.location.href = `${backendUrl}/api/auth/login-google${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ""}`
-}
-
-export function iniciarMicrosoft(returnUrl) {
-  const backendUrl = getBackendBaseUrl()
-  window.location.href = `${backendUrl}/api/auth/login-microsoft${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ""}`
 }
 
 export const solicitarOtp = (email) =>

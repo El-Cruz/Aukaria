@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from "framer-motion"
+import { useLanguage } from "../i18n/LanguageContext"
 
 const spring = { type: "spring", stiffness: 400, damping: 30 }
 
@@ -11,9 +12,11 @@ export default function FloatingAnalysisTracker({
   progreso = null,
   onMaximize = () => {},
 }) {
+  const { langShort, t } = useLanguage()
+  const en = langShort === "en"
   const reduce = useReducedMotion()
   const pct = progreso?.Porcentaje ? Math.min(progreso.Porcentaje, 100) : null
-  const etiqueta = progreso?.Mensaje || "Analizando predio en segundo plano…"
+  const etiqueta = progreso?.Mensaje || t("proc.bgRunning")
 
   return (
     <motion.button
@@ -39,7 +42,7 @@ export default function FloatingAnalysisTracker({
 
       <span className="min-w-0">
         <span className="block font-mono text-[10px] font-bold uppercase tracking-widest text-neutral-400">
-          En segundo plano
+          {en ? "In background" : "En segundo plano"}
         </span>
         <span className="mt-0.5 block truncate text-xs font-semibold text-neutral-800">
           {etiqueta}

@@ -4,7 +4,7 @@ namespace Aukaria.Infrastructure.Services;
 
 public static class LegalPromptBuilder
 {
-    public static string ConstruirSystemPrompt(PropositoAnalisis proposito, TipoDocumentoJuridico tipoDoc)
+    public static string ConstruirSystemPrompt(PropositoAnalisis proposito, TipoDocumentoJuridico tipoDoc, string idioma = "es")
     {
         string enfoque = proposito switch
         {
@@ -43,9 +43,18 @@ public static class LegalPromptBuilder
                 "- Pobla MatriculaFMI, ORIP, departamento/municipio, área, propietario actual y estado del folio desde el certificado."
         };
 
-        return PlantillaSystem
+        string prompt = PlantillaSystem
             .Replace("{ENFOQUE}", enfoque, StringComparison.Ordinal)
             .Replace("{TIPO_DOCUMENTO}", instruccionesTipo, StringComparison.Ordinal);
+
+        if (!string.IsNullOrWhiteSpace(idioma) && idioma.Trim().StartsWith("en", StringComparison.OrdinalIgnoreCase))
+        {
+            prompt += "\n\nLANGUAGE REQUIREMENT (MANDATORY):\n" +
+                      "- Write ALL descriptive text values in the JSON output (ResumenEjecutivo, DiagnosticoEjecutivo, ConclusionPredial, OrigenCabidaActual, DesenglobesVentasParciales, LinderosDescripcion, SoporteDocumentalLinderos, RegimenPropiedadAnalisis, CertificacionTracto, Observaciones, ObservacionAmbiental, ExclusionResponsabilidad, DocumentosAnalizados, Anotaciones[].AnalisisJuridico, Anotaciones[].HechoRegistral, AlertasJuridicas[].Descripcion, AlertasJuridicas[].Recomendacion, AlertasJuridicas[].NivelRiesgo, TradicionActos[].AnalisisJuridico) in clear, professional legal ENGLISH.\n" +
+                      "- Keep JSON property names, SNR codes, FMI numbers, proper names, dates, and Viabilidad enum values ('Viable', 'RequiereRevision', 'AlertaCritica') unchanged.";
+        }
+
+        return prompt;
     }
 
     public static string ConstruirUserPrompt(string textoDocumento)

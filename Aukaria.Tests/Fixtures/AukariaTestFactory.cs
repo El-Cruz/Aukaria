@@ -86,17 +86,45 @@ public sealed class InMemoryTestAnalisisPredialRepository : IAnalisisPredialRepo
 
     public Task<AnalisisPredial?> ObtenerUltimoPorFmiAsync(string matriculaFmi, Guid empresaId, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(_storage.LastOrDefault(a => a.MatriculaFMI == matriculaFmi && a.EmpresaId == empresaId));
+        return Task.FromResult(_storage
+            .Where(a => a.MatriculaFMI == matriculaFmi && a.EmpresaId == empresaId && !a.Reemplazado)
+            .OrderByDescending(a => a.FechaExpedicionCertificado)
+            .ThenByDescending(a => a.FechaAnalisis)
+            .FirstOrDefault());
+    }
+
+    public Task<List<AnalisisPredial>> ListarVigentesPorFmiAsync(string matriculaFmi, Guid empresaId, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(_storage
+            .Where(a => a.MatriculaFMI == matriculaFmi && a.EmpresaId == empresaId && !a.Reemplazado)
+            .OrderByDescending(a => a.FechaExpedicionCertificado)
+            .ThenByDescending(a => a.FechaAnalisis)
+            .ToList());
     }
 
     public Task<List<AnalisisPredial>> ObtenerHistorialPorUsuarioAsync(Guid usuarioId, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(_storage.Where(a => a.UsuarioId == usuarioId).ToList());
+        return Task.FromResult(_storage.Where(a => a.UsuarioId == usuarioId && !a.Reemplazado).ToList());
     }
 
     public Task AgregarAsync(AnalisisPredial analisis, CancellationToken cancellationToken = default)
     {
         _storage.Add(analisis);
+        return Task.CompletedTask;
+    }
+
+    public Task GuardarDeduplicacionAsync(
+        AnalisisPredial nuevoAnalisis,
+        IReadOnlyCollection<Guid> idsAReemplazar,
+        Guid reemplazadoPorId,
+        CancellationToken cancellationToken = default)
+    {
+        foreach (var item in _storage.Where(a => idsAReemplazar.Contains(a.Id)))
+        {
+            item.Reemplazado = true;
+            item.ReemplazadoPorId = reemplazadoPorId;
+        }
+        _storage.Add(nuevoAnalisis);
         return Task.CompletedTask;
     }
 }
